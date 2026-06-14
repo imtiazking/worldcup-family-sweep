@@ -1,0 +1,5 @@
+[project]
+id = "world-cup-family-sweep"
+
+[api]
+enabled = true
