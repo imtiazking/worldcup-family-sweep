@@ -4,8 +4,8 @@ import Link from "next/link";
 import { createPublicClient } from "@/lib/supabase";
 
 type Row = {
-    participants: { name: string }[];
-    teams: { name: string; flag_emoji: string }[];
+    participant: { name: string }[];
+    team: { name: string; flag_emoji: string }[];
     team_status: { status: string; stage: string } | null;
   };
 
@@ -21,9 +21,9 @@ export default async function TrackerPage() {
   const { data, error } = await supabase
     .from("assignments")
     .select(`
-      participants ( name ),
-      teams ( name, flag_emoji )
-    `);
+        participant:participants!assignments_participant_id_fkey ( name ),
+        team:teams!assignments_team_id_fkey ( name, flag_emoji )
+      `);
 
   const { data: statuses } = await supabase
     .from("team_status")
@@ -44,7 +44,7 @@ export default async function TrackerPage() {
 
   const rows: Row[] = (data ?? []).map((r) => ({
     ...r,
-    team_status: statusMap.get(r.teams?.[0]?.name) ?? {
+    team_status: statusMap.get(r.team?.[0]?.name) ?? {
       status: "active",
       stage: "Group Stage",
     },
@@ -75,7 +75,7 @@ export default async function TrackerPage() {
               World Cup Sweep Winner
             </p>
             <p className="mt-2 font-[family-name:var(--font-bebas)] text-5xl text-white">
-            {winner.participants?.[0]?.name} — {winner.teams?.[0]?.flag_emoji} {winner.teams?.[0]?.name}
+            {winner.participant?.[0]?.name} — {winner.team?.[0]?.flag_emoji} {winner.team?.[0]?.name}
             </p>
           </div>
         ) : (
@@ -111,12 +111,12 @@ export default async function TrackerPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-5xl">{row.teams?.[0]?.flag_emoji}</p>
+                  <p className="text-5xl">{row.team?.[0]?.flag_emoji}</p>
                     <h3 className="mt-3 font-[family-name:var(--font-bebas)] text-3xl text-white">
-                     {row.teams?.[0]?.name}
+                     {row.team?.[0]?.name}
                     </h3>
                     <p className="text-sm text-white/50">
-                     Owned by {row.participants?.[0]?.name}
+                    Owned by {row.participant?.[0]?.name}
                     </p>
                   </div>
 
@@ -162,10 +162,10 @@ export default async function TrackerPage() {
               >
                 <div>
                   <p className="font-[family-name:var(--font-bebas)] text-2xl text-white">
-                    {row.teams?.[0]?.flag_emoji} {row.teams?.[0]?.name}
+                    {row.team?.[0]?.flag_emoji} {row.team?.[0]?.name}
                   </p>
                   <p className="text-sm text-white/40">
-                  {row.participants?.[0]?.name}
+                  {row.participant?.[0]?.name}
                   </p>
                 </div>
                 <span className="text-xs text-red-300">
