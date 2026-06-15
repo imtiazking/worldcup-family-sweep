@@ -19,6 +19,7 @@ export const INVITE_LINKS = [
   { name: "Zayn", token: "zayn-k8p3m7x2" },
   { name: "Sara", token: "sara-v4n9q1t6" },
   { name: "Siyana", token: "siyana-r7w2k5m8" },
+  { name: "Zavier", token: "zavier-c8m4p7x2" },
 ] as const;
 
 export function getInvitePath(token: string) {
