@@ -3,31 +3,52 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { createPublicClient } from "@/lib/supabase";
 
-type Row = {
-    participant: { name: string }[];
-    team: { name: string; flag_emoji: string }[];
-    team_status: { status: string; stage: string } | null;
-  };
+type Assignment = {
+  participant_id: string;
+  team_id: string;
+};
+
+type Participant = {
+  id: string;
+  name: string;
+};
+
+type Team = {
+  id: string;
+  name: string;
+  flag_emoji: string;
+};
 
 type TeamStatus = {
-    team_name: string;
-    status: string;
-    stage: string;
-  };
+  team_name: string;
+  status: string;
+  stage: string;
+};
+
+type Row = {
+  participant: Participant | null;
+  team: Team | null;
+  team_status: TeamStatus;
+};
 
 export default async function TrackerPage() {
   const supabase = createPublicClient();
 
-  const { data, error } = await supabase
+  const { data: assignments, error } = await supabase
     .from("assignments")
-    .select(`
-        participant:participants!assignments_participant_id_fkey ( name ),
-        team:teams!assignments_team_id_fkey ( name, flag_emoji )
-      `);
+    .select("participant_id, team_id");
+
+  const { data: participants } = await supabase
+    .from("participants")
+    .select("id, name");
+
+  const { data: teams } = await supabase
+    .from("teams")
+    .select("id, name, flag_emoji");
 
   const { data: statuses } = await supabase
     .from("team_status")
-    .select("*");
+    .select("team_name, status, stage");
 
   if (error) {
     return (
@@ -38,21 +59,42 @@ export default async function TrackerPage() {
     );
   }
 
+  const participantMap = new Map(
+    (participants ?? []).map((p: Participant) => [p.id, p])
+  );
+
+  const teamMap = new Map(
+    (teams ?? []).map((t: Team) => [t.id, t])
+  );
+
   const statusMap = new Map(
     (statuses ?? []).map((s: TeamStatus) => [s.team_name, s])
   );
 
-  const rows: Row[] = (data ?? []).map((r) => ({
-    ...r,
-    team_status: statusMap.get(r.team?.[0]?.name) ?? {
-      status: "active",
-      stage: "Group Stage",
-    },
-  }));
+  const rows: Row[] = (assignments ?? []).map((a: Assignment) => {
+    const team = teamMap.get(a.team_id) ?? null;
 
-  const winner = rows.find((r) => r.team_status?.status === "winner");
-  const alive = rows.filter((r) => r.team_status?.status !== "eliminated" && r.team_status?.status !== "winner");
-  const eliminated = rows.filter((r) => r.team_status?.status === "eliminated");
+    return {
+      participant: participantMap.get(a.participant_id) ?? null,
+      team,
+      team_status:
+        statusMap.get(team?.name ?? "") ?? {
+          team_name: team?.name ?? "",
+          status: "active",
+          stage: "Group Stage",
+        },
+    };
+  });
+
+  const winner = rows.find((r) => r.team_status.status === "winner");
+  const alive = rows.filter(
+    (r) =>
+      r.team_status.status !== "eliminated" &&
+      r.team_status.status !== "winner"
+  );
+  const eliminated = rows.filter(
+    (r) => r.team_status.status === "eliminated"
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
@@ -75,7 +117,8 @@ export default async function TrackerPage() {
               World Cup Sweep Winner
             </p>
             <p className="mt-2 font-[family-name:var(--font-bebas)] text-5xl text-white">
-            {winner.participant?.[0]?.name} — {winner.team?.[0]?.flag_emoji} {winner.team?.[0]?.name}
+              {winner.participant?.name} — {winner.team?.flag_emoji}{" "}
+              {winner.team?.name}
             </p>
           </div>
         ) : (
@@ -111,12 +154,12 @@ export default async function TrackerPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                  <p className="text-5xl">{row.team?.[0]?.flag_emoji}</p>
+                    <p className="text-5xl">{row.team?.flag_emoji}</p>
                     <h3 className="mt-3 font-[family-name:var(--font-bebas)] text-3xl text-white">
-                     {row.team?.[0]?.name}
+                      {row.team?.name}
                     </h3>
                     <p className="text-sm text-white/50">
-                    Owned by {row.participant?.[0]?.name}
+                      Owned by {row.participant?.name}
                     </p>
                   </div>
 
@@ -130,7 +173,7 @@ export default async function TrackerPage() {
                     Current Stage
                   </p>
                   <p className="font-[family-name:var(--font-bebas)] text-2xl text-wc-gold">
-                    {row.team_status?.stage ?? "Group Stage"}
+                    {row.team_status.stage}
                   </p>
                 </div>
               </div>
@@ -162,14 +205,14 @@ export default async function TrackerPage() {
               >
                 <div>
                   <p className="font-[family-name:var(--font-bebas)] text-2xl text-white">
-                    {row.team?.[0]?.flag_emoji} {row.team?.[0]?.name}
+                    {row.team?.flag_emoji} {row.team?.name}
                   </p>
                   <p className="text-sm text-white/40">
-                  {row.participant?.[0]?.name}
+                    {row.participant?.name}
                   </p>
                 </div>
                 <span className="text-xs text-red-300">
-                  {row.team_status?.stage}
+                  {row.team_status.stage}
                 </span>
               </div>
             ))}
