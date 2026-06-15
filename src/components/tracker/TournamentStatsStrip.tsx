@@ -1,12 +1,23 @@
+"use client";
+
+import { motion } from "framer-motion";
 import type { TournamentStats } from "@/lib/tracker";
+import { revealTransition, useMotionSettings } from "./motion-utils";
 
 type TournamentStatsStripProps = {
   stats: TournamentStats;
 };
 
 export function TournamentStatsStrip({ stats }: TournamentStatsStripProps) {
+  const { reduceMotion } = useMotionSettings();
+
   return (
-    <section className="wc-card mt-8 rounded-2xl p-5 sm:p-6">
+    <motion.section
+      className="wc-card mt-8 rounded-2xl p-5 sm:p-6"
+      initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={revealTransition(0.15, reduceMotion)}
+    >
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="text-center sm:text-left">
           <p className="text-xs uppercase tracking-wider text-white/40">
@@ -44,12 +55,18 @@ export function TournamentStatsStrip({ stats }: TournamentStatsStripProps) {
           </span>
         </div>
         <div className="h-3 overflow-hidden rounded-full bg-wc-navy-light">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-wc-gold-dark via-wc-gold to-wc-gold-light transition-all duration-700"
-            style={{ width: `${stats.progressPercent}%` }}
+          <motion.div
+            className="h-full rounded-full bg-gradient-to-r from-wc-gold-dark via-wc-gold to-wc-gold-light"
+            initial={{ width: reduceMotion ? `${stats.progressPercent}%` : "0%" }}
+            animate={{ width: `${stats.progressPercent}%` }}
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : { duration: 1.4, delay: 0.4, ease: [0.22, 1, 0.36, 1] }
+            }
           />
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

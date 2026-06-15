@@ -1,10 +1,15 @@
+"use client";
+
+import { motion } from "framer-motion";
 import {
   TOURNAMENT_STAGES,
   groupRowsByStage,
   type TrackerRow,
 } from "@/lib/tracker";
+import { BracketConnector } from "./BracketConnector";
 import { PathTeamCard } from "./PathTeamCard";
 import { TrackerCelebration } from "./TrackerCelebration";
+import { revealTransition, useMotionSettings } from "./motion-utils";
 
 type TournamentPathProps = {
   rows: TrackerRow[];
@@ -13,10 +18,16 @@ type TournamentPathProps = {
 
 export function TournamentPath({ rows, hasWinner }: TournamentPathProps) {
   const teamsByStage = groupRowsByStage(rows);
+  const { reduceMotion } = useMotionSettings();
 
   return (
-    <section className="wc-card relative mt-12 overflow-hidden rounded-3xl p-5 sm:p-8">
-      {hasWinner && <TrackerCelebration />}
+    <motion.section
+      className="wc-card relative mt-12 overflow-hidden rounded-3xl p-5 sm:p-8"
+      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={revealTransition(0.3, reduceMotion)}
+    >
+      {hasWinner && <TrackerCelebration burst />}
 
       <div className="text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-wc-gold/60">
@@ -82,20 +93,11 @@ export function TournamentPath({ rows, hasWinner }: TournamentPathProps) {
                 )}
               </div>
 
-              {index < TOURNAMENT_STAGES.length - 1 && (
-                <div
-                  className="flex flex-col items-center py-2 text-wc-gold/50"
-                  aria-hidden
-                >
-                  <div className="h-4 w-px bg-gradient-to-b from-wc-gold/40 to-wc-gold/10" />
-                  <span className="my-1 text-lg leading-none">↓</span>
-                  <div className="h-4 w-px bg-gradient-to-b from-wc-gold/10 to-wc-gold/40" />
-                </div>
-              )}
+              {index < TOURNAMENT_STAGES.length - 1 && <BracketConnector />}
             </div>
           );
         })}
       </div>
-    </section>
+    </motion.section>
   );
 }
