@@ -3,7 +3,14 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { createPublicClient } from "@/lib/supabase";
 import { TournamentPath } from "@/components/tracker/TournamentPath";
-import type { TrackerRow } from "@/lib/tracker";
+import { TournamentStatsStrip } from "@/components/tracker/TournamentStatsStrip";
+import { FamilyLeaderboard } from "@/components/tracker/FamilyLeaderboard";
+import { WinnerBanner } from "@/components/tracker/WinnerBanner";
+import {
+  buildLeaderboard,
+  computeTournamentStats,
+  type TrackerRow,
+} from "@/lib/tracker";
 
 type Assignment = {
   participant_id: string;
@@ -92,6 +99,9 @@ export default async function TrackerPage() {
     (r) => r.team_status.status === "eliminated"
   );
 
+  const stats = computeTournamentStats(rows);
+  const leaderboard = buildLeaderboard(rows);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
       <div className="text-center">
@@ -102,6 +112,10 @@ export default async function TrackerPage() {
         <h1 className="mt-3 font-[family-name:var(--font-bebas)] text-6xl tracking-wide text-wc-gold sm:text-8xl">
           Survival Tracker
         </h1>
+
+        <TournamentStatsStrip stats={stats} />
+
+        {winner && <WinnerBanner winner={winner} />}
 
         <div className="mx-auto mt-8 flex h-40 w-40 items-center justify-center rounded-full border border-wc-gold/30 bg-wc-gold/10 text-8xl shadow-[0_0_80px_rgba(245,197,66,0.25)]">
           🏆
@@ -132,6 +146,8 @@ export default async function TrackerPage() {
       </div>
 
       <TournamentPath rows={rows} hasWinner={!!winner} />
+
+      <FamilyLeaderboard entries={leaderboard} />
 
       <div className="mt-12 grid gap-6 lg:grid-cols-[1fr_0.8fr]">
         <section className="wc-card rounded-3xl p-6">

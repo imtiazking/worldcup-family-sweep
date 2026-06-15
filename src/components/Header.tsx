@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NavLinks } from "@/components/NavLinks";
 
 export function Header() {
   return (
@@ -17,14 +18,7 @@ export function Header() {
             </p>
           </div>
         </Link>
-        <nav className="flex items-center gap-2 sm:gap-4">
-          <Link
-            href="/results"
-            className="rounded-full border border-wc-gold/30 px-3 py-1.5 text-xs font-medium text-wc-gold transition hover:border-wc-gold hover:bg-wc-gold/10 sm:px-4 sm:text-sm"
-          >
-            Results
-          </Link>
-        </nav>
+        <NavLinks />
       </div>
     </header>
   );

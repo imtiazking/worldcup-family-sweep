@@ -93,3 +93,66 @@ export function groupRowsByStage(
 
   return grouped;
 }
+
+export function getStageDepth(row: TrackerRow): number {
+  const stage = getStageForRow(row);
+  return TOURNAMENT_STAGES.indexOf(stage);
+}
+
+export function getDisplayStage(row: TrackerRow): TournamentStage {
+  return getStageForRow(row);
+}
+
+export type TournamentStats = {
+  alive: number;
+  eliminated: number;
+  total: number;
+  progressPercent: number;
+};
+
+export function computeTournamentStats(rows: TrackerRow[]): TournamentStats {
+  const total = rows.length;
+  const eliminated = rows.filter(
+    (r) => r.team_status.status === "eliminated"
+  ).length;
+  const alive = rows.filter(
+    (r) =>
+      r.team_status.status !== "eliminated" &&
+      r.team_status.status !== "winner"
+  ).length;
+  const progressPercent =
+    total > 0 ? Math.round((eliminated / total) * 100) : 0;
+
+  return { alive, eliminated, total, progressPercent };
+}
+
+export type LeaderboardEntry = {
+  rank: number;
+  participantName: string;
+  teamName: string;
+  teamFlag: string;
+  stage: TournamentStage;
+  depth: number;
+  status: string;
+};
+
+export function buildLeaderboard(rows: TrackerRow[]): LeaderboardEntry[] {
+  const sorted = [...rows].sort((a, b) => {
+    const depthDiff = getStageDepth(b) - getStageDepth(a);
+    if (depthDiff !== 0) return depthDiff;
+
+    const nameA = a.participant?.name ?? "";
+    const nameB = b.participant?.name ?? "";
+    return nameA.localeCompare(nameB);
+  });
+
+  return sorted.map((row, index) => ({
+    rank: index + 1,
+    participantName: row.participant?.name ?? "Unknown",
+    teamName: row.team?.name ?? "Unknown",
+    teamFlag: row.team?.flag_emoji ?? "⚽",
+    stage: getDisplayStage(row),
+    depth: getStageDepth(row),
+    status: row.team_status.status,
+  }));
+}
