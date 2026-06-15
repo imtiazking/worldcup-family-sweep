@@ -2,6 +2,8 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { createPublicClient } from "@/lib/supabase";
+import { TournamentPath } from "@/components/tracker/TournamentPath";
+import type { TrackerRow } from "@/lib/tracker";
 
 type Assignment = {
   participant_id: string;
@@ -23,12 +25,6 @@ type TeamStatus = {
   team_name: string;
   status: string;
   stage: string;
-};
-
-type Row = {
-  participant: Participant | null;
-  team: Team | null;
-  team_status: TeamStatus;
 };
 
 export default async function TrackerPage() {
@@ -71,7 +67,7 @@ export default async function TrackerPage() {
     (statuses ?? []).map((s: TeamStatus) => [s.team_name, s])
   );
 
-  const rows: Row[] = (assignments ?? []).map((a: Assignment) => {
+  const rows: TrackerRow[] = (assignments ?? []).map((a: Assignment) => {
     const team = teamMap.get(a.team_id) ?? null;
 
     return {
@@ -134,6 +130,8 @@ export default async function TrackerPage() {
           View Draw Results
         </Link>
       </div>
+
+      <TournamentPath rows={rows} hasWinner={!!winner} />
 
       <div className="mt-12 grid gap-6 lg:grid-cols-[1fr_0.8fr]">
         <section className="wc-card rounded-3xl p-6">
