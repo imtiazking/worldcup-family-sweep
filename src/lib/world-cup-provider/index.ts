@@ -1,26 +1,34 @@
+import { ApiFootballProvider } from "./api-football-provider";
 import { NoopWorldCupProvider } from "./noop-provider";
 import type { WorldCupDataProvider, WorldCupProviderId } from "./types";
 import { getConfiguredProviderId } from "./types";
 
 /**
- * Provider factory — add concrete implementations here.
+ * Provider factory.
  *
- * Example future wiring:
- *   case "api-football":
- *     return new ApiFootballProvider(process.env.API_FOOTBALL_KEY!);
+ * Default: api-football when API_FOOTBALL_KEY is set.
+ * Manual fallback: set WORLD_CUP_PROVIDER=noop to disable automated sync.
  */
 export function createWorldCupProvider(): WorldCupDataProvider {
   const providerId = getConfiguredProviderId();
 
   switch (providerId) {
-    case "api-football":
+    case "api-football": {
+      if (!process.env.API_FOOTBALL_KEY) {
+        console.warn(
+          "[world-cup-provider] WORLD_CUP_PROVIDER=api-football but API_FOOTBALL_KEY is missing. Using noop."
+        );
+        return new NoopWorldCupProvider();
+      }
+      return new ApiFootballProvider();
+    }
+    case "noop":
+      return new NoopWorldCupProvider();
     case "custom":
-      // Placeholder: fall back to noop until implemented
       console.warn(
-        `[world-cup-provider] Provider "${providerId}" is not implemented yet. Using noop.`
+        '[world-cup-provider] WORLD_CUP_PROVIDER=custom is not implemented. Using noop.'
       );
       return new NoopWorldCupProvider();
-    case "noop":
     default:
       return new NoopWorldCupProvider();
   }
@@ -29,9 +37,11 @@ export function createWorldCupProvider(): WorldCupDataProvider {
 export function getProviderStatus(): {
   providerId: WorldCupProviderId;
   wired: boolean;
+  hasApiKey: boolean;
 } {
   const providerId = getConfiguredProviderId();
-  const wired = providerId === "noop";
+  const hasApiKey = Boolean(process.env.API_FOOTBALL_KEY);
+  const wired = providerId === "api-football" && hasApiKey;
 
-  return { providerId, wired };
+  return { providerId, wired, hasApiKey };
 }

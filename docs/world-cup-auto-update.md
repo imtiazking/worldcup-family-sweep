@@ -1,63 +1,70 @@
-# World Cup Auto-Update Architecture
+# World Cup Auto-Update
 
-Automated daily sync of `team_status` from an external FIFA/tournament data provider.
+Automated daily sync of `team_status` from API-Football (World Cup 2026).
 
 ## Schedule
 
 - **Target:** 02:00 UK time daily
-- **Vercel Cron:** `0 2 * * *` (02:00 UTC — aligns with UK GMT; during BST, runs at 03:00 UK)
+- **Vercel Cron:** `0 1 * * *` (01:00 UTC = 02:00 UK during BST, Jun–Oct)
+- During GMT (winter): runs at 01:00 UK — adjust to `0 2 * * *` if needed
 
-Configured in `vercel.json`.
+## Setup
+
+1. Register at [api-football.com](https://www.api-football.com/) (free tier available)
+2. Copy your API key
+3. Add to Vercel → **Settings → Environment Variables**:
+
+| Variable | Value |
+|----------|-------|
+| `API_FOOTBALL_KEY` | Your API-Football key |
+| `CRON_SECRET` | Random secret string |
+| `WORLD_CUP_PROVIDER` | `api-football` (optional — auto-enabled when key is set) |
+
+4. Deploy — cron runs automatically
+
+## Manual fallback
+
+Set `WORLD_CUP_PROVIDER=noop` to disable automated API calls. Existing `team_status` rows are never deleted.
+
+If the API fails, the sync aborts and **preserves** current database values.
 
 ## Endpoint
 
 ```
-POST /api/update-world-cup-status
+GET /api/update-world-cup-status
 Authorization: Bearer <CRON_SECRET>
 ```
 
-`GET` returns endpoint metadata for health checks.
+Vercel Cron sends this header automatically when `CRON_SECRET` is set.
 
-## Flow
+## Data source
 
-```
-Vercel Cron (daily)
-    → POST /api/update-world-cup-status
-    → createWorldCupProvider()
-    → provider.fetchTournamentSnapshot()
-    → applyTournamentSnapshot()
-    → upsert team_status rows in Supabase
-```
+- **Provider:** API-Football (`v3.football.api-sports.io`)
+- **Competition:** FIFA World Cup — `league=1`, `season=2026`
+- **Matches:** Completed only (`status=FT`)
+- **Standings:** Group-stage elimination and knockout progression
 
-## Environment Variables
+## What gets updated
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `CRON_SECRET` | Yes (prod) | Secures the cron endpoint |
-| `WORLD_CUP_PROVIDER` | No | `noop` (default), `api-football`, or `custom` |
-| `API_FOOTBALL_KEY` | Future | API key when `api-football` provider is implemented |
+Only the `team_status` table:
 
-## Adding a Real Provider
+| Field | Values |
+|-------|--------|
+| `team_name` | Must match sweep team (Spain, France, etc.) |
+| `status` | `active`, `eliminated`, `winner` |
+| `stage` | Group Stage → Round of 32 → … → World Cup Winner |
 
-1. Create `src/lib/world-cup-provider/api-football-provider.ts`
-2. Implement `WorldCupDataProvider` interface
-3. Map API responses to `ProviderTeamUpdate[]`
-4. Register in `src/lib/world-cup-provider/index.ts`
-5. Set `WORLD_CUP_PROVIDER=api-football` in Vercel
+**Not modified:** assignments, participants, invite links, draw logic.
 
-## team_status Schema
-
-Each update sets:
-
-- `team_name` — must match `teams.name` in the sweep
-- `status` — `active` | `eliminated` | `winner`
-- `stage` — e.g. `Group Stage`, `Round of 16`, `Semi Final`, `Final`
-
-## Manual Test
+## Manual test
 
 ```bash
-curl -X POST https://your-app.vercel.app/api/update-world-cup-status \
+curl https://your-app.vercel.app/api/update-world-cup-status \
   -H "Authorization: Bearer YOUR_CRON_SECRET"
 ```
 
-With `noop` provider, response confirms architecture without modifying data.
+Health check (no auth):
+
+```bash
+curl https://your-app.vercel.app/api/update-world-cup-status
+```

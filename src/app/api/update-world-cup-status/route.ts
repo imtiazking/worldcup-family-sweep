@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
+import { getProviderStatus } from "@/lib/world-cup-provider";
 import { runWorldCupStatusUpdate } from "@/lib/world-cup-update";
 
 /**
  * World Cup status sync endpoint.
  *
- * Vercel Cron calls GET daily at 02:00 UTC (see vercel.json).
+ * Vercel Cron calls GET daily at 01:00 UTC (02:00 UK BST during summer).
  * Manual trigger: POST or GET with Authorization: Bearer <CRON_SECRET>
  *
  * @see docs/world-cup-auto-update.md
@@ -26,7 +27,7 @@ async function handleUpdate(request: Request) {
 
   try {
     const result = await runWorldCupStatusUpdate();
-    return NextResponse.json(result);
+    return NextResponse.json(result, { status: result.ok ? 200 : 502 });
   } catch (error) {
     console.error("[update-world-cup-status]", error);
     return NextResponse.json(
@@ -43,13 +44,15 @@ export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
 
   if (!authHeader) {
+    const status = getProviderStatus();
     return NextResponse.json({
       endpoint: "/api/update-world-cup-status",
       methods: ["GET", "POST"],
-      schedule: "Daily at 02:00 UTC (target 02:00 UK GMT)",
-      provider: process.env.WORLD_CUP_PROVIDER ?? "noop",
+      schedule: "Daily at 01:00 UTC (02:00 UK time during BST)",
+      provider: status.providerId,
+      wired: status.wired,
+      hasApiKey: status.hasApiKey,
       documentation: "docs/world-cup-auto-update.md",
-      status: "ready — provider not wired",
     });
   }
 
