@@ -11,6 +11,8 @@ import { KnockedOutTeamsSection } from "./KnockedOutTeamsSection";
 import { TournamentPath } from "./TournamentPath";
 import { TournamentStatsStrip } from "./TournamentStatsStrip";
 import { TrackerAtmosphere } from "./TrackerAtmosphere";
+import { TrackerSoundControl } from "./TrackerSoundControl";
+import { TrackerSoundProvider } from "./TrackerSoundProvider";
 import { TrackerTeamCards } from "./TrackerTeamCards";
 import {
   MobileTabPanel,
@@ -44,6 +46,7 @@ function DesktopHeroExtras({
       <TournamentStatsStrip stats={stats} />
       {winner && <WinnerBanner winner={winner} />}
       <FloatingTrophy hasWinner={hasWinner} />
+      <TrackerSoundControl className="mt-2" />
     </div>
   );
 }
@@ -61,6 +64,7 @@ export function TrackerExperience({
   const hasWinner = !!winner;
 
   return (
+    <TrackerSoundProvider>
     <div className="relative">
       <TrackerAtmosphere />
 
@@ -87,6 +91,7 @@ export function TrackerExperience({
           {/* Mobile: trophy + stats immediately below title, above tabs */}
           <div className="md:hidden">
             <FloatingTrophy hasWinner={hasWinner} />
+            <TrackerSoundControl className="mt-2" />
             <TournamentStatsStrip stats={stats} className="mt-2" />
           </div>
 
@@ -191,5 +196,6 @@ export function TrackerExperience({
         </div>
       </div>
     </div>
+    </TrackerSoundProvider>
   );
 }

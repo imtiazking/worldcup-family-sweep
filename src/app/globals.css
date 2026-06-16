@@ -194,6 +194,7 @@ body {
   .tracker-trophy-glow-outer,
   .tracker-trophy-mist,
   .tracker-camera-flash,
+  .tracker-sound-eq-bar,
   .tracker-eliminated-badge,
   .confetti-piece {
     animation: none !important;
@@ -648,4 +649,50 @@ body {
   .tracker-trophy-shimmer {
     animation-duration: 4s;
   }
+}
+
+/* ── Tracker sound equalizer ── */
+
+.tracker-sound-eq {
+  height: 10px;
+  margin-left: 2px;
+}
+
+.tracker-sound-eq-bar {
+  display: block;
+  width: 2px;
+  border-radius: 1px;
+  background: linear-gradient(180deg, #f5e6a8, #f5c542);
+  height: 5px;
+  animation: tracker-sound-eq-bounce 0.85s ease-in-out infinite;
+}
+
+.tracker-sound-eq-bar-0 {
+  animation-delay: 0s;
+}
+
+.tracker-sound-eq-bar-1 {
+  animation-delay: 0.18s;
+}
+
+.tracker-sound-eq-bar-2 {
+  animation-delay: 0.36s;
+}
+
+@keyframes tracker-sound-eq-bounce {
+  0%,
+  100% {
+    height: 4px;
+    opacity: 0.65;
+  }
+  50% {
+    height: 10px;
+    opacity: 1;
+  }
+}
+
+.tracker-sound-eq--static .tracker-sound-eq-bar {
+  animation: none;
+  height: 6px;
+  opacity: 0.8;
 }
