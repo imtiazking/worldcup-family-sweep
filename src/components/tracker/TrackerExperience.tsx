@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import type { LoserWheelResult } from "@/lib/loser-wheel";
 import type { LeaderboardEntry, TournamentStats, TrackerRow } from "@/lib/tracker";
 import { AliveTeamsSection } from "./AliveTeamsSection";
 import { FamilyLeaderboard } from "./FamilyLeaderboard";
 import { FloatingTrophy } from "./FloatingTrophy";
 import { KnockedOutTeamsSection } from "./KnockedOutTeamsSection";
+import { LosersWheelTab } from "./loser-wheel/LosersWheelTab";
 import { TournamentPath } from "./TournamentPath";
 import { TournamentStatsStrip } from "./TournamentStatsStrip";
 import { TrackerAtmosphere } from "./TrackerAtmosphere";
@@ -29,6 +31,7 @@ type TrackerExperienceProps = {
   eliminated: TrackerRow[];
   stats: TournamentStats;
   leaderboard: LeaderboardEntry[];
+  wheelResults: LoserWheelResult[];
 };
 
 /** Desktop-only hero block — stats, banner, trophy */
@@ -58,6 +61,7 @@ export function TrackerExperience({
   eliminated,
   stats,
   leaderboard,
+  wheelResults,
 }: TrackerExperienceProps) {
   const { reduceMotion } = useMotionSettings();
   const [activeTab, setActiveTab] = useState<TrackerTab>("overview");
@@ -182,6 +186,14 @@ export function TrackerExperience({
           </div>
         </MobileTabPanel>
 
+        <MobileTabPanel tab="losers-wheel" activeTab={activeTab} mobileOnly>
+          <LosersWheelTab
+            eliminated={eliminated}
+            wheelResults={wheelResults}
+            rows={rows}
+          />
+        </MobileTabPanel>
+
         <MobileTabPanel tab="knocked-out" activeTab={activeTab} mobileOnly>
           <div className="max-md:mt-2">
             <KnockedOutTeamsSection
@@ -193,6 +205,14 @@ export function TrackerExperience({
 
         <div className="hidden md:block">
           <TrackerTeamCards alive={alive} eliminated={eliminated} />
+        </div>
+
+        <div className="hidden md:block">
+          <LosersWheelTab
+            eliminated={eliminated}
+            wheelResults={wheelResults}
+            rows={rows}
+          />
         </div>
       </div>
     </div>

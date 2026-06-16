@@ -195,6 +195,8 @@ body {
   .tracker-trophy-mist,
   .tracker-camera-flash,
   .tracker-sound-eq-bar,
+  .losers-wheel-spotlight-center,
+  .losers-wheel-gold-particle,
   .tracker-eliminated-badge,
   .confetti-piece {
     animation: none !important;
@@ -695,4 +697,91 @@ body {
   animation: none;
   height: 6px;
   opacity: 0.8;
+}
+
+/* ── Loser's Wheel ── */
+
+.losers-wheel-blur > div:first-child {
+  filter: blur(0.6px);
+  will-change: transform;
+}
+
+.losers-wheel-spotlight {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(245, 197, 66, 0.14) 0%,
+    transparent 70%
+  );
+}
+
+.losers-wheel-spotlight-center {
+  left: 50%;
+  top: 35%;
+  width: 70%;
+  height: 50%;
+  transform: translate(-50%, -50%);
+  animation: losers-wheel-spotlight-pulse 4s ease-in-out infinite;
+}
+
+.losers-wheel-spotlight-left {
+  left: 5%;
+  top: 20%;
+  width: 40%;
+  height: 60%;
+  opacity: 0.6;
+}
+
+.losers-wheel-spotlight-right {
+  right: 5%;
+  top: 20%;
+  width: 40%;
+  height: 60%;
+  opacity: 0.6;
+}
+
+@keyframes losers-wheel-spotlight-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+.losers-wheel-gold-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(245, 197, 66, 0.7);
+  animation: losers-wheel-particle-float 2.5s ease-in-out infinite;
+}
+
+@keyframes losers-wheel-particle-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-12px) scale(1.3);
+    opacity: 0.75;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .losers-wheel-blur > div:first-child {
+    filter: none;
+  }
+
+  .losers-wheel-spotlight-center,
+  .losers-wheel-gold-particle {
+    animation: none !important;
+  }
 }

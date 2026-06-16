@@ -4,11 +4,17 @@ import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { EASE_BROADCAST, useMotionSettings } from "./motion-utils";
 
-export type TrackerTab = "overview" | "rankings" | "alive" | "knocked-out";
+export type TrackerTab =
+  | "overview"
+  | "rankings"
+  | "alive"
+  | "knocked-out"
+  | "losers-wheel";
 
 const TABS: { id: TrackerTab; label: string; shortLabel?: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "rankings", label: "Rankings" },
+  { id: "losers-wheel", label: "Loser's Wheel", shortLabel: "Wheel" },
   { id: "alive", label: "Alive" },
   { id: "knocked-out", label: "Knocked Out", shortLabel: "Out" },
 ];
@@ -57,9 +63,7 @@ export function TrackerMobileTabs({
                 />
               )}
               <span className="relative z-10 sm:hidden">
-                {tab.shortLabel && tab.id === "knocked-out"
-                  ? tab.shortLabel
-                  : tab.label}
+                {tab.shortLabel ?? tab.label}
               </span>
               <span className="relative z-10 hidden sm:inline">
                 {tab.label}

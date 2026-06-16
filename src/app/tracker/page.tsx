@@ -110,6 +110,11 @@ export default async function TrackerPage() {
   const stats = computeTournamentStats(rows);
   const leaderboard = buildLeaderboard(rows);
 
+  const { data: wheelResults } = await supabase
+    .from("loser_wheel_results")
+    .select("id, participant_id, team_id, prize, spun_at")
+    .order("spun_at", { ascending: false });
+
   return (
     <TrackerExperience
       rows={rows}
@@ -118,6 +123,7 @@ export default async function TrackerPage() {
       eliminated={eliminated}
       stats={stats}
       leaderboard={leaderboard}
+      wheelResults={wheelResults ?? []}
     />
   );
 }
