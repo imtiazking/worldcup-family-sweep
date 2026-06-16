@@ -11,6 +11,8 @@ export type ProviderTeamUpdate = {
   teamName: string;
   status: TeamTournamentStatus;
   stage: string;
+  /** Optional 0–100 estimate from provider predictions API */
+  nextStageProbability?: number | null;
 };
 
 export type ProviderTournamentSnapshot = {

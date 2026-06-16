@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import type { LeaderboardEntry } from "@/lib/tracker";
+import { NextStageChance } from "./NextStageChance";
 import { revealTransition, useMotionSettings } from "./motion-utils";
 
 type FamilyLeaderboardProps = {
@@ -98,6 +99,7 @@ export function FamilyLeaderboard({ entries }: FamilyLeaderboardProps) {
                 </span>
               </p>
               <p className="text-sm text-white/50">{entry.stage}</p>
+              <NextStageChance chance={entry.nextStageChance} compact />
             </div>
 
             {entry.status === "winner" && (

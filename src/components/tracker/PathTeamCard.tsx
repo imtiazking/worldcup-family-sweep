@@ -1,4 +1,6 @@
 import type { TrackerRow } from "@/lib/tracker";
+import { getNextStageChanceDisplay } from "@/lib/tracker";
+import { NextStageChance } from "./NextStageChance";
 
 type PathTeamCardProps = {
   row: TrackerRow;
@@ -54,6 +56,10 @@ export function PathTeamCard({ row }: PathTeamCardProps) {
               <>Owned by {row.participant?.name}</>
             )}
           </p>
+          <NextStageChance
+            chance={getNextStageChanceDisplay(row)}
+            compact
+          />
         </div>
 
         {isEliminated && (

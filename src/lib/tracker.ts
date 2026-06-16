@@ -13,6 +13,7 @@ export type TrackerTeamStatus = {
   team_name: string;
   status: string;
   stage: string;
+  next_stage_probability?: number | null;
 };
 
 export type TrackerRow = {
@@ -134,7 +135,84 @@ export type LeaderboardEntry = {
   stage: TournamentStage;
   depth: number;
   status: string;
+  nextStageChance: NextStageChanceDisplay;
 };
+
+export type NextStageChanceVariant =
+  | "winner"
+  | "eliminated"
+  | "qualified"
+  | "probability"
+  | "pending";
+
+export type NextStageChanceDisplay = {
+  text: string;
+  variant: NextStageChanceVariant;
+  probability?: number;
+  nextStage?: TournamentStage | null;
+};
+
+export function getNextStage(current: TournamentStage): TournamentStage | null {
+  const idx = TOURNAMENT_STAGES.indexOf(current);
+  if (idx < 0 || idx >= TOURNAMENT_STAGES.length - 1) {
+    return null;
+  }
+  return TOURNAMENT_STAGES[idx + 1];
+}
+
+/**
+ * Display label for estimated next-stage progression (not betting odds).
+ */
+export function getNextStageChanceDisplay(
+  row: TrackerRow
+): NextStageChanceDisplay {
+  const status = row.team_status.status;
+  const currentStage = getStageForRow(row);
+  const nextStage = getNextStage(currentStage);
+  const rawProb = row.team_status.next_stage_probability;
+  const prob =
+    rawProb !== null && rawProb !== undefined && !Number.isNaN(Number(rawProb))
+      ? Number(rawProb)
+      : null;
+
+  if (status === "winner") {
+    return { text: "Champion", variant: "winner", nextStage: null };
+  }
+
+  if (status === "eliminated") {
+    return { text: "Eliminated", variant: "eliminated", nextStage: null };
+  }
+
+  if (prob !== null && prob >= 100) {
+    return {
+      text: "Qualified to next stage",
+      variant: "qualified",
+      probability: 100,
+      nextStage,
+    };
+  }
+
+  if (prob !== null) {
+    const pct = Math.round(Math.min(100, Math.max(0, prob)));
+    const target = nextStage ?? "next stage";
+    return {
+      text: `Chance to reach ${target}: ${pct}%`,
+      variant: "probability",
+      probability: pct,
+      nextStage,
+    };
+  }
+
+  if (nextStage) {
+    return {
+      text: "Chance pending",
+      variant: "pending",
+      nextStage,
+    };
+  }
+
+  return { text: "Chance pending", variant: "pending", nextStage: null };
+}
 
 export function buildLeaderboard(rows: TrackerRow[]): LeaderboardEntry[] {
   const sorted = [...rows].sort((a, b) => {
@@ -154,5 +232,6 @@ export function buildLeaderboard(rows: TrackerRow[]): LeaderboardEntry[] {
     stage: getDisplayStage(row),
     depth: getStageDepth(row),
     status: row.team_status.status,
+    nextStageChance: getNextStageChanceDisplay(row),
   }));
 }

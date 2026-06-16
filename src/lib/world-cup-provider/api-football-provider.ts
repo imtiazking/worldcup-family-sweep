@@ -32,6 +32,10 @@ async function getTrackedTeamNames(): Promise<string[]> {
  * Register at https://www.api-football.com/ and paste the key in Vercel.
  *
  * Uses league=1, season=2026, completed fixtures only (status=FT).
+ *
+ * Optional: API-Football predictions endpoint can populate
+ * `nextStageProbability` on each ProviderTeamUpdate when wired.
+ * Until then, probability stays null and the UI shows "Chance pending".
  */
 export class ApiFootballProvider implements WorldCupDataProvider {
   readonly name = "api-football";

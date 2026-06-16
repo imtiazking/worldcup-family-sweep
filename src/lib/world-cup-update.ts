@@ -45,14 +45,28 @@ export async function applyTournamentSnapshot(
       continue;
     }
 
-    const { error } = await supabase.from("team_status").upsert(
-      {
-        team_name: team.teamName,
-        status: team.status,
-        stage: team.stage,
-      },
-      { onConflict: "team_name" }
-    );
+    const payload: {
+      team_name: string;
+      status: string;
+      stage: string;
+      next_stage_probability?: number;
+    } = {
+      team_name: team.teamName,
+      status: team.status,
+      stage: team.stage,
+    };
+
+    if (
+      team.nextStageProbability !== undefined &&
+      team.nextStageProbability !== null &&
+      !Number.isNaN(Number(team.nextStageProbability))
+    ) {
+      payload.next_stage_probability = Number(team.nextStageProbability);
+    }
+
+    const { error } = await supabase.from("team_status").upsert(payload, {
+      onConflict: "team_name",
+    });
 
     if (error) {
       console.error(

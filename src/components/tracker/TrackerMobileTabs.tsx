@@ -4,12 +4,13 @@ import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { EASE_BROADCAST, useMotionSettings } from "./motion-utils";
 
-export type TrackerTab = "overview" | "rankings" | "teams";
+export type TrackerTab = "overview" | "rankings" | "alive" | "knocked-out";
 
-const TABS: { id: TrackerTab; label: string }[] = [
+const TABS: { id: TrackerTab; label: string; shortLabel?: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "rankings", label: "Rankings" },
-  { id: "teams", label: "Teams" },
+  { id: "alive", label: "Alive" },
+  { id: "knocked-out", label: "Knocked Out", shortLabel: "Out" },
 ];
 
 type TrackerMobileTabsProps = {
@@ -25,10 +26,10 @@ export function TrackerMobileTabs({
 
   return (
     <nav
-      className="sticky top-16 z-30 -mx-4 border-b border-wc-gold/20 bg-wc-navy/95 px-4 py-3 backdrop-blur-md md:hidden"
+      className="sticky top-16 z-30 -mx-4 border-b border-wc-gold/20 bg-wc-navy/95 px-3 py-3 backdrop-blur-md md:hidden"
       aria-label="Tracker sections"
     >
-      <div className="flex rounded-full border border-wc-gold/25 bg-wc-navy-light/80 p-1">
+      <div className="flex gap-1 overflow-x-auto rounded-full border border-wc-gold/25 bg-wc-navy-light/80 p-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
 
@@ -40,7 +41,7 @@ export function TrackerMobileTabs({
               aria-selected={isActive}
               role="tab"
               className={[
-                "relative flex-1 rounded-full py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors",
+                "relative shrink-0 rounded-full px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider transition-colors sm:px-4 sm:text-xs",
                 isActive ? "text-wc-navy" : "text-wc-gold/70",
               ].join(" ")}
             >
@@ -55,7 +56,14 @@ export function TrackerMobileTabs({
                   }
                 />
               )}
-              <span className="relative z-10">{tab.label}</span>
+              <span className="relative z-10 sm:hidden">
+                {tab.shortLabel && tab.id === "knocked-out"
+                  ? tab.shortLabel
+                  : tab.label}
+              </span>
+              <span className="relative z-10 hidden sm:inline">
+                {tab.label}
+              </span>
             </button>
           );
         })}
@@ -69,6 +77,8 @@ type MobileTabPanelProps = {
   activeTab: TrackerTab;
   children: ReactNode;
   className?: string;
+  /** When true, panel is mobile-only (desktop uses separate layout) */
+  mobileOnly?: boolean;
 };
 
 export function MobileTabPanel({
@@ -76,6 +86,7 @@ export function MobileTabPanel({
   activeTab,
   children,
   className = "",
+  mobileOnly = false,
 }: MobileTabPanelProps) {
   const { reduceMotion } = useMotionSettings();
   const isActive = activeTab === tab;
@@ -86,7 +97,7 @@ export function MobileTabPanel({
       aria-hidden={!isActive}
       className={[
         isActive ? "max-md:block" : "max-md:hidden",
-        "md:contents",
+        mobileOnly ? "md:hidden" : "md:contents",
         className,
       ].join(" ")}
     >

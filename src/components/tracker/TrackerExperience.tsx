@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import type { LeaderboardEntry, TournamentStats, TrackerRow } from "@/lib/tracker";
+import { AliveTeamsSection } from "./AliveTeamsSection";
 import { FamilyLeaderboard } from "./FamilyLeaderboard";
 import { FloatingTrophy } from "./FloatingTrophy";
+import { KnockedOutTeamsSection } from "./KnockedOutTeamsSection";
 import { TournamentPath } from "./TournamentPath";
 import { TournamentStatsStrip } from "./TournamentStatsStrip";
 import { TrackerAtmosphere } from "./TrackerAtmosphere";
@@ -66,7 +68,6 @@ export function TrackerExperience({
       <TrackerAtmosphere />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-10">
-        {/* Hero — always visible */}
         <div className="text-center">
           <motion.p
             className="text-xs uppercase tracking-[0.35em] text-wc-gold/60"
@@ -86,7 +87,6 @@ export function TrackerExperience({
             Survival Tracker
           </motion.h1>
 
-          {/* Desktop: stats, banner, trophy stay in hero */}
           <OverviewExtras
             stats={stats}
             winner={winner}
@@ -133,13 +133,11 @@ export function TrackerExperience({
           </motion.div>
         </div>
 
-        {/* Mobile tab bar — sticky below site header */}
         <TrackerMobileTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
 
-        {/* Overview: mobile extras + tournament path */}
         <MobileTabPanel tab="overview" activeTab={activeTab}>
           <OverviewExtras
             stats={stats}
@@ -152,19 +150,31 @@ export function TrackerExperience({
           </div>
         </MobileTabPanel>
 
-        {/* Rankings */}
         <MobileTabPanel tab="rankings" activeTab={activeTab}>
           <div className="max-md:mt-2">
             <FamilyLeaderboard entries={leaderboard} />
           </div>
         </MobileTabPanel>
 
-        {/* Teams */}
-        <MobileTabPanel tab="teams" activeTab={activeTab}>
+        <MobileTabPanel tab="alive" activeTab={activeTab} mobileOnly>
           <div className="max-md:mt-2">
-            <TrackerTeamCards alive={alive} eliminated={eliminated} />
+            <AliveTeamsSection alive={alive} className="max-md:mt-0" />
           </div>
         </MobileTabPanel>
+
+        <MobileTabPanel tab="knocked-out" activeTab={activeTab} mobileOnly>
+          <div className="max-md:mt-2">
+            <KnockedOutTeamsSection
+              eliminated={eliminated}
+              className="max-md:mt-0"
+            />
+          </div>
+        </MobileTabPanel>
+
+        {/* Desktop: combined team cards grid */}
+        <div className="hidden md:block">
+          <TrackerTeamCards alive={alive} eliminated={eliminated} />
+        </div>
       </div>
     </div>
   );

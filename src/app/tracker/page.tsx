@@ -28,6 +28,7 @@ type TeamStatus = {
   team_name: string;
   status: string;
   stage: string;
+  next_stage_probability?: number | null;
 };
 
 export default async function TrackerPage() {
@@ -47,7 +48,7 @@ export default async function TrackerPage() {
 
   const { data: statuses } = await supabase
     .from("team_status")
-    .select("team_name, status, stage");
+    .select("team_name, status, stage, next_stage_probability");
 
   if (error) {
     return (
@@ -76,12 +77,23 @@ export default async function TrackerPage() {
     return {
       participant: participantMap.get(a.participant_id) ?? null,
       team,
-      team_status:
-        statusMap.get(team?.name ?? "") ?? {
+      team_status: (() => {
+        const found = statusMap.get(team?.name ?? "");
+        if (found) {
+          return {
+            team_name: found.team_name,
+            status: found.status,
+            stage: found.stage,
+            next_stage_probability: found.next_stage_probability ?? null,
+          };
+        }
+        return {
           team_name: team?.name ?? "",
           status: "active",
           stage: "Group Stage",
-        },
+          next_stage_probability: null,
+        };
+      })(),
     };
   });
 
