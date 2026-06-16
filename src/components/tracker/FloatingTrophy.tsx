@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { GoldFootballTrophyIcon } from "./GoldFootballTrophyIcon";
 import { floatTransition, revealTransition, useMotionSettings } from "./motion-utils";
 
 type FloatingTrophyProps = {
@@ -24,7 +25,13 @@ export function FloatingTrophy({
       animate={{ scale: 1, opacity: 1 }}
       transition={revealTransition(0, reduceMotion)}
     >
-      {/* Halo — tighter on mobile */}
+      {/* Spotlight */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(212,175,55,0.22)_0%,transparent_68%)]"
+        aria-hidden
+      />
+
+      {/* Gold halo */}
       <motion.div
         className={[
           "absolute inset-0 rounded-full",
@@ -40,15 +47,16 @@ export function FloatingTrophy({
             ? "0 0 36px rgba(212, 175, 55, 0.28)"
             : "0 0 80px rgba(212, 175, 55, 0.35)",
         }}
+        aria-hidden
       />
 
       <motion.div
         className={[
           "relative flex items-center justify-center rounded-full",
           "border border-wc-gold/30 bg-wc-gold/10",
-          "h-[170px] min-h-[150px] w-[170px] text-[5.5rem] leading-none",
+          "h-[170px] min-h-[150px] w-[170px]",
           "max-md:shadow-[0_0_40px_rgba(245,197,66,0.2)]",
-          "md:h-40 md:min-h-0 md:w-40 md:text-8xl md:shadow-[0_0_80px_rgba(245,197,66,0.25)]",
+          "md:h-40 md:min-h-0 md:w-40 md:shadow-[0_0_80px_rgba(245,197,66,0.25)]",
         ].join(" ")}
         animate={
           reduceMotion
@@ -59,15 +67,25 @@ export function FloatingTrophy({
         }
         transition={floatTransition(reduceMotion, isMobile)}
       >
-        <span
+        {/* First-load shine sweep */}
+        {!reduceMotion && (
+          <motion.div
+            className="tracker-trophy-first-shine pointer-events-none absolute inset-0 overflow-hidden rounded-full"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            transition={{ delay: 0.4, duration: 1.4, ease: "easeOut" }}
+            aria-hidden
+          />
+        )}
+
+        <div
           className={[
             hasWinner ? "tracker-trophy-icon-shimmer" : "",
-            "select-none",
+            "relative z-10 flex items-center justify-center",
           ].join(" ")}
-          aria-hidden
         >
-          🏆
-        </span>
+          <GoldFootballTrophyIcon />
+        </div>
       </motion.div>
     </motion.div>
   );

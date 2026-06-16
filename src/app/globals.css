@@ -189,6 +189,7 @@ body {
   .tracker-banner-sweep,
   .tracker-trophy-shimmer,
   .tracker-trophy-icon-shimmer,
+  .tracker-trophy-first-shine::after,
   .tracker-eliminated-badge,
   .confetti-piece {
     animation: none !important;
@@ -279,6 +280,33 @@ body {
 .tracker-trophy-icon-shimmer {
   display: inline-block;
   animation: trophy-shimmer 2.5s ease-in-out infinite;
+}
+
+.tracker-trophy-first-shine::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 248, 220, 0.55) 50%,
+    transparent 60%
+  );
+  animation: tracker-trophy-load-shine 1.2s ease-out forwards;
+}
+
+@keyframes tracker-trophy-load-shine {
+  0% {
+    transform: translateX(-120%) skewX(-12deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(120%) skewX(-12deg);
+    opacity: 0;
+  }
 }
 
 @keyframes banner-glow-sweep {
