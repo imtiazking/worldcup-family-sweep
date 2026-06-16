@@ -190,6 +190,10 @@ body {
   .tracker-trophy-shimmer,
   .tracker-trophy-icon-shimmer,
   .tracker-trophy-first-shine::after,
+  .tracker-trophy-glow-inner,
+  .tracker-trophy-glow-outer,
+  .tracker-trophy-mist,
+  .tracker-camera-flash,
   .tracker-eliminated-badge,
   .confetti-piece {
     animation: none !important;
@@ -306,6 +310,222 @@ body {
   100% {
     transform: translateX(120%) skewX(-12deg);
     opacity: 0;
+  }
+}
+
+/* ── Trophy hero glow (pulses light behind trophy, not the image) ── */
+
+.tracker-trophy-glow-inner,
+.tracker-trophy-glow-outer {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  pointer-events: none;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  will-change: transform, opacity;
+}
+
+.tracker-trophy-glow-inner {
+  --glow-opacity-min: 0.35;
+  --glow-opacity-max: 0.55;
+  width: 100%;
+  height: 92%;
+  background: radial-gradient(
+    ellipse 50% 50% at 50% 48%,
+    rgba(245, 197, 66, 0.7) 0%,
+    rgba(245, 197, 66, 0.28) 38%,
+    rgba(230, 160, 40, 0.1) 58%,
+    transparent 74%
+  );
+  animation: tracker-trophy-glow-inner-pulse 4s ease-in-out infinite;
+}
+
+.tracker-trophy-glow-outer {
+  --glow-outer-min: 0.1;
+  --glow-outer-max: 0.18;
+  width: 210%;
+  height: 185%;
+  background: radial-gradient(
+    ellipse 50% 50% at 50% 48%,
+    rgba(245, 197, 66, 0.22) 0%,
+    rgba(245, 197, 66, 0.07) 42%,
+    transparent 70%
+  );
+  animation: tracker-trophy-glow-outer-pulse 8s ease-in-out infinite;
+}
+
+@keyframes tracker-trophy-glow-inner-pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: var(--glow-opacity-min);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: var(--glow-opacity-max);
+  }
+}
+
+@keyframes tracker-trophy-glow-outer-pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: var(--glow-outer-min);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: var(--glow-outer-max);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracker-trophy-glow-inner {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(1.075);
+  }
+
+  .tracker-trophy-glow-outer {
+    opacity: 0.14;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .tracker-trophy-glow-inner {
+    --glow-opacity-min: 0.245;
+    --glow-opacity-max: 0.385;
+  }
+
+  .tracker-trophy-glow-outer {
+    --glow-outer-min: 0.07;
+    --glow-outer-max: 0.126;
+  }
+}
+
+/* ── Trophy stadium atmosphere (hero only) ── */
+
+.tracker-stadium-atmosphere {
+  --stadium-intensity: 1;
+}
+
+.tracker-stadium-atmosphere--mobile {
+  --stadium-intensity: 0.5;
+}
+
+.tracker-stadium-silhouette {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: 135%;
+  height: auto;
+  max-height: 78%;
+  transform: translateX(-50%);
+  opacity: calc(0.08 * var(--stadium-intensity));
+  filter: blur(5px);
+  will-change: auto;
+}
+
+.tracker-trophy-mist {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 160%;
+  height: 120%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(
+      ellipse 55% 45% at 28% 58%,
+      rgba(245, 197, 66, 0.14),
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 50% 38% at 72% 42%,
+      rgba(255, 255, 255, 0.07),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 70% 30% at 50% 80%,
+      rgba(245, 197, 66, 0.08),
+      transparent 65%
+    );
+  opacity: calc(0.32 * var(--stadium-intensity));
+  filter: blur(14px);
+  animation: tracker-trophy-mist-drift 24s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes tracker-trophy-mist-drift {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+  50% {
+    transform: translate(calc(-50% + 10px), calc(-50% - 8px));
+  }
+}
+
+.tracker-camera-flash {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 0 4px 1px rgba(255, 255, 255, 0.45),
+    0 0 10px 2px rgba(245, 197, 66, 0.2);
+  animation: tracker-camera-flash-pop 0.18s ease-out forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes tracker-camera-flash-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  25% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+.tracker-stadium-atmosphere--mobile .tracker-camera-flash {
+  width: 2px;
+  height: 2px;
+  box-shadow:
+    0 0 3px 1px rgba(255, 255, 255, 0.3),
+    0 0 6px 1px rgba(245, 197, 66, 0.12);
+  animation-name: tracker-camera-flash-pop-mobile;
+}
+
+@keyframes tracker-camera-flash-pop-mobile {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  25% {
+    opacity: 0.25;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracker-stadium-silhouette {
+    opacity: calc(0.06 * var(--stadium-intensity));
+  }
+
+  .tracker-trophy-mist {
+    animation: none;
+    opacity: calc(0.2 * var(--stadium-intensity));
   }
 }
 

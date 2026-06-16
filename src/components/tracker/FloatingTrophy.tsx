@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { GoldFootballTrophyIcon } from "./GoldFootballTrophyIcon";
+import { TrophyStadiumAtmosphere } from "./TrophyStadiumAtmosphere";
 import { floatTransition, revealTransition, useMotionSettings } from "./motion-utils";
 
 type FloatingTrophyProps = {
@@ -26,40 +27,29 @@ export function FloatingTrophy({
     <motion.div
       className={[
         "relative mx-auto flex w-full max-w-[200px] flex-col items-center justify-center",
-        "mt-3 md:mt-8 md:max-w-[280px]",
+        "min-h-[195px] mt-3 md:mt-8 md:max-w-[280px] md:min-h-[270px]",
         className,
       ].join(" ")}
       initial={reduceMotion ? false : { scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={revealTransition(0, reduceMotion)}
     >
-      {/* Spotlight — reduced ~50% so the trophy stays focal */}
+      <TrophyStadiumAtmosphere />
+
+      {/* Outer halo — slow, wide championship wash */}
+      <div className="tracker-trophy-glow-outer" aria-hidden />
+
+      {/* Inner radial glow — primary pulsing light behind trophy */}
+      <div className="tracker-trophy-glow-inner" aria-hidden />
+
+      {/* Static spotlight cone */}
       <div
-        className="pointer-events-none absolute left-1/2 top-[52%] h-[115%] w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(212,175,55,0.11)_0%,transparent_70%)]"
-        aria-hidden
-      />
-
-      {/* Gold halo */}
-      <motion.div
-        className={[
-          "pointer-events-none absolute left-1/2 top-1/2 h-[88%] w-[72%] -translate-x-1/2 -translate-y-1/2 rounded-full",
-          hasWinner ? "tracker-trophy-shimmer" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        initial={reduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: hasWinner ? 1 : 0.55 }}
-        transition={{ duration: 1.2, delay: 0.2 }}
-        style={{
-          boxShadow: isMobile
-            ? "0 0 36px rgba(212, 175, 55, 0.14)"
-            : "0 0 80px rgba(212, 175, 55, 0.175)",
-        }}
+        className="pointer-events-none absolute left-1/2 top-[52%] z-0 h-[115%] w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(245,197,66,0.1)_0%,transparent_70%)]"
         aria-hidden
       />
 
       <motion.div
-        className="relative flex items-center justify-center"
+        className="relative z-10 flex items-center justify-center"
         animate={
           reduceMotion
             ? undefined
@@ -83,7 +73,7 @@ export function FloatingTrophy({
         <div
           className={[
             hasWinner ? "tracker-trophy-icon-shimmer" : "",
-            "relative z-10 flex items-center justify-center",
+            "relative flex items-center justify-center",
           ].join(" ")}
         >
           {imageError ? (
