@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { LeaderboardEntry, TournamentStats, TrackerRow } from "@/lib/tracker";
 import { FamilyLeaderboard } from "./FamilyLeaderboard";
@@ -9,6 +10,11 @@ import { TournamentPath } from "./TournamentPath";
 import { TournamentStatsStrip } from "./TournamentStatsStrip";
 import { TrackerAtmosphere } from "./TrackerAtmosphere";
 import { TrackerTeamCards } from "./TrackerTeamCards";
+import {
+  MobileTabPanel,
+  TrackerMobileTabs,
+  type TrackerTab,
+} from "./TrackerMobileTabs";
 import { WinnerBanner } from "./WinnerBanner";
 import { revealTransition, useMotionSettings } from "./motion-utils";
 
@@ -21,6 +27,28 @@ type TrackerExperienceProps = {
   leaderboard: LeaderboardEntry[];
 };
 
+function OverviewExtras({
+  stats,
+  winner,
+  hasWinner,
+  mobileOnly = false,
+}: {
+  stats: TournamentStats;
+  winner: TrackerRow | undefined;
+  hasWinner: boolean;
+  mobileOnly?: boolean;
+}) {
+  const wrapperClass = mobileOnly ? "md:hidden" : "hidden md:block";
+
+  return (
+    <div className={wrapperClass}>
+      <TournamentStatsStrip stats={stats} />
+      {winner && <WinnerBanner winner={winner} />}
+      <FloatingTrophy hasWinner={hasWinner} />
+    </div>
+  );
+}
+
 export function TrackerExperience({
   rows,
   winner,
@@ -30,12 +58,15 @@ export function TrackerExperience({
   leaderboard,
 }: TrackerExperienceProps) {
   const { reduceMotion } = useMotionSettings();
+  const [activeTab, setActiveTab] = useState<TrackerTab>("overview");
+  const hasWinner = !!winner;
 
   return (
     <div className="relative">
       <TrackerAtmosphere />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-10">
+        {/* Hero — always visible */}
         <div className="text-center">
           <motion.p
             className="text-xs uppercase tracking-[0.35em] text-wc-gold/60"
@@ -55,11 +86,12 @@ export function TrackerExperience({
             Survival Tracker
           </motion.h1>
 
-          <TournamentStatsStrip stats={stats} />
-
-          {winner && <WinnerBanner winner={winner} />}
-
-          <FloatingTrophy hasWinner={!!winner} />
+          {/* Desktop: stats, banner, trophy stay in hero */}
+          <OverviewExtras
+            stats={stats}
+            winner={winner}
+            hasWinner={hasWinner}
+          />
 
           {winner ? (
             <motion.div
@@ -71,7 +103,7 @@ export function TrackerExperience({
               <p className="text-sm uppercase tracking-[0.25em] text-wc-gold/60">
                 World Cup Sweep Winner
               </p>
-              <p className="mt-2 font-[family-name:var(--font-bebas)] text-5xl text-white">
+              <p className="mt-2 font-[family-name:var(--font-bebas)] text-4xl text-white sm:text-5xl">
                 {winner.participant?.name} — {winner.team?.flag_emoji}{" "}
                 {winner.team?.name}
               </p>
@@ -101,9 +133,38 @@ export function TrackerExperience({
           </motion.div>
         </div>
 
-        <TournamentPath rows={rows} hasWinner={!!winner} />
-        <FamilyLeaderboard entries={leaderboard} />
-        <TrackerTeamCards alive={alive} eliminated={eliminated} />
+        {/* Mobile tab bar — sticky below site header */}
+        <TrackerMobileTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+
+        {/* Overview: mobile extras + tournament path */}
+        <MobileTabPanel tab="overview" activeTab={activeTab}>
+          <OverviewExtras
+            stats={stats}
+            winner={winner}
+            hasWinner={hasWinner}
+            mobileOnly
+          />
+          <div className="max-md:mt-2">
+            <TournamentPath rows={rows} hasWinner={hasWinner} />
+          </div>
+        </MobileTabPanel>
+
+        {/* Rankings */}
+        <MobileTabPanel tab="rankings" activeTab={activeTab}>
+          <div className="max-md:mt-2">
+            <FamilyLeaderboard entries={leaderboard} />
+          </div>
+        </MobileTabPanel>
+
+        {/* Teams */}
+        <MobileTabPanel tab="teams" activeTab={activeTab}>
+          <div className="max-md:mt-2">
+            <TrackerTeamCards alive={alive} eliminated={eliminated} />
+          </div>
+        </MobileTabPanel>
       </div>
     </div>
   );
