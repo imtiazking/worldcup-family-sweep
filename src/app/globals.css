@@ -358,10 +358,10 @@ body {
 @keyframes tracker-ray-pulse {
   0%,
   100% {
-    opacity: 0.04;
+    opacity: 0.02;
   }
   50% {
-    opacity: 0.1;
+    opacity: 0.05;
   }
 }
 
@@ -373,7 +373,7 @@ body {
   background: linear-gradient(
     180deg,
     transparent,
-    rgba(212, 175, 55, 0.12),
+    rgba(212, 175, 55, 0.06),
     transparent
   );
   transform: rotate(-18deg);

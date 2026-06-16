@@ -6,10 +6,7 @@ type GoldFootballTrophyIconProps = {
   className?: string;
 };
 
-/**
- * Generic gold football trophy — not the official FIFA World Cup trophy.
- * Replace with a custom PNG via FloatingTrophy when provided.
- */
+/** Fallback SVG when the World Cup trophy image cannot load. */
 export function GoldFootballTrophyIcon({
   className = "h-[88px] w-[72px] md:h-[96px] md:w-[80px]",
 }: GoldFootballTrophyIconProps) {
