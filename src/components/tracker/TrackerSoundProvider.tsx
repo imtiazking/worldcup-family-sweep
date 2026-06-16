@@ -20,6 +20,7 @@ type TrackerSoundContextValue = {
   enabled: boolean;
   isPlaying: boolean;
   hydrated: boolean;
+  showAutoplayPrompt: boolean;
   toggleSound: () => void;
 };
 
@@ -31,6 +32,17 @@ export function useTrackerSound() {
     throw new Error("useTrackerSound must be used within TrackerSoundProvider");
   }
   return ctx;
+}
+
+function readSoundPreference(): boolean {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === "false") return false;
+    if (stored === "true") return true;
+  } catch {
+    // localStorage unavailable
+  }
+  return true;
 }
 
 function cancelFade(rafRef: React.MutableRefObject<number | null>) {
@@ -69,56 +81,32 @@ function fadeVolume(
 export function TrackerSoundProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeRef = useRef<number | null>(null);
-  const [enabled, setEnabled] = useState(false);
+  const startingRef = useRef(false);
+  const [enabled, setEnabled] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [showAutoplayPrompt, setShowAutoplayPrompt] = useState(false);
 
-  useEffect(() => {
-    const audio = new Audio(AUDIO_SRC);
-    audio.loop = true;
-    audio.preload = "metadata";
-    audio.volume = 0;
-    audioRef.current = audio;
-
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === "true") {
-        setEnabled(true);
-      }
-    } catch {
-      // localStorage unavailable
-    }
-
-    setHydrated(true);
-
-    return () => {
-      cancelFade(fadeRef);
-      audio.pause();
-      audio.src = "";
-      audioRef.current = null;
-    };
-  }, []);
-
-  const playWithFadeIn = useCallback(() => {
+  const playWithFadeIn = useCallback((): Promise<boolean> => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio) return Promise.resolve(false);
 
     cancelFade(fadeRef);
     audio.volume = 0;
 
-    const startPlayback = () => {
-      void audio
-        .play()
-        .then(() => {
-          setIsPlaying(true);
-          fadeVolume(audio, 0, TARGET_VOLUME, FADE_IN_MS, fadeRef);
-        })
-        .catch(() => {
-          setIsPlaying(false);
-        });
-    };
-
-    startPlayback();
+    return audio
+      .play()
+      .then(() => {
+        setIsPlaying(true);
+        setShowAutoplayPrompt(false);
+        fadeVolume(audio, 0, TARGET_VOLUME, FADE_IN_MS, fadeRef);
+        return true;
+      })
+      .catch(() => {
+        setIsPlaying(false);
+        setShowAutoplayPrompt(true);
+        return false;
+      });
   }, []);
 
   const fadeOutAndPause = useCallback(() => {
@@ -140,38 +128,93 @@ export function TrackerSoundProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  useEffect(() => {
+    const audio = new Audio(AUDIO_SRC);
+    audio.loop = true;
+    audio.preload = "metadata";
+    audio.volume = 0;
+    audioRef.current = audio;
+
+    const preferred = readSoundPreference();
+    setEnabled(preferred);
+    setShowAutoplayPrompt(preferred);
+    setHydrated(true);
+
+    return () => {
+      cancelFade(fadeRef);
+      audio.pause();
+      audio.src = "";
+      audioRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || !enabled || isPlaying) return;
+
+    const tryStart = () => {
+      if (startingRef.current) return;
+      startingRef.current = true;
+      void playWithFadeIn().finally(() => {
+        startingRef.current = false;
+      });
+    };
+
+    const options: AddEventListenerOptions = { passive: true, capture: true };
+    const events = ["click", "touchstart", "scroll", "keydown"] as const;
+
+    for (const event of events) {
+      window.addEventListener(event, tryStart, options);
+    }
+
+    return () => {
+      for (const event of events) {
+        window.removeEventListener(event, tryStart, options);
+      }
+    };
+  }, [hydrated, enabled, isPlaying, playWithFadeIn]);
+
   const toggleSound = useCallback(() => {
-    if (!enabled) {
-      setEnabled(true);
+    if (enabled) {
+      setEnabled(false);
+      setShowAutoplayPrompt(false);
       try {
-        localStorage.setItem(STORAGE_KEY, "true");
+        localStorage.setItem(STORAGE_KEY, "false");
       } catch {
         // ignore
       }
-      playWithFadeIn();
+      fadeOutAndPause();
       return;
     }
 
-    const audio = audioRef.current;
-    if (audio?.paused) {
-      playWithFadeIn();
-      return;
-    }
-
-    setEnabled(false);
+    setEnabled(true);
     try {
-      localStorage.setItem(STORAGE_KEY, "false");
+      localStorage.setItem(STORAGE_KEY, "true");
     } catch {
       // ignore
     }
-    fadeOutAndPause();
+    void playWithFadeIn();
   }, [enabled, playWithFadeIn, fadeOutAndPause]);
 
   return (
     <TrackerSoundContext.Provider
-      value={{ enabled, isPlaying, hydrated, toggleSound }}
+      value={{
+        enabled,
+        isPlaying,
+        hydrated,
+        showAutoplayPrompt,
+        toggleSound,
+      }}
     >
       {children}
+      {hydrated && showAutoplayPrompt && enabled && !isPlaying && (
+        <p
+          className="pointer-events-none fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-full border border-wc-gold/25 bg-black/75 px-4 py-2 text-center text-xs text-wc-gold/90 shadow-[0_0_24px_rgba(245,197,66,0.12)] backdrop-blur-sm"
+          role="status"
+          aria-live="polite"
+        >
+          🎵 Tap anywhere to start World Cup atmosphere
+        </p>
+      )}
     </TrackerSoundContext.Provider>
   );
 }

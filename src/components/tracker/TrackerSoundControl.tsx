@@ -33,15 +33,13 @@ export function TrackerSoundControl({ className = "" }: TrackerSoundControlProps
       aria-pressed={enabled}
       aria-label={
         enabled
-          ? "Sound on. Tap to mute World Cup atmosphere music."
-          : "Sound off. Tap to play World Cup atmosphere music."
+          ? "Music on. Tap to mute World Cup atmosphere music."
+          : "Music off. Tap to play World Cup atmosphere music."
       }
     >
       <span aria-hidden>{enabled ? "🔊" : "🔇"}</span>
-      <span>{enabled ? "Sound On" : "Sound Off"}</span>
-      {showEqualizer && (
-        <SoundEqualizer reduceMotion={reduceMotion} />
-      )}
+      <span>{enabled ? "Music On" : "Music Off"}</span>
+      {showEqualizer && <SoundEqualizer reduceMotion={reduceMotion} />}
     </button>
   );
 }
