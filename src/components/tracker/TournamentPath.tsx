@@ -22,7 +22,7 @@ export function TournamentPath({ rows, hasWinner }: TournamentPathProps) {
 
   return (
     <motion.section
-      className="wc-card relative mt-12 overflow-hidden rounded-3xl p-5 sm:p-8"
+      className="wc-card relative mt-4 overflow-hidden rounded-3xl p-4 max-md:mt-4 md:mt-12 md:p-5 sm:p-8"
       initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={revealTransition(0.3, reduceMotion)}

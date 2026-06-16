@@ -29,21 +29,18 @@ type TrackerExperienceProps = {
   leaderboard: LeaderboardEntry[];
 };
 
-function OverviewExtras({
+/** Desktop-only hero block — stats, banner, trophy */
+function DesktopHeroExtras({
   stats,
   winner,
   hasWinner,
-  mobileOnly = false,
 }: {
   stats: TournamentStats;
   winner: TrackerRow | undefined;
   hasWinner: boolean;
-  mobileOnly?: boolean;
 }) {
-  const wrapperClass = mobileOnly ? "md:hidden" : "hidden md:block";
-
   return (
-    <div className={wrapperClass}>
+    <div className="hidden md:block">
       <TournamentStatsStrip stats={stats} />
       {winner && <WinnerBanner winner={winner} />}
       <FloatingTrophy hasWinner={hasWinner} />
@@ -67,10 +64,10 @@ export function TrackerExperience({
     <div className="relative">
       <TrackerAtmosphere />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-10">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-5 md:py-10">
         <div className="text-center">
           <motion.p
-            className="text-xs uppercase tracking-[0.35em] text-wc-gold/60"
+            className="text-[10px] uppercase tracking-[0.25em] text-wc-gold/60 md:text-xs md:tracking-[0.35em]"
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={revealTransition(0, reduceMotion)}
@@ -79,7 +76,7 @@ export function TrackerExperience({
           </motion.p>
 
           <motion.h1
-            className="mt-3 font-[family-name:var(--font-bebas)] text-6xl tracking-wide text-wc-gold sm:text-8xl"
+            className="mt-1.5 font-[family-name:var(--font-bebas)] text-5xl tracking-wide text-wc-gold max-md:leading-none md:mt-3 md:text-6xl sm:text-8xl"
             initial={reduceMotion ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={revealTransition(0.05, reduceMotion)}
@@ -87,50 +84,68 @@ export function TrackerExperience({
             Survival Tracker
           </motion.h1>
 
-          <OverviewExtras
+          {/* Mobile: trophy + stats immediately below title, above tabs */}
+          <div className="md:hidden">
+            <FloatingTrophy hasWinner={hasWinner} />
+            <TournamentStatsStrip stats={stats} className="mt-2" />
+          </div>
+
+          <DesktopHeroExtras
             stats={stats}
             winner={winner}
             hasWinner={hasWinner}
           />
 
-          {winner ? (
-            <motion.div
-              className="mt-6"
-              initial={reduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={revealTransition(0.2, reduceMotion)}
-            >
-              <p className="text-sm uppercase tracking-[0.25em] text-wc-gold/60">
-                World Cup Sweep Winner
-              </p>
-              <p className="mt-2 font-[family-name:var(--font-bebas)] text-4xl text-white sm:text-5xl">
-                {winner.participant?.name} — {winner.team?.flag_emoji}{" "}
-                {winner.team?.name}
-              </p>
-            </motion.div>
-          ) : (
-            <motion.p
-              className="mt-5 text-white/50"
-              initial={reduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={revealTransition(0.2, reduceMotion)}
-            >
-              Track who is still alive, who advances, and who gets knocked out.
-            </motion.p>
-          )}
+          {/* Desktop: full winner block + subtitle */}
+          <div className="hidden md:block">
+            {winner ? (
+              <motion.div
+                className="mt-6"
+                initial={reduceMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={revealTransition(0.2, reduceMotion)}
+              >
+                <p className="text-sm uppercase tracking-[0.25em] text-wc-gold/60">
+                  World Cup Sweep Winner
+                </p>
+                <p className="mt-2 font-[family-name:var(--font-bebas)] text-4xl text-white sm:text-5xl">
+                  {winner.participant?.name} — {winner.team?.flag_emoji}{" "}
+                  {winner.team?.name}
+                </p>
+              </motion.div>
+            ) : (
+              <motion.p
+                className="mt-5 text-white/50"
+                initial={reduceMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={revealTransition(0.2, reduceMotion)}
+              >
+                Track who is still alive, who advances, and who gets knocked out.
+              </motion.p>
+            )}
 
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={revealTransition(0.25, reduceMotion)}
-          >
-            <Link
-              href="/results"
-              className="mt-6 inline-block rounded-full border border-wc-gold/30 px-5 py-2 text-sm text-wc-gold hover:bg-wc-gold/10"
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={revealTransition(0.25, reduceMotion)}
             >
-              View Draw Results
-            </Link>
-          </motion.div>
+              <Link
+                href="/results"
+                className="mt-6 inline-block rounded-full border border-wc-gold/30 px-5 py-2 text-sm text-wc-gold hover:bg-wc-gold/10"
+              >
+                View Draw Results
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Mobile: compact winner line */}
+          {winner && (
+            <p className="mt-2 text-sm text-white/70 md:hidden">
+              <span className="text-wc-gold">🏆 {winner.participant?.name}</span>
+              {" · "}
+              {winner.team?.flag_emoji} {winner.team?.name}
+            </p>
+          )}
         </div>
 
         <TrackerMobileTabs
@@ -138,14 +153,14 @@ export function TrackerExperience({
           onTabChange={setActiveTab}
         />
 
+        {/* Overview: mobile = banner + path; desktop = path only (hero has rest) */}
         <MobileTabPanel tab="overview" activeTab={activeTab}>
-          <OverviewExtras
-            stats={stats}
-            winner={winner}
-            hasWinner={hasWinner}
-            mobileOnly
-          />
-          <div className="max-md:mt-2">
+          {winner && (
+            <div className="mt-2 md:hidden">
+              <WinnerBanner winner={winner} />
+            </div>
+          )}
+          <div className="max-md:mt-2 md:mt-0">
             <TournamentPath rows={rows} hasWinner={hasWinner} />
           </div>
         </MobileTabPanel>
@@ -171,7 +186,6 @@ export function TrackerExperience({
           </div>
         </MobileTabPanel>
 
-        {/* Desktop: combined team cards grid */}
         <div className="hidden md:block">
           <TrackerTeamCards alive={alive} eliminated={eliminated} />
         </div>

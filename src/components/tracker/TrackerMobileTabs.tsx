@@ -26,7 +26,7 @@ export function TrackerMobileTabs({
 
   return (
     <nav
-      className="sticky top-16 z-30 -mx-4 border-b border-wc-gold/20 bg-wc-navy/95 px-3 py-3 backdrop-blur-md md:hidden"
+      className="sticky top-16 z-30 -mx-4 mt-2 border-b border-wc-gold/20 bg-wc-navy/95 px-3 py-2 backdrop-blur-md md:hidden"
       aria-label="Tracker sections"
     >
       <div className="flex gap-1 overflow-x-auto rounded-full border border-wc-gold/25 bg-wc-navy-light/80 p-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

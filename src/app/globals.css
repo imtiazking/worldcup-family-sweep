@@ -386,13 +386,18 @@ body {
   .tracker-particle {
     width: 2px;
     height: 2px;
+    opacity: 0.35;
   }
 
   .tracker-light-ray {
-    opacity: 0.5;
+    opacity: 0.35;
   }
 
   .tracker-alive-card {
     animation-duration: 5s;
+  }
+
+  .tracker-trophy-shimmer {
+    animation-duration: 4s;
   }
 }

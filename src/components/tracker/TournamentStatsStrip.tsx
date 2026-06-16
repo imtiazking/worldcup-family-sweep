@@ -6,48 +6,55 @@ import { revealTransition, useMotionSettings } from "./motion-utils";
 
 type TournamentStatsStripProps = {
   stats: TournamentStats;
+  className?: string;
 };
 
-export function TournamentStatsStrip({ stats }: TournamentStatsStripProps) {
+export function TournamentStatsStrip({
+  stats,
+  className = "",
+}: TournamentStatsStripProps) {
   const { reduceMotion } = useMotionSettings();
 
   return (
     <motion.section
-      className="wc-card mt-8 rounded-2xl p-5 sm:p-6"
+      className={[
+        "wc-card mt-3 rounded-2xl p-4 max-md:mt-3 md:mt-8 md:p-5 sm:p-6",
+        className,
+      ].join(" ")}
       initial={reduceMotion ? false : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={revealTransition(0.15, reduceMotion)}
     >
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-3 max-md:gap-2 sm:grid-cols-3 sm:gap-4">
         <div className="text-center sm:text-left">
-          <p className="text-xs uppercase tracking-wider text-white/40">
+          <p className="text-[10px] uppercase tracking-wider text-white/40 md:text-xs">
             Alive Teams
           </p>
-          <p className="font-[family-name:var(--font-bebas)] text-4xl text-emerald-300">
+          <p className="font-[family-name:var(--font-bebas)] text-3xl text-emerald-300 md:text-4xl">
             {stats.alive}
           </p>
         </div>
 
         <div className="text-center">
-          <p className="text-xs uppercase tracking-wider text-white/40">
+          <p className="text-[10px] uppercase tracking-wider text-white/40 md:text-xs">
             Eliminated Teams
           </p>
-          <p className="font-[family-name:var(--font-bebas)] text-4xl text-red-300">
+          <p className="font-[family-name:var(--font-bebas)] text-3xl text-red-300 md:text-4xl">
             {stats.eliminated}
           </p>
         </div>
 
         <div className="text-center sm:text-right">
-          <p className="text-xs uppercase tracking-wider text-white/40">
+          <p className="text-[10px] uppercase tracking-wider text-white/40 md:text-xs">
             Tournament Progress
           </p>
-          <p className="font-[family-name:var(--font-bebas)] text-4xl text-wc-gold">
+          <p className="font-[family-name:var(--font-bebas)] text-3xl text-wc-gold md:text-4xl">
             {stats.progressPercent}%
           </p>
         </div>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-3 max-md:mt-2 md:mt-5">
         <div className="mb-2 flex justify-between text-xs text-white/40">
           <span>Elimination progress</span>
           <span>
