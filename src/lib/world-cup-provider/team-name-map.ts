@@ -14,6 +14,10 @@ export const SWEEP_TEAM_NAMES = [
   "Morocco",
   "Belgium",
   "Mexico",
+  "Colombia",
+  "Norway",
+  "Switzerland",
+  "United States",
 ] as const;
 
 const API_NAME_ALIASES: Record<string, string> = {
@@ -28,6 +32,11 @@ const API_NAME_ALIASES: Record<string, string> = {
   "morocco": "Morocco",
   "belgium": "Belgium",
   "mexico": "Mexico",
+  "colombia": "Colombia",
+  "norway": "Norway",
+  "switzerland": "Switzerland",
+  "united states": "United States",
+  "usa": "United States",
 };
 
 const SWEEP_NAME_SET = new Set<string>(SWEEP_TEAM_NAMES);

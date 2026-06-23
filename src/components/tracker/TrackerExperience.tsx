@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import type { LoserWheelResult } from "@/lib/loser-wheel";
 import type { LeaderboardEntry, TournamentStats, TrackerRow } from "@/lib/tracker";
+import {
+  buildWheelVisibilityDebug,
+  logWheelVisibilityDebug,
+} from "@/lib/wheel-visibility-debug";
 import { AliveTeamsSection } from "./AliveTeamsSection";
 import { FamilyLeaderboard } from "./FamilyLeaderboard";
 import { FloatingTrophy } from "./FloatingTrophy";
@@ -32,7 +36,21 @@ type TrackerExperienceProps = {
   stats: TournamentStats;
   leaderboard: LeaderboardEntry[];
   wheelResults: LoserWheelResult[];
+  lastStatusSync?: string | null;
+  /** Temporary debug — remove after wheel join verified */
+  debugEliminatedCount?: number;
+  debugStatusesRowCount?: number;
 };
+
+function formatLastUpdated(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleString("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "UTC",
+  });
+}
 
 /** Desktop-only hero block — stats, banner, trophy */
 function DesktopHeroExtras({
@@ -62,10 +80,24 @@ export function TrackerExperience({
   stats,
   leaderboard,
   wheelResults,
+  lastStatusSync,
+  debugEliminatedCount,
+  debugStatusesRowCount,
 }: TrackerExperienceProps) {
   const { reduceMotion } = useMotionSettings();
   const [activeTab, setActiveTab] = useState<TrackerTab>("overview");
   const hasWinner = !!winner;
+
+  useEffect(() => {
+    const debug = buildWheelVisibilityDebug(eliminated, rows, wheelResults);
+    logWheelVisibilityDebug("client TrackerExperience", debug);
+    console.log("[LoserWheel debug] tab/panel state:", {
+      activeTab,
+      losersWheelTabInNav: true,
+      mobilePanelShown: activeTab === "losers-wheel",
+      desktopWheelSectionMounted: true,
+    });
+  }, [eliminated, rows, wheelResults, activeTab]);
 
   return (
     <TrackerSoundProvider>
@@ -91,6 +123,17 @@ export function TrackerExperience({
           >
             Survival Tracker
           </motion.h1>
+
+          {lastStatusSync && (
+            <motion.p
+              className="mt-2 text-xs text-white/40 md:text-sm"
+              initial={reduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={revealTransition(0.12, reduceMotion)}
+            >
+              Last updated: {formatLastUpdated(lastStatusSync)} UTC
+            </motion.p>
+          )}
 
           {/* Mobile: trophy + stats immediately below title, above tabs */}
           <div className="md:hidden">
@@ -161,6 +204,24 @@ export function TrackerExperience({
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
+
+        {/* Temporary debug banner — remove after wheel join verified */}
+        {debugEliminatedCount !== undefined && (
+          <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-center text-xs text-amber-200">
+            Eliminated Count: {debugEliminatedCount}
+            {debugStatusesRowCount !== undefined && (
+              <>
+                {" "}
+                · team_status rows from API: {debugStatusesRowCount}
+                {debugStatusesRowCount === 0 && (
+                  <span className="block text-amber-400/90">
+                    (0 rows = RLS blocking team_status — run migration 004)
+                  </span>
+                )}
+              </>
+            )}
+          </p>
+        )}
 
         {/* Overview: mobile = banner + path; desktop = path only (hero has rest) */}
         <MobileTabPanel tab="overview" activeTab={activeTab}>

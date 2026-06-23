@@ -95,6 +95,17 @@ function applyStandings(
         continue;
       }
 
+      if (
+        description.includes("advance") &&
+        description.includes("further round")
+      ) {
+        const current = states.get(teamName)!;
+        if (current.status === "active") {
+          states.set(teamName, { status: "active", stage: "Round of 32" });
+        }
+        continue;
+      }
+
       // Group of 4: 4th place is eliminated once all group games are played
       if (row.all.played >= 3 && row.rank >= 4) {
         states.set(teamName, { status: "eliminated", stage: "Group Stage" });
@@ -184,6 +195,12 @@ export function buildTeamUpdatesFromApiData(
       teamName,
       status: state.status,
       stage: state.stage,
+      nextStageProbability:
+        state.status === "active" &&
+        state.stage !== "Group Stage" &&
+        state.stage !== "World Cup Winner"
+          ? 100
+          : undefined,
     };
   });
 }
