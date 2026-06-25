@@ -9,6 +9,7 @@ import {
   buildWheelVisibilityDebug,
   logWheelVisibilityDebug,
 } from "@/lib/wheel-visibility-debug";
+import type { TrackerSyncInfo } from "@/lib/sync-verified-team-status";
 import { AliveTeamsSection } from "./AliveTeamsSection";
 import { FamilyLeaderboard } from "./FamilyLeaderboard";
 import { FloatingTrophy } from "./FloatingTrophy";
@@ -37,6 +38,7 @@ type TrackerExperienceProps = {
   leaderboard: LeaderboardEntry[];
   wheelResults: LoserWheelResult[];
   lastStatusSync?: string | null;
+  syncInfo?: TrackerSyncInfo;
   /** Temporary debug — remove after wheel join verified */
   debugEliminatedCount?: number;
   debugStatusesRowCount?: number;
@@ -50,6 +52,70 @@ function formatLastUpdated(iso: string): string {
     timeStyle: "short",
     timeZone: "UTC",
   });
+}
+
+function formatSyncStatus(syncInfo?: TrackerSyncInfo): string {
+  if (!syncInfo || syncInfo.syncStatus === "unknown") {
+    return "Sync status unknown";
+  }
+  if (syncInfo.syncStatus === "failed") {
+    return "Last sync check failed";
+  }
+  return "Up to date";
+}
+
+function TrackerSyncMeta({
+  lastStatusSync,
+  syncInfo,
+  reduceMotion,
+}: {
+  lastStatusSync?: string | null;
+  syncInfo?: TrackerSyncInfo;
+  reduceMotion: boolean;
+}) {
+  const showChecked =
+    syncInfo?.lastCheckedAt &&
+    syncInfo.lastCheckedAt !== lastStatusSync &&
+    syncInfo.syncStatus === "failed";
+
+  if (!lastStatusSync && !syncInfo?.dataSource) {
+    return null;
+  }
+
+  return (
+    <motion.div
+      className="mt-2 space-y-1 text-xs text-white/40 md:text-sm"
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={revealTransition(0.12, reduceMotion)}
+    >
+      {lastStatusSync && (
+        <p>Last updated: {formatLastUpdated(lastStatusSync)} UTC</p>
+      )}
+      {syncInfo?.dataSource && (
+        <p className="text-white/35">Source: {syncInfo.dataSource}</p>
+      )}
+      {syncInfo && syncInfo.syncStatus !== "unknown" && (
+        <p
+          className={
+            syncInfo.syncStatus === "failed"
+              ? "text-amber-300/80"
+              : "text-emerald-300/70"
+          }
+        >
+          {formatSyncStatus(syncInfo)}
+        </p>
+      )}
+      {showChecked && syncInfo?.lastCheckedAt && (
+        <p className="text-white/35">
+          Last checked: {formatLastUpdated(syncInfo.lastCheckedAt)} UTC
+        </p>
+      )}
+      {syncInfo?.syncError && syncInfo.syncStatus === "failed" && (
+        <p className="text-amber-300/60">{syncInfo.syncError}</p>
+      )}
+    </motion.div>
+  );
 }
 
 /** Desktop-only hero block — stats, banner, trophy */
@@ -81,6 +147,7 @@ export function TrackerExperience({
   leaderboard,
   wheelResults,
   lastStatusSync,
+  syncInfo,
   debugEliminatedCount,
   debugStatusesRowCount,
 }: TrackerExperienceProps) {
@@ -124,16 +191,11 @@ export function TrackerExperience({
             Survival Tracker
           </motion.h1>
 
-          {lastStatusSync && (
-            <motion.p
-              className="mt-2 text-xs text-white/40 md:text-sm"
-              initial={reduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={revealTransition(0.12, reduceMotion)}
-            >
-              Last updated: {formatLastUpdated(lastStatusSync)} UTC
-            </motion.p>
-          )}
+          <TrackerSyncMeta
+            lastStatusSync={lastStatusSync}
+            syncInfo={syncInfo}
+            reduceMotion={reduceMotion}
+          />
 
           {/* Mobile: trophy + stats immediately below title, above tabs */}
           <div className="md:hidden">

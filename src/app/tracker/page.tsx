@@ -11,6 +11,7 @@ import {
   buildWheelVisibilityDebug,
   logWheelVisibilityDebug,
 } from "@/lib/wheel-visibility-debug";
+import { parseTournamentSyncMeta } from "@/lib/sync-verified-team-status";
 
 type Assignment = {
   participant_id: string;
@@ -68,17 +69,11 @@ export default async function TrackerPage() {
     .eq("key", "last_status_sync")
     .maybeSingle();
 
-  let lastStatusSync: string | null = null;
-  if (metaRows?.updated_at) {
-    lastStatusSync = metaRows.updated_at;
-  } else if (metaRows?.value) {
-    try {
-      const parsed = JSON.parse(metaRows.value) as { at?: string };
-      lastStatusSync = parsed.at ?? null;
-    } catch {
-      lastStatusSync = null;
-    }
-  }
+  const syncInfo = parseTournamentSyncMeta(
+    metaRows?.value,
+    metaRows?.updated_at ?? null,
+  );
+  const lastStatusSync = syncInfo.lastSyncAt;
 
   if (assignmentsError) {
     return (
@@ -230,6 +225,7 @@ export default async function TrackerPage() {
       leaderboard={leaderboard}
       wheelResults={wheelResultsSafe}
       lastStatusSync={lastStatusSync}
+      syncInfo={syncInfo}
       debugEliminatedCount={eliminated.length}
       debugStatusesRowCount={statuses?.length ?? 0}
     />

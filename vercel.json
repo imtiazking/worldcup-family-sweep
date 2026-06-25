@@ -4,8 +4,8 @@
   "installCommand": "npm install",
   "crons": [
     {
-      "path": "/api/update-world-cup-status",
-      "schedule": "0 1 * * *"
+      "path": "/api/sync-team-status",
+      "schedule": "0 */6 * * *"
     }
   ]
 }

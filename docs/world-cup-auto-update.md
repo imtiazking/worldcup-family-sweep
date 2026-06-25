@@ -1,70 +1,74 @@
-# World Cup Auto-Update
+# World Cup Tracker Auto-Update
 
-Automated daily sync of `team_status` from API-Football (World Cup 2026).
+Automatic sync of `team_status` from the verified FIFA/Wikipedia snapshot used by the family sweep tracker.
 
 ## Schedule
 
-- **Target:** 02:00 UK time daily
-- **Vercel Cron:** `0 1 * * *` (01:00 UTC = 02:00 UK during BST, Jun–Oct)
-- During GMT (winter): runs at 01:00 UK — adjust to `0 2 * * *` if needed
+- **Vercel Cron:** `0 */6 * * *` (every 6 hours)
+- **Endpoint:** `GET /api/sync-team-status`
+- **Auth:** `Authorization: Bearer <CRON_SECRET>` (Vercel Cron) or `?key=<CRON_SECRET>` (manual)
 
-## Setup
+## Required environment variables (Vercel Production)
 
-1. Register at [api-football.com](https://www.api-football.com/) (free tier available)
-2. Copy your API key
-3. Add to Vercel → **Settings → Environment Variables**:
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Tracker reads (public) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Cron writes `team_status` + `tournament_meta` |
+| `CRON_SECRET` | Protects sync endpoint |
 
-| Variable | Value |
-|----------|-------|
-| `API_FOOTBALL_KEY` | Your API-Football key |
-| `CRON_SECRET` | Random secret string |
-| `WORLD_CUP_PROVIDER` | `api-football` (optional — auto-enabled when key is set) |
-
-4. Deploy — cron runs automatically
-
-## Manual fallback
-
-Set `WORLD_CUP_PROVIDER=noop` to disable automated API calls. Existing `team_status` rows are never deleted.
-
-If the API fails, the sync aborts and **preserves** current database values.
-
-## Endpoint
-
-```
-GET /api/update-world-cup-status
-Authorization: Bearer <CRON_SECRET>
-```
-
-Vercel Cron sends this header automatically when `CRON_SECRET` is set.
+`API_FOOTBALL_KEY` is **optional** and used only by the legacy `/api/update-world-cup-status` route (not the active cron).
 
 ## Data source
 
-- **Provider:** API-Football (`v3.football.api-sports.io`)
-- **Competition:** FIFA World Cup — `league=1`, `season=2026`
-- **Matches:** Completed only (`status=FT`)
-- **Standings:** Group-stage elimination and knockout progression
+The active cron applies `src/lib/world-cup-verified-snapshot.ts` — manually verified FIFA "(A)" qualification rules from Wikipedia group pages.
 
-## What gets updated
+To mark newly qualified teams, update that snapshot file and deploy. The 6-hour cron then re-applies it automatically.
 
-Only the `team_status` table:
-
-| Field | Values |
-|-------|--------|
-| `team_name` | Must match sweep team (Spain, France, etc.) |
-| `status` | `active`, `eliminated`, `winner` |
-| `stage` | Group Stage → Round of 32 → … → World Cup Winner |
-
-**Not modified:** assignments, participants, invite links, draw logic.
-
-## Manual test
+## Manual sync
 
 ```bash
-curl https://your-app.vercel.app/api/update-world-cup-status \
-  -H "Authorization: Bearer YOUR_CRON_SECRET"
+npm run sync:team-status
+```
+
+Or trigger production:
+
+```bash
+curl "https://worldcup-family-sweep.vercel.app/api/sync-team-status?key=YOUR_CRON_SECRET"
 ```
 
 Health check (no auth):
 
 ```bash
-curl https://your-app.vercel.app/api/update-world-cup-status
+curl https://worldcup-family-sweep.vercel.app/api/sync-team-status
 ```
+
+## Response shape
+
+```json
+{
+  "ok": true,
+  "qualified": 6,
+  "pending": 9,
+  "eliminated": 0,
+  "updatedTeams": ["Mexico", "..."],
+  "updated": 15,
+  "skipped": 0,
+  "lastSyncAt": "2026-06-24T12:00:00.000Z",
+  "dataSource": "Wikipedia 2026 FIFA World Cup group pages ...",
+  "message": "Synced 15 team(s) from verified snapshot ..."
+}
+```
+
+## Tracker UI
+
+`/tracker` reads `tournament_meta.last_status_sync` for:
+
+- Last updated
+- Data source
+- Sync status (up to date / failed)
+- Last checked (on failure — tracker still loads)
+
+## Legacy API-Football route
+
+`/api/update-world-cup-status` remains available for future live API sync when `API_FOOTBALL_KEY` is configured. It is no longer on the Vercel cron schedule.
