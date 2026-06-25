@@ -4,7 +4,8 @@ Automatic sync of `team_status` from the verified FIFA/Wikipedia snapshot used b
 
 ## Schedule
 
-- **Vercel Cron:** `0 */6 * * *` (every 6 hours)
+- **Vercel Cron:** `0 6 * * *` (daily at 06:00 UTC)
+- **Note:** Vercel Hobby allows **one cron run per day** only. For more frequent syncs, trigger manually via `?key=` or upgrade to Pro for `0 */6 * * *`.
 - **Endpoint:** `GET /api/sync-team-status`
 - **Auth:** `Authorization: Bearer <CRON_SECRET>` (Vercel Cron) or `?key=<CRON_SECRET>` (manual)
 

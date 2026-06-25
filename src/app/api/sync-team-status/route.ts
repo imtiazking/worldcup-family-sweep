@@ -55,7 +55,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       endpoint: "/api/sync-team-status",
       methods: ["GET", "POST"],
-      schedule: "Every 6 hours (0 */6 * * *)",
+      schedule: "Daily at 06:00 UTC (Hobby plan — once per day max)",
       auth: "Authorization: Bearer <CRON_SECRET> or ?key=<CRON_SECRET>",
       dataSource:
         "Verified FIFA/Wikipedia snapshot (world-cup-verified-snapshot.ts)",
