@@ -5,7 +5,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { runVerifiedTeamStatusSync } from "../src/lib/sync-verified-team-status";
+import { runLiveFirstTeamStatusSync } from "../src/lib/sync-live-team-status";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const envPath = resolve(root, ".env.local");
@@ -23,7 +23,7 @@ if (existsSync(envPath)) {
 }
 
 async function main() {
-  const result = await runVerifiedTeamStatusSync();
+  const result = await runLiveFirstTeamStatusSync();
 
   for (const team of result.updatedTeams) {
     console.log(`✓ ${team}`);
@@ -39,6 +39,8 @@ async function main() {
         eliminated: result.eliminated,
         updatedTeams: result.updatedTeams,
         lastSyncAt: result.lastSyncAt,
+        source: result.source,
+        logs: result.logs,
       },
       null,
       2,

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { WorldCup26EnrichmentMap } from "@/lib/providers/worldcup26-provider";
 import {
   TOURNAMENT_STAGES,
   groupRowsByStage,
@@ -8,15 +9,21 @@ import {
 } from "@/lib/tracker";
 import { BracketConnector } from "./BracketConnector";
 import { PathTeamCard } from "./PathTeamCard";
+import { RoundOf32Bracket } from "./RoundOf32Bracket";
 import { TrackerCelebration } from "./TrackerCelebration";
 import { revealTransition, useMotionSettings } from "./motion-utils";
 
 type TournamentPathProps = {
   rows: TrackerRow[];
   hasWinner: boolean;
+  fixtureEnrichment?: WorldCup26EnrichmentMap | null;
 };
 
-export function TournamentPath({ rows, hasWinner }: TournamentPathProps) {
+export function TournamentPath({
+  rows,
+  hasWinner,
+  fixtureEnrichment = null,
+}: TournamentPathProps) {
   const teamsByStage = groupRowsByStage(rows);
   const { reduceMotion } = useMotionSettings();
 
@@ -40,6 +47,8 @@ export function TournamentPath({ rows, hasWinner }: TournamentPathProps) {
           Teams advance through each stage as the World Cup progresses.
         </p>
       </div>
+
+      <RoundOf32Bracket rows={rows} fixtureEnrichment={fixtureEnrichment} />
 
       <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center">
         {TOURNAMENT_STAGES.map((stage, index) => {

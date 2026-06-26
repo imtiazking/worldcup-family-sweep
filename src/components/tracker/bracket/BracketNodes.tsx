@@ -1,0 +1,141 @@
+import type { BracketOpponent, BracketStatus, SweepBracketEntry } from "@/lib/round-of-32-bracket";
+
+const STATUS_LABELS: Record<BracketStatus, string> = {
+  through: "Through",
+  pending: "Pending",
+  eliminated: "Eliminated",
+};
+
+const STATUS_STYLES: Record<BracketStatus, string> = {
+  through: "bg-emerald-100 text-emerald-800 ring-emerald-200",
+  pending: "bg-amber-100 text-amber-900 ring-amber-200",
+  eliminated: "bg-red-100 text-red-800 ring-red-200",
+};
+
+type BracketStatusBadgeProps = {
+  status: BracketStatus;
+};
+
+export function BracketStatusBadge({ status }: BracketStatusBadgeProps) {
+  return (
+    <span
+      className={[
+        "inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1",
+        STATUS_STYLES[status],
+      ].join(" ")}
+    >
+      {STATUS_LABELS[status]}
+    </span>
+  );
+}
+
+type BracketTeamNodeProps = {
+  entry: SweepBracketEntry;
+  align?: "left" | "right";
+  compact?: boolean;
+};
+
+export function BracketTeamNode({
+  entry,
+  align = "left",
+  compact = false,
+}: BracketTeamNodeProps) {
+  const { row, status } = entry;
+  const isRight = align === "right";
+
+  return (
+    <div
+      className={[
+        "flex min-w-0 items-center gap-3",
+        isRight ? "flex-row-reverse text-right" : "text-left",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "flex shrink-0 items-center justify-center rounded-full bg-white shadow-[0_2px_12px_rgba(15,23,42,0.12)] ring-1 ring-slate-200",
+          compact ? "h-12 w-12 text-2xl" : "h-14 w-14 text-3xl sm:h-16 sm:w-16 sm:text-4xl",
+          status === "eliminated" ? "grayscale opacity-60" : "",
+        ].join(" ")}
+        aria-hidden
+      >
+        {row.team?.flag_emoji ?? "⚽"}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p
+          className={[
+            "truncate font-semibold text-slate-900",
+            compact ? "text-sm" : "text-sm sm:text-base",
+          ].join(" ")}
+        >
+          {row.team?.name ?? "Unknown"}
+        </p>
+        <p className="truncate text-xs text-slate-500">
+          {row.participant?.name ?? "Unassigned"}
+        </p>
+        <div className={["mt-1", isRight ? "flex justify-end" : ""].join(" ")}>
+          <BracketStatusBadge status={status} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type BracketOpponentNodeProps = {
+  opponent: BracketOpponent | null;
+  align?: "left" | "right";
+  compact?: boolean;
+};
+
+export function BracketOpponentNode({
+  opponent,
+  align = "right",
+  compact = false,
+}: BracketOpponentNodeProps) {
+  const isTbc = !opponent || opponent.kind === "tbc";
+  const label = opponent?.label ?? "TBC";
+  const kindLabel =
+    opponent?.kind === "confirmed"
+      ? "Confirmed"
+      : opponent?.kind === "projected"
+        ? "Projected"
+        : "TBC";
+
+  return (
+    <div
+      className={[
+        "flex min-w-0 items-center gap-2",
+        align === "left" ? "flex-row text-left" : "flex-row-reverse text-right",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "flex shrink-0 items-center justify-center rounded-full border-2 border-dashed",
+          compact ? "h-12 w-12" : "h-14 w-14 sm:h-16 sm:w-16",
+          isTbc
+            ? "border-slate-300 bg-slate-100 text-slate-400"
+            : "border-slate-300 bg-slate-50 text-slate-500",
+        ].join(" ")}
+        aria-hidden
+      >
+        <span className="text-[10px] font-bold uppercase tracking-wide sm:text-xs">
+          {isTbc ? "TBC" : "?"}
+        </span>
+      </div>
+      <div className="min-w-0">
+        <p
+          className={[
+            "truncate font-medium text-slate-600",
+            compact ? "text-xs" : "text-xs sm:text-sm",
+          ].join(" ")}
+        >
+          {label}
+        </p>
+        <p className="text-[10px] uppercase tracking-wide text-slate-400">
+          {kindLabel}
+          {opponent?.date ? ` · ${opponent.date}` : ""}
+        </p>
+      </div>
+    </div>
+  );
+}

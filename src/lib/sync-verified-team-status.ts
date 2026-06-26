@@ -2,8 +2,13 @@ import { createServiceClient } from "@/lib/supabase";
 import {
   VERIFIED_FAMILY_TEAM_STATUSES,
   VERIFIED_SNAPSHOT_SOURCE,
-  type VerifiedTeamStatus,
 } from "@/lib/world-cup-verified-snapshot";
+import type { ApiFootballSyncLogs } from "@/lib/api-football-live-classifier";
+import {
+  SYNC_SOURCE_API_ERROR,
+  SYNC_SOURCE_FALLBACK,
+  formatSyncSourceLabel,
+} from "@/lib/sync-sources";
 
 export type TournamentSyncMeta = {
   at: string;
@@ -16,6 +21,15 @@ export type TournamentSyncMeta = {
   eliminated: number;
   updatedTeams: string[];
   error?: string;
+  reason?: string;
+  logs?: ApiFootballSyncLogs;
+};
+
+export type TeamStatusRowInput = {
+  teamName: string;
+  status: string;
+  stage: string;
+  nextStageProbability: number | null;
 };
 
 export type VerifiedSyncResult = {
@@ -28,8 +42,10 @@ export type VerifiedSyncResult = {
   skipped: number;
   lastSyncAt: string;
   dataSource: string;
+  source: string;
   message: string;
   error?: string;
+  logs?: ApiFootballSyncLogs;
 };
 
 export type TrackerSyncInfo = {
@@ -41,20 +57,24 @@ export type TrackerSyncInfo = {
 };
 
 function classifyTeam(
-  row: VerifiedTeamStatus,
+  row: Pick<TeamStatusRowInput, "status" | "stage" | "nextStageProbability">,
 ): "qualified" | "pending" | "eliminated" {
   if (row.status === "eliminated") return "eliminated";
-  if (row.nextStageProbability === 100 && row.stage !== "Group Stage") {
+  if (
+    row.nextStageProbability !== null &&
+    row.nextStageProbability >= 100 &&
+    row.stage !== "Group Stage"
+  ) {
     return "qualified";
   }
   return "pending";
 }
 
-function countBuckets(statuses: VerifiedTeamStatus[]) {
+function countBuckets(rows: TeamStatusRowInput[]) {
   let qualified = 0;
   let pending = 0;
   let eliminated = 0;
-  for (const row of statuses) {
+  for (const row of rows) {
     const bucket = classifyTeam(row);
     if (bucket === "qualified") qualified += 1;
     else if (bucket === "eliminated") eliminated += 1;
@@ -95,12 +115,14 @@ export function parseTournamentSyncMeta(
             ? "ok"
             : "unknown";
 
+    const source = parsed.source ?? null;
+
     return {
       lastSyncAt,
       lastCheckedAt,
-      dataSource: parsed.source ?? null,
+      dataSource: source ? formatSyncSourceLabel(source) : null,
       syncStatus,
-      syncError: parsed.error ?? null,
+      syncError: parsed.error ?? parsed.reason ?? null,
     };
   } catch {
     return {
@@ -143,16 +165,15 @@ async function writeSyncMeta(meta: TournamentSyncMeta): Promise<string | null> {
   return error?.message ?? null;
 }
 
-/**
- * Applies the verified FIFA/Wikipedia snapshot to team_status and tournament_meta.
- * Same logic as `npm run sync:team-status`.
- */
-export async function runVerifiedTeamStatusSync(): Promise<VerifiedSyncResult> {
+export async function applyTeamStatusRows(
+  rows: TeamStatusRowInput[],
+  source: string,
+  logs?: ApiFootballSyncLogs,
+  reason?: string,
+): Promise<VerifiedSyncResult> {
   const now = new Date().toISOString();
-  const dataSource = VERIFIED_SNAPSHOT_SOURCE;
-  const { qualified, pending, eliminated } = countBuckets(
-    VERIFIED_FAMILY_TEAM_STATUSES,
-  );
+  const { qualified, pending, eliminated } = countBuckets(rows);
+  const dataSource = formatSyncSourceLabel(source);
 
   let supabase;
   try {
@@ -167,11 +188,13 @@ export async function runVerifiedTeamStatusSync(): Promise<VerifiedSyncResult> {
       eliminated,
       updatedTeams: [],
       updated: 0,
-      skipped: VERIFIED_FAMILY_TEAM_STATUSES.length,
+      skipped: rows.length,
       lastSyncAt: now,
       dataSource,
-      message: message,
+      source,
+      message,
       error: message,
+      logs,
     };
   }
 
@@ -184,7 +207,7 @@ export async function runVerifiedTeamStatusSync(): Promise<VerifiedSyncResult> {
     await writeSyncMeta({
       at: existing?.lastSyncAt ?? existing?.at ?? now,
       lastSyncAt: existing?.lastSyncAt ?? existing?.at ?? now,
-      source: dataSource,
+      source,
       status: "failed",
       lastCheckedAt: now,
       qualified,
@@ -192,6 +215,8 @@ export async function runVerifiedTeamStatusSync(): Promise<VerifiedSyncResult> {
       eliminated,
       updatedTeams: existing?.updatedTeams ?? [],
       error: teamsError.message,
+      reason,
+      logs,
     });
 
     return {
@@ -201,11 +226,13 @@ export async function runVerifiedTeamStatusSync(): Promise<VerifiedSyncResult> {
       eliminated,
       updatedTeams: [],
       updated: 0,
-      skipped: VERIFIED_FAMILY_TEAM_STATUSES.length,
+      skipped: rows.length,
       lastSyncAt: existing?.lastSyncAt ?? existing?.at ?? now,
       dataSource,
+      source,
       message: `Sync failed — existing data preserved. ${teamsError.message}`,
       error: teamsError.message,
+      logs,
     };
   }
 
@@ -214,7 +241,7 @@ export async function runVerifiedTeamStatusSync(): Promise<VerifiedSyncResult> {
   let skipped = 0;
   const updatedTeams: string[] = [];
 
-  for (const row of VERIFIED_FAMILY_TEAM_STATUSES) {
+  for (const row of rows) {
     if (!allowed.has(row.teamName)) {
       skipped += 1;
       continue;
@@ -244,13 +271,15 @@ export async function runVerifiedTeamStatusSync(): Promise<VerifiedSyncResult> {
   const metaError = await writeSyncMeta({
     at: now,
     lastSyncAt: now,
-    source: dataSource,
+    source,
     status: "ok",
     lastCheckedAt: now,
     qualified,
     pending,
     eliminated,
     updatedTeams,
+    reason,
+    logs,
   });
 
   if (metaError) {
@@ -264,8 +293,10 @@ export async function runVerifiedTeamStatusSync(): Promise<VerifiedSyncResult> {
       skipped,
       lastSyncAt: now,
       dataSource,
+      source,
       message: `team_status updated but tournament_meta failed: ${metaError}`,
       error: metaError,
+      logs,
     };
   }
 
@@ -279,6 +310,39 @@ export async function runVerifiedTeamStatusSync(): Promise<VerifiedSyncResult> {
     skipped,
     lastSyncAt: now,
     dataSource,
-    message: `Synced ${updated} team(s) from verified snapshot (${qualified} qualified, ${pending} pending, ${eliminated} eliminated).`,
+    source,
+    message: `Synced ${updated} team(s) from ${dataSource} (${qualified} qualified, ${pending} pending, ${eliminated} eliminated).`,
+    logs,
   };
+}
+
+export type VerifiedSyncOptions = {
+  source?: string;
+  reason?: string;
+};
+
+/**
+ * Applies the verified FIFA/Wikipedia snapshot to team_status and tournament_meta.
+ */
+export async function runVerifiedTeamStatusSync(
+  options: VerifiedSyncOptions = {},
+): Promise<VerifiedSyncResult> {
+  const source = options.source ?? VERIFIED_SNAPSHOT_SOURCE;
+  const rows: TeamStatusRowInput[] = VERIFIED_FAMILY_TEAM_STATUSES.map(
+    (row) => ({
+      teamName: row.teamName,
+      status: row.status,
+      stage: row.stage,
+      nextStageProbability: row.nextStageProbability,
+    }),
+  );
+
+  if (source === SYNC_SOURCE_FALLBACK || source === SYNC_SOURCE_API_ERROR) {
+    console.info(
+      `[sync-team-status] Verified snapshot fallback (${source})`,
+      options.reason ?? "no reason",
+    );
+  }
+
+  return applyTeamStatusRows(rows, source, undefined, options.reason);
 }

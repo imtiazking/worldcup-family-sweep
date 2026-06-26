@@ -9,6 +9,24 @@
 
 const API_FOOTBALL_BASE = "https://v3.football.api-sports.io";
 
+export class ApiFootballError extends Error {
+  constructor(
+    message: string,
+    readonly statusCode?: number,
+    readonly endpoint?: string,
+  ) {
+    super(message);
+    this.name = "ApiFootballError";
+  }
+}
+
+export class ApiFootballRateLimitError extends ApiFootballError {
+  constructor(endpoint: string) {
+    super(`API-Football rate limit exceeded: ${endpoint}`, 429, endpoint);
+    this.name = "ApiFootballRateLimitError";
+  }
+}
+
 export const WORLD_CUP_LEAGUE_ID = "1";
 export const WORLD_CUP_SEASON = "2026";
 
@@ -53,6 +71,26 @@ export type ApiStandingRow = {
 
 export type ApiStandingsGroup = ApiStandingRow[];
 
+export type ApiLeagueTeam = {
+  team: {
+    id: number;
+    name: string;
+    code: string | null;
+    country: string;
+    logo: string;
+  };
+  venue: {
+    id: number;
+    name: string;
+    city: string;
+  };
+};
+
+const WORLD_CUP_PARAMS = {
+  league: WORLD_CUP_LEAGUE_ID,
+  season: WORLD_CUP_SEASON,
+} as const;
+
 export async function apiFootballFetch<T>(
   endpoint: string,
   params: Record<string, string> = {}
@@ -78,9 +116,15 @@ export async function apiFootballFetch<T>(
     cache: "no-store",
   });
 
+  if (response.status === 429) {
+    throw new ApiFootballRateLimitError(endpoint);
+  }
+
   if (!response.ok) {
-    throw new Error(
-      `API-Football request failed (${response.status}): ${endpoint}`
+    throw new ApiFootballError(
+      `API-Football request failed (${response.status}): ${endpoint}`,
+      response.status,
+      endpoint,
     );
   }
 
@@ -91,26 +135,57 @@ export async function apiFootballFetch<T>(
       typeof data.errors === "object" && !Array.isArray(data.errors)
         ? JSON.stringify(data.errors)
         : String(data.errors);
-    throw new Error(`API-Football error: ${message}`);
+    const lower = message.toLowerCase();
+    if (lower.includes("rate limit") || lower.includes("too many")) {
+      throw new ApiFootballRateLimitError(endpoint);
+    }
+    throw new ApiFootballError(`API-Football error: ${message}`, undefined, endpoint);
   }
 
   return data;
 }
 
+/** GET /fixtures?league=1&season=2026 */
+export async function fetchAllFixtures(): Promise<ApiFixture[]> {
+  const data = await apiFootballFetch<ApiFixture[]>("fixtures", {
+    ...WORLD_CUP_PARAMS,
+  });
+
+  return data.response ?? [];
+}
+
+/** Completed matches only — used by tournament sync logic. */
 export async function fetchCompletedFixtures(): Promise<ApiFixture[]> {
   const data = await apiFootballFetch<ApiFixture[]>("fixtures", {
-    league: WORLD_CUP_LEAGUE_ID,
-    season: WORLD_CUP_SEASON,
+    ...WORLD_CUP_PARAMS,
     status: "FT",
   });
 
   return data.response ?? [];
 }
 
+/** GET /standings?league=1&season=2026 */
 export async function fetchStandings(): Promise<ApiStandingsGroup[]> {
   const data = await apiFootballFetch<ApiStandingsGroup[]>("standings", {
-    league: WORLD_CUP_LEAGUE_ID,
-    season: WORLD_CUP_SEASON,
+    ...WORLD_CUP_PARAMS,
+  });
+
+  return data.response ?? [];
+}
+
+/** GET /fixtures/rounds?league=1&season=2026 */
+export async function fetchFixtureRounds(): Promise<string[]> {
+  const data = await apiFootballFetch<string[]>("fixtures/rounds", {
+    ...WORLD_CUP_PARAMS,
+  });
+
+  return data.response ?? [];
+}
+
+/** GET /teams?league=1&season=2026 */
+export async function fetchLeagueTeams(): Promise<ApiLeagueTeam[]> {
+  const data = await apiFootballFetch<ApiLeagueTeam[]>("teams", {
+    ...WORLD_CUP_PARAMS,
   });
 
   return data.response ?? [];

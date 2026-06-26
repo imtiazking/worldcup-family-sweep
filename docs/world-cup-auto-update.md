@@ -1,11 +1,11 @@
 # World Cup Tracker Auto-Update
 
-Automatic sync of `team_status` from the verified FIFA/Wikipedia snapshot used by the family sweep tracker.
+Automatic sync of `team_status` using **API-Football live-first** mode, with fallback to the verified FIFA/Wikipedia snapshot.
 
 ## Schedule
 
 - **Vercel Cron:** `0 6 * * *` (daily at 06:00 UTC)
-- **Note:** Vercel Hobby allows **one cron run per day** only. For more frequent syncs, trigger manually via `?key=` or upgrade to Pro for `0 */6 * * *`.
+- **Note:** Vercel Hobby allows **one cron run per day** only.
 - **Endpoint:** `GET /api/sync-team-status`
 - **Auth:** `Authorization: Bearer <CRON_SECRET>` (Vercel Cron) or `?key=<CRON_SECRET>` (manual)
 
@@ -17,19 +17,34 @@ Automatic sync of `team_status` from the verified FIFA/Wikipedia snapshot used b
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Tracker reads (public) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Cron writes `team_status` + `tournament_meta` |
 | `CRON_SECRET` | Protects sync endpoint |
+| `API_FOOTBALL_KEY` | Live standings/fixtures/rounds/teams from API-Football |
 
-`API_FOOTBALL_KEY` is **optional** and used only by the legacy `/api/update-world-cup-status` route (not the active cron).
+## Live-first flow
 
-## Data source
+1. Cron calls `/api/sync-team-status`.
+2. Fetches API-Football (league `1`, season `2026`):
+   - `/standings`
+   - `/fixtures`
+   - `/fixtures/rounds`
+   - `/teams`
+3. If standings + rounds are valid → updates `team_status` from live API.
+4. On API failure, rate limit, or invalid/ambiguous dataset → applies `world-cup-verified-snapshot.ts`.
 
-The active cron applies `src/lib/world-cup-verified-snapshot.ts` — manually verified FIFA "(A)" qualification rules from Wikipedia group pages.
+### `tournament_meta.source` values
 
-To mark newly qualified teams, update that snapshot file and deploy. The 6-hour cron then re-applies it automatically.
+| Source key | Tracker label |
+|------------|---------------|
+| `api-football-live` | API-Football Live |
+| `verified-snapshot-fallback` | Verified snapshot (API fallback) |
+| `api-football-error` | Verified snapshot (API error) |
+
+Safety logs (counts, mapped/unmapped teams, ambiguous teams) are written to `tournament_meta.last_status_sync` under `logs`.
 
 ## Manual sync
 
 ```bash
-npm run sync:team-status
+npm run probe:api-football   # test API key + endpoints
+npm run sync:team-status     # live-first sync to Supabase
 ```
 
 Or trigger production:
@@ -56,8 +71,10 @@ curl https://worldcup-family-sweep.vercel.app/api/sync-team-status
   "updated": 15,
   "skipped": 0,
   "lastSyncAt": "2026-06-24T12:00:00.000Z",
-  "dataSource": "Wikipedia 2026 FIFA World Cup group pages ...",
-  "message": "Synced 15 team(s) from verified snapshot ..."
+  "dataSource": "API-Football Live",
+  "source": "api-football-live",
+  "message": "Synced 15 team(s) from API-Football Live ...",
+  "logs": { "standingsGroups": 12, "mappedSweepTeams": ["..."], "...": "..." }
 }
 ```
 
@@ -66,10 +83,13 @@ curl https://worldcup-family-sweep.vercel.app/api/sync-team-status
 `/tracker` reads `tournament_meta.last_status_sync` for:
 
 - Last updated
-- Data source
+- Data source (e.g. **API-Football Live**)
 - Sync status (up to date / failed)
-- Last checked (on failure — tracker still loads)
 
-## Legacy API-Football route
+## Legacy route
 
-`/api/update-world-cup-status` remains available for future live API sync when `API_FOOTBALL_KEY` is configured. It is no longer on the Vercel cron schedule.
+`/api/update-world-cup-status` remains for the older provider-only sync path. The active cron uses `/api/sync-team-status`.
+
+## Updating the fallback snapshot
+
+When API-Football is unavailable, edit `src/lib/world-cup-verified-snapshot.ts` and deploy. The snapshot is **not removed** — it is the safety net.

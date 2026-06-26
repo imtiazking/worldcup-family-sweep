@@ -12,6 +12,7 @@ import {
   logWheelVisibilityDebug,
 } from "@/lib/wheel-visibility-debug";
 import { parseTournamentSyncMeta } from "@/lib/sync-verified-team-status";
+import { loadWorldCup26Enrichment } from "@/lib/providers/worldcup26-provider";
 
 type Assignment = {
   participant_id: string;
@@ -215,6 +216,8 @@ export default async function TrackerPage() {
     buildWheelVisibilityDebug(eliminated, rows, wheelResultsSafe),
   );
 
+  const fixtureEnrichment = await loadWorldCup26Enrichment();
+
   return (
     <TrackerExperience
       rows={rows}
@@ -228,6 +231,7 @@ export default async function TrackerPage() {
       syncInfo={syncInfo}
       debugEliminatedCount={eliminated.length}
       debugStatusesRowCount={statuses?.length ?? 0}
+      fixtureEnrichment={fixtureEnrichment}
     />
   );
 }

@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { runVerifiedTeamStatusSync } from "@/lib/sync-verified-team-status";
+import { runLiveFirstTeamStatusSync } from "@/lib/sync-live-team-status";
+import {
+  SYNC_SOURCE_API_ERROR,
+  SYNC_SOURCE_FALLBACK,
+  SYNC_SOURCE_LIVE,
+  formatSyncSourceLabel,
+} from "@/lib/sync-sources";
 
 function isAuthorized(request: Request): boolean {
   const cronSecret = process.env.CRON_SECRET;
@@ -36,7 +42,7 @@ async function handleSync() {
   }
 
   try {
-    const result = await runVerifiedTeamStatusSync();
+    const result = await runLiveFirstTeamStatusSync();
     return NextResponse.json(result, { status: result.ok ? 200 : 502 });
   } catch (error) {
     console.error("[sync-team-status]", error);
@@ -57,9 +63,15 @@ export async function GET(request: Request) {
       methods: ["GET", "POST"],
       schedule: "Daily at 06:00 UTC (Hobby plan — once per day max)",
       auth: "Authorization: Bearer <CRON_SECRET> or ?key=<CRON_SECRET>",
-      dataSource:
-        "Verified FIFA/Wikipedia snapshot (world-cup-verified-snapshot.ts)",
+      mode: "API-Football live-first with verified snapshot fallback",
+      sources: {
+        live: formatSyncSourceLabel(SYNC_SOURCE_LIVE),
+        fallback: formatSyncSourceLabel(SYNC_SOURCE_FALLBACK),
+        apiError: formatSyncSourceLabel(SYNC_SOURCE_API_ERROR),
+      },
+      requiredEnv: ["CRON_SECRET", "SUPABASE_SERVICE_ROLE_KEY", "API_FOOTBALL_KEY"],
       npmScript: "npm run sync:team-status",
+      probeScript: "npm run probe:api-football",
     });
   }
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import type { WorldCup26EnrichmentMap } from "@/lib/providers/worldcup26-provider";
 import type { LoserWheelResult } from "@/lib/loser-wheel";
 import type { LeaderboardEntry, TournamentStats, TrackerRow } from "@/lib/tracker";
 import {
@@ -42,6 +43,7 @@ type TrackerExperienceProps = {
   /** Temporary debug — remove after wheel join verified */
   debugEliminatedCount?: number;
   debugStatusesRowCount?: number;
+  fixtureEnrichment?: WorldCup26EnrichmentMap | null;
 };
 
 function formatLastUpdated(iso: string): string {
@@ -150,6 +152,7 @@ export function TrackerExperience({
   syncInfo,
   debugEliminatedCount,
   debugStatusesRowCount,
+  fixtureEnrichment = null,
 }: TrackerExperienceProps) {
   const { reduceMotion } = useMotionSettings();
   const [activeTab, setActiveTab] = useState<TrackerTab>("overview");
@@ -293,7 +296,11 @@ export function TrackerExperience({
             </div>
           )}
           <div className="max-md:mt-2 md:mt-0">
-            <TournamentPath rows={rows} hasWinner={hasWinner} />
+            <TournamentPath
+              rows={rows}
+              hasWinner={hasWinner}
+              fixtureEnrichment={fixtureEnrichment}
+            />
           </div>
         </MobileTabPanel>
 

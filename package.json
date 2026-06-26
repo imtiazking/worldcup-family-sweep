@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sync:team-status": "npx tsx scripts/apply-verified-team-status.ts"
+    "sync:team-status": "npx tsx scripts/apply-verified-team-status.ts",
+    "probe:api-football": "npx tsx scripts/probe-api-football.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
