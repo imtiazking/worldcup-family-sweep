@@ -64,12 +64,12 @@ const checks = [
   ["Bracket Pending badges (desktop+mobile) = 8", totalPendingBadges === 8],
   [
     "Netherlands primary: Confirmed fixture metadata visible",
-    /Netherlands[\s\S]{0,1200}?Confirmed[\s\S]{0,120}?29 Jun/i.test(html),
+    /Netherlands[\s\S]{0,1200}?Confirmed[\s\S]{0,120}?29 Jun/i.test(mobileThroughSlice),
   ],
   [
     "Morocco secondary: shows Netherlands without duplicate date",
-    /Morocco[\s\S]{0,800}?Netherlands/i.test(html) &&
-      !/Morocco[\s\S]{0,800}?Confirmed[\s\S]{0,120}?29 Jun/i.test(html),
+    /Morocco[\s\S]{0,800}?Netherlands/i.test(mobileThroughSlice) &&
+      !/Morocco[\s\S]{0,800}?Confirmed[\s\S]{0,120}?29 Jun/i.test(mobileThroughSlice),
   ],
   [
     "R32 stage ladder: Netherlands vs Morocco once",
