@@ -24,6 +24,8 @@ export type SweepBracketEntry = {
   /** Group-stage or qualification path line for pending teams */
   pendingLine: string | null;
   side: "left" | "right";
+  /** For mutual confirmed sweep pairings — metadata only on primary */
+  confirmedFixtureRole?: "primary" | "secondary" | null;
 };
 
 const SNAPSHOT_BY_TEAM = new Map<string, VerifiedTeamStatus>(
@@ -213,6 +215,86 @@ function applyPendingLineEnrichment(
   return parts.length > 1 ? parts.join(" · ") : line;
 }
 
+/** Flag emoji for a sweep team name within bracket entries */
+export function getTeamFlagFromEntries(
+  entries: SweepBracketEntry[],
+  teamName: string,
+): string | undefined {
+  const found = entries.find(
+    (e) => e.row.team?.name?.toLowerCase() === teamName.toLowerCase(),
+  );
+  return found?.row.team?.flag_emoji ?? undefined;
+}
+
+/**
+ * Mutual confirmed pairings: alphabetically later team is primary (full metadata once).
+ * Unpaired confirmed rows stay primary.
+ */
+function assignConfirmedFixtureRoles(through: SweepBracketEntry[]): void {
+  const byName = new Map(
+    through.map((e) => [e.row.team?.name?.toLowerCase() ?? "", e]),
+  );
+
+  for (const entry of through) {
+    const team = entry.row.team?.name;
+    const opp = entry.r32Opponent;
+    if (!team || opp?.kind !== "confirmed") continue;
+
+    const oppEntry = byName.get(opp.label.toLowerCase());
+    if (
+      !oppEntry?.r32Opponent ||
+      oppEntry.r32Opponent.kind !== "confirmed" ||
+      oppEntry.r32Opponent.label.toLowerCase() !== team.toLowerCase()
+    ) {
+      continue;
+    }
+
+    const primary =
+      team.localeCompare(opp.label, undefined, { sensitivity: "base" }) > 0
+        ? team
+        : opp.label;
+    entry.confirmedFixtureRole = team === primary ? "primary" : "secondary";
+  }
+
+  for (const entry of through) {
+    if (entry.r32Opponent?.kind === "confirmed" && !entry.confirmedFixtureRole) {
+      entry.confirmedFixtureRole = "primary";
+    }
+  }
+}
+
+export type ConfirmedMutualFixture = {
+  primary: SweepBracketEntry;
+  secondary: SweepBracketEntry;
+};
+
+/** Mutual confirmed R32 pairings for single-fixture stage ladder display */
+export function getConfirmedMutualFixtures(
+  through: SweepBracketEntry[],
+): ConfirmedMutualFixture[] {
+  const seen = new Set<string>();
+  const result: ConfirmedMutualFixture[] = [];
+
+  for (const entry of through) {
+    if (entry.confirmedFixtureRole !== "primary" || entry.r32Opponent?.kind !== "confirmed") {
+      continue;
+    }
+
+    const teamA = entry.row.team?.name ?? "";
+    const teamB = entry.r32Opponent.label;
+    const key = [teamA, teamB].sort().join("|");
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const secondary = through.find((e) => e.row.team?.name === teamB);
+    if (!secondary) continue;
+
+    result.push({ primary: entry, secondary });
+  }
+
+  return result;
+}
+
 export type SweepBracketData = {
   through: SweepBracketEntry[];
   pending: SweepBracketEntry[];
@@ -277,6 +359,8 @@ export function buildSweepBracketData(
   through.sort(sortByName);
   pending.sort(sortByName);
   eliminated.sort(sortByName);
+
+  assignConfirmedFixtureRoles(through);
 
   const half = Math.ceil(through.length / 2);
   const throughWithSides = [

@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import type { WorldCup26EnrichmentMap } from "@/lib/providers/worldcup26-provider";
 import type { TrackerRow } from "@/lib/tracker";
 import { buildSweepBracketData } from "@/lib/round-of-32-bracket";
-import { BracketOpponentNode, BracketTeamNode } from "./bracket/BracketNodes";
+import { BracketTeamNode } from "./bracket/BracketNodes";
+import { BracketMatchOpponent } from "./bracket/BracketMatchOpponent";
 import { RoundOf32MobileCards } from "./RoundOf32MobileCards";
 import { revealTransition, useMotionSettings } from "./motion-utils";
 
@@ -16,9 +17,11 @@ type RoundOf32BracketProps = {
 function DesktopMatchRow({
   entry,
   side,
+  through,
 }: {
   entry: ReturnType<typeof buildSweepBracketData>["through"][number];
   side: "left" | "right";
+  through: ReturnType<typeof buildSweepBracketData>["through"];
 }) {
   const isLeft = side === "left";
 
@@ -31,19 +34,13 @@ function DesktopMatchRow({
           </div>
           <div className="h-px flex-1 bg-slate-300" />
           <div className="w-[min(100%,160px)] shrink-0">
-            <BracketOpponentNode
-              opponent={entry.r32Opponent}
-              align="right"
-            />
+            <BracketMatchOpponent entry={entry} through={through} align="right" />
           </div>
         </>
       ) : (
         <>
           <div className="w-[min(100%,160px)] shrink-0">
-            <BracketOpponentNode
-              opponent={entry.r32Opponent}
-              align="left"
-            />
+            <BracketMatchOpponent entry={entry} through={through} align="left" />
           </div>
           <div className="h-px flex-1 bg-slate-300" />
           <div className="w-[min(100%,220px)] shrink-0">
@@ -146,7 +143,12 @@ export function RoundOf32Bracket({
         <div className="mx-auto flex max-w-6xl items-stretch justify-between gap-4">
           <div className="flex flex-1 flex-col justify-center gap-10">
             {left.map((entry) => (
-              <DesktopMatchRow key={entry.row.team?.id} entry={entry} side="left" />
+              <DesktopMatchRow
+                key={entry.row.team?.id}
+                entry={entry}
+                side="left"
+                through={data.through}
+              />
             ))}
           </div>
 
@@ -154,7 +156,12 @@ export function RoundOf32Bracket({
 
           <div className="flex flex-1 flex-col justify-center gap-10">
             {right.map((entry) => (
-              <DesktopMatchRow key={entry.row.team?.id} entry={entry} side="right" />
+              <DesktopMatchRow
+                key={entry.row.team?.id}
+                entry={entry}
+                side="right"
+                through={data.through}
+              />
             ))}
           </div>
         </div>

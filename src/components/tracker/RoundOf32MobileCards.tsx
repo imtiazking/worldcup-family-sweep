@@ -1,5 +1,6 @@
 import type { SweepBracketData } from "@/lib/round-of-32-bracket";
-import { BracketOpponentNode, BracketTeamNode } from "./bracket/BracketNodes";
+import { BracketTeamNode } from "./bracket/BracketNodes";
+import { BracketMatchOpponent } from "./bracket/BracketMatchOpponent";
 
 type RoundOf32MobileCardsProps = {
   data: SweepBracketData;
@@ -7,20 +8,27 @@ type RoundOf32MobileCardsProps = {
 
 function MobileMatchCard({
   entry,
+  through = [],
   showOpponent = false,
 }: {
   entry: SweepBracketData["through"][number];
+  through?: SweepBracketData["through"];
   showOpponent?: boolean;
 }) {
   return (
     <article className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm">
       <BracketTeamNode entry={entry} compact />
       {showOpponent && entry.r32Opponent && (
-        <div className="mt-3 flex items-center gap-2 border-t border-slate-200 pt-3">
-          <span className="text-xs text-slate-400">vs</span>
-          <div className="flex-1">
-            <BracketOpponentNode opponent={entry.r32Opponent} align="left" compact />
-          </div>
+        <div className="mt-3 space-y-2 border-t border-slate-200 pt-3">
+          {entry.r32Opponent.kind !== "confirmed" && (
+            <span className="text-xs text-slate-400">vs</span>
+          )}
+          <BracketMatchOpponent
+            entry={entry}
+            through={through}
+            align="left"
+            compact
+          />
         </div>
       )}
       {entry.status === "pending" && entry.pendingLine && (
@@ -44,7 +52,12 @@ export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
           </p>
           <div className="space-y-3">
             {data.through.map((entry) => (
-              <MobileMatchCard key={entry.row.team?.id} entry={entry} showOpponent />
+              <MobileMatchCard
+                key={entry.row.team?.id}
+                entry={entry}
+                through={data.through}
+                showOpponent
+              />
             ))}
           </div>
         </div>

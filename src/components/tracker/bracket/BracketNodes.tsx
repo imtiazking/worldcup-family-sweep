@@ -1,4 +1,8 @@
-import type { BracketOpponent, BracketStatus, SweepBracketEntry } from "@/lib/round-of-32-bracket";
+import type {
+  BracketOpponent,
+  BracketStatus,
+  SweepBracketEntry,
+} from "@/lib/round-of-32-bracket";
 
 const STATUS_LABELS: Record<BracketStatus, string> = {
   through: "Through",
@@ -29,6 +33,34 @@ export function BracketStatusBadge({ status }: BracketStatusBadgeProps) {
   );
 }
 
+type BracketFlagCircleProps = {
+  flag: string;
+  compact?: boolean;
+  className?: string;
+};
+
+/** Circular flag node — shared by bracket cards and stage ladder fixtures */
+export function BracketFlagCircle({
+  flag,
+  compact = false,
+  className = "",
+}: BracketFlagCircleProps) {
+  return (
+    <div
+      className={[
+        "flex shrink-0 items-center justify-center rounded-full bg-white shadow-[0_2px_12px_rgba(15,23,42,0.12)] ring-1 ring-slate-200",
+        compact
+          ? "h-12 w-12 text-2xl"
+          : "h-14 w-14 text-3xl sm:h-16 sm:w-16 sm:text-4xl",
+        className,
+      ].join(" ")}
+      aria-hidden
+    >
+      {flag}
+    </div>
+  );
+}
+
 type BracketTeamNodeProps = {
   entry: SweepBracketEntry;
   align?: "left" | "right";
@@ -50,16 +82,11 @@ export function BracketTeamNode({
         isRight ? "flex-row-reverse text-right" : "text-left",
       ].join(" ")}
     >
-      <div
-        className={[
-          "flex shrink-0 items-center justify-center rounded-full bg-white shadow-[0_2px_12px_rgba(15,23,42,0.12)] ring-1 ring-slate-200",
-          compact ? "h-12 w-12 text-2xl" : "h-14 w-14 text-3xl sm:h-16 sm:w-16 sm:text-4xl",
-          status === "eliminated" ? "grayscale opacity-60" : "",
-        ].join(" ")}
-        aria-hidden
-      >
-        {row.team?.flag_emoji ?? "⚽"}
-      </div>
+      <BracketFlagCircle
+        flag={row.team?.flag_emoji ?? "⚽"}
+        compact={compact}
+        className={status === "eliminated" ? "grayscale opacity-60" : ""}
+      />
 
       <div className="min-w-0 flex-1">
         <p
@@ -81,19 +108,86 @@ export function BracketTeamNode({
   );
 }
 
+type ConfirmedFixtureMetaProps = {
+  opponent: BracketOpponent;
+  align?: "left" | "right";
+  compact?: boolean;
+};
+
+/** Full confirmed fixture line — shown once per mutual pairing (primary row). */
+export function ConfirmedFixtureMeta({
+  opponent,
+  align = "left",
+  compact = false,
+}: ConfirmedFixtureMetaProps) {
+  const isRight = align === "right";
+  const parts = ["Confirmed"];
+  if (opponent.date) parts.push(opponent.date);
+  if (opponent.venue) parts.push(opponent.venue);
+
+  return (
+    <p
+      className={[
+        "font-medium text-emerald-700",
+        compact ? "text-[11px]" : "text-xs sm:text-sm",
+        isRight ? "text-right" : "text-left",
+      ].join(" ")}
+    >
+      {parts.join(" · ")}
+    </p>
+  );
+}
+
 type BracketOpponentNodeProps = {
   opponent: BracketOpponent | null;
   align?: "left" | "right";
   compact?: boolean;
+  variant?: "full" | "slim";
+  opponentFlag?: string;
+  showConfirmedOpponentLabel?: boolean;
 };
 
 export function BracketOpponentNode({
   opponent,
   align = "right",
   compact = false,
+  variant = "full",
+  opponentFlag,
+  showConfirmedOpponentLabel = false,
 }: BracketOpponentNodeProps) {
   const isTbc = !opponent || opponent.kind === "tbc";
   const label = opponent?.label ?? "TBC";
+  const isSlim = variant === "slim";
+  const isRight = align === "right";
+
+  if (isSlim && opponent?.kind === "confirmed") {
+    return (
+      <div
+        className={[
+          "flex min-w-0 items-center gap-2",
+          isRight ? "flex-row-reverse text-right" : "flex-row text-left",
+        ].join(" ")}
+      >
+      <BracketFlagCircle flag={opponentFlag ?? "⚽"} compact={compact} />
+        <div className="min-w-0">
+          <p
+            className={[
+              "truncate font-medium text-slate-700",
+              compact ? "text-sm" : "text-sm sm:text-base",
+            ].join(" ")}
+          >
+            {label}
+          </p>
+          {showConfirmedOpponentLabel && (
+            <p className="text-[10px] uppercase tracking-wide text-slate-400">
+              Confirmed opponent
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   const kindLabel =
     opponent?.kind === "confirmed"
       ? "Confirmed"
@@ -105,7 +199,7 @@ export function BracketOpponentNode({
     <div
       className={[
         "flex min-w-0 items-center gap-2",
-        align === "left" ? "flex-row text-left" : "flex-row-reverse text-right",
+        isRight ? "flex-row-reverse text-right" : "flex-row text-left",
       ].join(" ")}
     >
       <div

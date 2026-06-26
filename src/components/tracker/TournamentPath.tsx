@@ -7,8 +7,11 @@ import {
   groupRowsByStage,
   type TrackerRow,
 } from "@/lib/tracker";
+import { buildSweepBracketData, getConfirmedMutualFixtures } from "@/lib/round-of-32-bracket";
 import { BracketConnector } from "./BracketConnector";
+import { PathConfirmedFixtureCard } from "./PathConfirmedFixtureCard";
 import { PathTeamCard } from "./PathTeamCard";
+import { buildRoundOf32LadderItems } from "./stage-ladder-items";
 import { RoundOf32Bracket } from "./RoundOf32Bracket";
 import { TrackerCelebration } from "./TrackerCelebration";
 import { revealTransition, useMotionSettings } from "./motion-utils";
@@ -25,6 +28,8 @@ export function TournamentPath({
   fixtureEnrichment = null,
 }: TournamentPathProps) {
   const teamsByStage = groupRowsByStage(rows);
+  const bracketData = buildSweepBracketData(rows, fixtureEnrichment);
+  const confirmedFixtures = getConfirmedMutualFixtures(bracketData.through);
   const { reduceMotion } = useMotionSettings();
 
   return (
@@ -86,12 +91,27 @@ export function TournamentPath({
 
                 {stageTeams.length > 0 ? (
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    {stageTeams.map((row, i) => (
-                      <PathTeamCard
-                        key={`${row.team?.id ?? row.participant?.id ?? i}`}
-                        row={row}
-                      />
-                    ))}
+                    {stage === "Round of 32"
+                      ? buildRoundOf32LadderItems(stageTeams, confirmedFixtures).map(
+                          (item, i) =>
+                            item.kind === "fixture" ? (
+                              <PathConfirmedFixtureCard
+                                key={`fixture-${item.fixture.primary.row.team?.id}-${item.fixture.secondary.row.team?.id}`}
+                                fixture={item.fixture}
+                              />
+                            ) : (
+                              <PathTeamCard
+                                key={`${item.row.team?.id ?? item.row.participant?.id ?? i}`}
+                                row={item.row}
+                              />
+                            ),
+                        )
+                      : stageTeams.map((row, i) => (
+                          <PathTeamCard
+                            key={`${row.team?.id ?? row.participant?.id ?? i}`}
+                            row={row}
+                          />
+                        ))}
                   </div>
                 ) : (
                   <p className="mt-4 rounded-xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/30">

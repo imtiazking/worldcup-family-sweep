@@ -88,6 +88,20 @@ const projected = data.through.filter((e) => e.r32Opponent?.kind === "projected"
 const tbc = data.through.filter((e) => e.r32Opponent?.kind === "tbc");
 const missingParticipants = rows.filter((r) => !r.participant?.name);
 
+function countConfirmedFixtures(entries) {
+  const pairs = new Set();
+  for (const e of entries) {
+    if (e.r32Opponent?.kind !== "confirmed") continue;
+    const team = e.row.team?.name;
+    const opp = e.r32Opponent.label;
+    if (!team || !opp) continue;
+    pairs.add([team, opp].sort().join("|"));
+  }
+  return pairs.size;
+}
+
+const confirmedFixtures = countConfirmedFixtures(data.through);
+
 const checks = [
   {
     id: 1,
@@ -103,39 +117,77 @@ const checks = [
   },
   {
     id: 3,
-    name: "Through count = 10",
-    pass: data.through.length === 10,
+    name: "Through count = 11",
+    pass: data.through.length === 11,
     detail: `through=${data.through.length}`,
   },
   {
     id: 4,
-    name: "Pending count = 5",
-    pass: data.pending.length === 5,
+    name: "Pending count = 4",
+    pass: data.pending.length === 4,
     detail: `pending=${data.pending.length}`,
   },
   {
     id: 5,
-    name: "No fake confirmed opponents",
-    pass: confirmed.length === 0,
-    detail:
-      confirmed.length === 0
-        ? "none"
-        : confirmed.map((e) => `${e.row.team?.name}:${e.r32Opponent?.label}`).join(", "),
+    name: "Confirmed team rows = 2 (Netherlands, Morocco)",
+    pass:
+      confirmed.length === 2 &&
+      confirmed.some((e) => e.row.team?.name === "Netherlands" && e.r32Opponent?.label === "Morocco") &&
+      confirmed.some((e) => e.row.team?.name === "Morocco" && e.r32Opponent?.label === "Netherlands"),
+    detail: confirmed.map((e) => `${e.row.team?.name}:${e.r32Opponent?.label}`).join(", ") || "none",
   },
   {
     id: 6,
+    name: "Confirmed fixtures = 1 (Netherlands vs Morocco)",
+    pass: confirmedFixtures === 1,
+    detail: `fixtures=${confirmedFixtures}`,
+  },
+  {
+    id: 7,
     name: "TBC slots present for unknown/3rd-place",
     pass: tbc.length >= 4,
     detail: `tbc=${tbc.length} (${tbc.map((e) => e.row.team?.name).join(", ")})`,
   },
   {
-    id: 7,
+    id: 11,
+    name: "Confirmed metadata on primary row only (Netherlands)",
+    pass: (() => {
+      const nl = data.through.find((e) => e.row.team?.name === "Netherlands");
+      const ma = data.through.find((e) => e.row.team?.name === "Morocco");
+      const primaryWithDate = data.through.filter(
+        (e) =>
+          e.confirmedFixtureRole === "primary" &&
+          e.r32Opponent?.kind === "confirmed" &&
+          e.r32Opponent.date,
+      );
+      return (
+        nl?.confirmedFixtureRole === "primary" &&
+        ma?.confirmedFixtureRole === "secondary" &&
+        primaryWithDate.length >= 1 &&
+        Boolean(nl?.r32Opponent?.date)
+      );
+    })(),
+    detail: `primary=${data.through
+      .filter((e) => e.confirmedFixtureRole === "primary")
+      .map((e) => e.row.team?.name)
+      .join(", ")}`,
+  },
+  {
+    id: 12,
+    name: "Confirmed opponents still visible on both team rows",
+    pass:
+      confirmed.length === 2 &&
+      confirmed.every((e) => Boolean(e.r32Opponent?.label)),
+    detail: confirmed.map((e) => e.r32Opponent?.label).join(", "),
+  },
+  {
+    id: 8,
     name: "Projected labels present",
     pass: projected.length >= 3,
     detail: `projected=${projected.length} (${projected.map((e) => `${e.row.team?.name}:${e.r32Opponent?.label}`).join("; ")})`,
   },
   {
-    id: 8,
+    id: 9,
     name: "All participants assigned",
     pass: missingParticipants.length === 0,
     detail:
@@ -144,7 +196,7 @@ const checks = [
         : missingParticipants.map((r) => r.team?.name).join(", "),
   },
   {
-    id: 9,
+    id: 10,
     name: "Pending lines use correct opponents",
     pass: data.pending.every((e) => {
       const line = e.pendingLine ?? "";

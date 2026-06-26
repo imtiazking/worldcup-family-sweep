@@ -17,9 +17,9 @@ export type VerifiedTeamStatus = {
 };
 
 export const VERIFIED_SNAPSHOT_SOURCE =
-  "Wikipedia 2026 FIFA World Cup group pages (FIFA standings, through 25 Jun 2026)";
+  "Wikipedia 2026 FIFA World Cup group pages (FIFA standings, through 26 Jun 2026)";
 
-export const VERIFIED_SNAPSHOT_AS_OF = "2026-06-25T23:59:00Z";
+export const VERIFIED_SNAPSHOT_AS_OF = "2026-06-26T23:59:00Z";
 
 export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   {
@@ -101,7 +101,8 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     nextStageProbability: 100,
     reason:
       "FIFA (A) — Group C runners-up after 4–2 vs Haiti (24 Jun). Group complete: 7 pts, +3 GD.",
-    nextFixture: "Round of 32 vs Group F winner (29 Jun, Monterrey)",
+    nextFixture: "Round of 32 vs Netherlands (29 Jun, Monterrey)",
+    r32OpponentLocked: "Netherlands",
   },
   {
     teamName: "Colombia",
@@ -152,10 +153,11 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   {
     teamName: "Netherlands",
     status: "active",
-    stage: "Group Stage",
-    nextStageProbability: null,
+    stage: "Round of 32",
+    nextStageProbability: 100,
     reason:
-      "Group F leaders, 4 pts (+4 GD) tied with Japan before final matchday. Tunisia vs Netherlands and Japan vs Sweden on 25 Jun — not yet FIFA (A).",
-    nextFixture: "25 Jun — Tunisia vs Netherlands (Arrowhead Stadium, Kansas City)",
+      "FIFA (A) — Group F winners after final matchday. Group complete.",
+    nextFixture: "Round of 32 vs Morocco (29 Jun, Monterrey)",
+    r32OpponentLocked: "Morocco",
   },
 ];

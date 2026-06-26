@@ -151,11 +151,11 @@ const checks = [
     detail: "confirmed/projected/tbc",
   },
   {
-    name: "No new confirmed opponents",
+    name: "Confirmed team rows unchanged after enrichment",
     pass:
       enrichedSnap.filter((e) => e.kind === "confirmed").length ===
       baselineSnap.filter((e) => e.kind === "confirmed").length,
-    detail: `confirmed=${enrichedSnap.filter((e) => e.kind === "confirmed").length}`,
+    detail: `confirmed team rows=${enrichedSnap.filter((e) => e.kind === "confirmed").length}`,
   },
 ];
 
