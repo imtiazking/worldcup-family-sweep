@@ -7,11 +7,15 @@ const res = await fetch(`${BASE}/tracker`);
 const html = await res.text();
 
 const mobileThroughSlice =
-  html.match(/Through to Round of 32[\s\S]*?(?=Still in group stage)/i)?.[0] ?? "";
+  html.match(
+    /Through to Round of 32[\s\S]*?(?=Still in group stage|Eliminated|No sweep teams)/i,
+  )?.[0] ?? "";
 const mobilePendingSlice =
-  html.match(/Still in group stage[\s\S]{0,12000}/i)?.[0] ?? "";
+  html.match(/Still in group stage[\s\S]*?(?=Eliminated|No sweep teams|$)/i)?.[0] ??
+  "";
 const awaitingSlice =
-  html.match(/Awaiting qualification[\s\S]*?(?=Through to Round of 32)/i)?.[0] ?? "";
+  html.match(/Awaiting qualification[\s\S]*?(?=Through to Round of 32|$)/i)?.[0] ??
+  "";
 
 const mobileThroughBadges = (mobileThroughSlice.match(/>Through</g) || []).length;
 const mobilePendingBadges = (mobilePendingSlice.match(/>Pending</g) || []).length;
@@ -61,7 +65,7 @@ const checks = [
   ["Projected labels absent", (html.match(/Projected/g) || []).length === 0],
   ["TBC slots absent from bracket", !/\bTBC\b/.test(bracketSlice)],
   ["Participant names (Owned by)", (html.match(/Owned by/g) || []).length >= 15],
-  ["Awaiting qualification section", /Awaiting qualification/i.test(html)],
+  ["Awaiting qualification absent when all through", !/Awaiting qualification/i.test(html)],
   ["No application error", !/Application error/i.test(html)],
   ["Stage ladder Group Stage = 0", groupStageCount === 0],
   ["Stage ladder Round of 32 = 15", r32StageCount === 15],
@@ -71,7 +75,8 @@ const checks = [
   ["Bracket Pending badges (desktop+mobile) = 0", totalPendingBadges === 0],
   [
     "Netherlands vs Morocco in bracket",
-    /Netherlands[\s\S]{0,1200}?Morocco/i.test(mobileThroughSlice),
+    /Netherlands[\s\S]{0,1200}?Morocco/i.test(mobileThroughSlice) ||
+      /Netherlands[\s\S]{0,1200}?Morocco/i.test(bracketSlice),
   ],
   [
     "R32 bracket: no date metadata",

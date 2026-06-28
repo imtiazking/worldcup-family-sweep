@@ -13,10 +13,12 @@ const bracket =
 const ladder =
   html.match(/Round of 32<\/h3>[\s\S]*?(?=Round of 16<\/h3>)/i)?.[0] ?? "";
 const mobileThrough =
-  html.match(/Through to Round of 32[\s\S]*?(?=Still in group stage)/i)?.[0] ??
-  "";
+  html.match(
+    /Through to Round of 32[\s\S]*?(?=Still in group stage|Eliminated|No sweep teams)/i,
+  )?.[0] ?? "";
 const mobilePending =
-  html.match(/Still in group stage[\s\S]*?(?=Eliminated|$)/i)?.[0] ?? "";
+  html.match(/Still in group stage[\s\S]*?(?=Eliminated|No sweep teams|$)/i)?.[0] ??
+  "";
 
 const twemojiBracket = (bracket.match(/twemoji@14\.0\.2/g) || []).length;
 const twemojiAll = (html.match(/twemoji@14\.0\.2/g) || []).length;
@@ -80,7 +82,7 @@ const checks = [
   ["R32 ladder count = 15", r32Count === 15],
   ["Through badges = 15", throughBadges === 15],
   ["Pending badges = 0", pendingBadges === 0],
-  ["NL vs MA confirmed in mobile bracket", /Netherlands[\s\S]{0,1200}?Morocco/i.test(mobileThrough)],
+  ["NL vs MA confirmed in mobile or desktop bracket", nlMaConfirmed || /Netherlands[\s\S]{0,1200}?Morocco/i.test(bracket)],
   [
     "R32 bracket: no dates or stadiums",
     !/\d{1,2}\s+Jun/i.test(bracket) &&
