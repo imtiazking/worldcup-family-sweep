@@ -5,7 +5,10 @@ import type { WorldCup26EnrichmentMap } from "@/lib/providers/worldcup26-provide
 import type { TrackerRow } from "@/lib/tracker";
 import { buildSweepBracketData } from "@/lib/round-of-32-bracket";
 import { BracketTeamNode } from "./bracket/BracketNodes";
-import { BracketMatchOpponent } from "./bracket/BracketMatchOpponent";
+import {
+  BracketMatchOpponent,
+  formatBracketPendingSummary,
+} from "./bracket/BracketMatchOpponent";
 import { RoundOf32MobileCards } from "./RoundOf32MobileCards";
 import { revealTransition, useMotionSettings } from "./motion-utils";
 
@@ -134,7 +137,7 @@ export function RoundOf32Bracket({
           World Cup Round of 32
         </h2>
         <p className="mt-2 text-[10px] text-slate-400 sm:text-xs">
-          Family sweep teams · opponents from verified snapshot
+          Family sweep teams · who plays who
         </p>
       </div>
 
@@ -180,7 +183,8 @@ export function RoundOf32Bracket({
                   <BracketTeamNode entry={entry} compact />
                   {entry.pendingLine && (
                     <p className="mt-2 text-xs text-amber-900/80">
-                      Pending — {entry.pendingLine}
+                      Pending —{" "}
+                      {formatBracketPendingSummary(entry.pendingLine)}
                     </p>
                   )}
                 </div>

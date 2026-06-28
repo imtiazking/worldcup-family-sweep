@@ -34,6 +34,7 @@ export function PathConfirmedFixtureCard({ fixture }: PathConfirmedFixtureCardPr
   const opponent = primary.r32Opponent;
   const metaParts = ["Confirmed"];
   if (opponent?.date) metaParts.push(opponent.date);
+  if (opponent?.time) metaParts.push(opponent.time);
   if (opponent?.venue) metaParts.push(opponent.venue);
 
   const teamA = primary.row;

@@ -1,9 +1,6 @@
 import type { SweepBracketData, SweepBracketEntry } from "@/lib/round-of-32-bracket";
 import { getTeamFlagFromEntries } from "@/lib/round-of-32-bracket";
-import {
-  BracketOpponentNode,
-  ConfirmedFixtureMeta,
-} from "./BracketNodes";
+import { BracketOpponentNode } from "./BracketNodes";
 
 type BracketMatchOpponentProps = {
   entry: SweepBracketEntry;
@@ -21,42 +18,24 @@ export function BracketMatchOpponent({
   const opponent = entry.r32Opponent;
   if (!opponent) return null;
 
-  const role = entry.confirmedFixtureRole;
   const opponentFlag = getTeamFlagFromEntries(through, opponent.label);
-
-  if (opponent.kind === "confirmed" && role === "primary") {
-    return (
-      <div className="flex flex-col gap-1.5">
-        <ConfirmedFixtureMeta opponent={opponent} align={align} compact={compact} />
-        <BracketOpponentNode
-          opponent={opponent}
-          align={align}
-          compact={compact}
-          variant="slim"
-          opponentFlag={opponentFlag}
-        />
-      </div>
-    );
-  }
-
-  if (opponent.kind === "confirmed" && role === "secondary") {
-    return (
-      <BracketOpponentNode
-        opponent={opponent}
-        align={align}
-        compact={compact}
-        variant="slim"
-        opponentFlag={opponentFlag}
-      />
-    );
-  }
 
   return (
     <BracketOpponentNode
       opponent={opponent}
       align={align}
       compact={compact}
-      variant="full"
+      variant={opponent.kind === "confirmed" ? "slim" : "full"}
+      opponentFlag={opponentFlag}
     />
   );
+}
+
+/** Strip kickoff dates from pending lines in the bracket UI */
+export function formatBracketPendingSummary(line: string | null): string | null {
+  if (!line) return null;
+  return line
+    .replace(/\s*·\s*\d{1,2}\s+[A-Za-z]{3}.*$/i, "")
+    .replace(/\s+\d{1,2}\s+[A-Za-z]{3}.*$/i, "")
+    .trim();
 }

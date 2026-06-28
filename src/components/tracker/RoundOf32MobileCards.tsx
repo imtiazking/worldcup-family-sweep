@@ -1,6 +1,9 @@
 import type { SweepBracketData } from "@/lib/round-of-32-bracket";
 import { BracketTeamNode } from "./bracket/BracketNodes";
-import { BracketMatchOpponent } from "./bracket/BracketMatchOpponent";
+import {
+  BracketMatchOpponent,
+  formatBracketPendingSummary,
+} from "./bracket/BracketMatchOpponent";
 
 type RoundOf32MobileCardsProps = {
   data: SweepBracketData;
@@ -20,9 +23,9 @@ function MobileMatchCard({
       <BracketTeamNode entry={entry} compact />
       {showOpponent && entry.r32Opponent && (
         <div className="mt-3 space-y-2 border-t border-slate-200 pt-3">
-          {entry.r32Opponent.kind !== "confirmed" && (
-            <span className="text-xs text-slate-400">vs</span>
-          )}
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+            vs
+          </span>
           <BracketMatchOpponent
             entry={entry}
             through={through}
@@ -33,7 +36,7 @@ function MobileMatchCard({
       )}
       {entry.status === "pending" && entry.pendingLine && (
         <p className="mt-3 border-t border-amber-100 pt-3 text-xs text-amber-900/90">
-          Pending — {entry.pendingLine}
+          Pending — {formatBracketPendingSummary(entry.pendingLine)}
         </p>
       )}
     </article>

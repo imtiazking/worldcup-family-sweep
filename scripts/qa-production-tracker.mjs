@@ -32,9 +32,16 @@ const r32LadderSlice =
   html.match(/Round of 32<\/h3>[\s\S]*?(?=Round of 16<\/h3>)/i)?.[0] ?? "";
 const r32LadderVsCount = (r32LadderSlice.match(/\bvs\b/gi) || []).length;
 const r32LadderHasNlMaFixture =
-  /Netherlands[\s\S]{0,400}?vs[\s\S]{0,400}?Morocco/i.test(r32LadderSlice) ||
-  /Morocco[\s\S]{0,400}?vs[\s\S]{0,400}?Netherlands/i.test(r32LadderSlice);
+  /Netherlands[\s\S]{0,1200}?vs[\s\S]{0,900}?Morocco/i.test(r32LadderSlice) ||
+  /Morocco[\s\S]{0,1200}?vs[\s\S]{0,900}?Netherlands/i.test(r32LadderSlice);
 const r32LadderFlagCircles = (r32LadderSlice.match(/rounded-full bg-white/g) || []).length;
+
+const bracketSlice =
+  html.match(
+    /World Cup Round of 32[\s\S]*?(?=mx-auto mt-10 flex max-w-2xl flex-col)/i,
+  )?.[0] ?? "";
+const bracketTwemojiImages = (bracketSlice.match(/twemoji@14\.0\.2/g) || []).length;
+const bracketFlagCircles = (bracketSlice.match(/rounded-full bg-white shadow/g) || []).length;
 
 const stadiumHints = [
   "Miami Stadium",
@@ -51,25 +58,32 @@ const checks = [
   ["Tournament Path ladder", /Tournament Path/i.test(html) && /Round of 16/i.test(html)],
   ["Desktop bracket breakpoint", html.includes("hidden px-4 py-8 md:block")],
   ["Mobile cards breakpoint", html.includes("md:hidden")],
-  ["Projected labels present", (html.match(/Projected/g) || []).length >= 4],
-  ["TBC slots present", (html.match(/\bTBC\b/g) || []).length >= 5],
+  ["Projected labels absent", (html.match(/Projected/g) || []).length === 0],
+  ["TBC slots absent from bracket", !/\bTBC\b/.test(bracketSlice)],
   ["Participant names (Owned by)", (html.match(/Owned by/g) || []).length >= 15],
   ["Awaiting qualification section", /Awaiting qualification/i.test(html)],
   ["No application error", !/Application error/i.test(html)],
-  ["Stage ladder Group Stage = 4", groupStageCount === 4],
-  ["Stage ladder Round of 32 = 11", r32StageCount === 11],
-  ["Mobile through section = 11", mobileThroughBadges === 11],
-  ["Mobile pending section = 4", mobilePendingBadges === 4],
-  ["Desktop awaiting qualification = 4", awaitingPendingBadges === 4],
-  ["Bracket Pending badges (desktop+mobile) = 8", totalPendingBadges === 8],
+  ["Stage ladder Group Stage = 0", groupStageCount === 0],
+  ["Stage ladder Round of 32 = 15", r32StageCount === 15],
+  ["Mobile through section = 15", mobileThroughBadges === 15],
+  ["Mobile pending section = 0", mobilePendingBadges === 0],
+  ["Desktop awaiting qualification = 0", awaitingPendingBadges === 0],
+  ["Bracket Pending badges (desktop+mobile) = 0", totalPendingBadges === 0],
   [
-    "Netherlands primary: Confirmed fixture metadata visible",
-    /Netherlands[\s\S]{0,1200}?Confirmed[\s\S]{0,120}?29 Jun/i.test(mobileThroughSlice),
+    "Netherlands vs Morocco in bracket",
+    /Netherlands[\s\S]{0,1200}?Morocco/i.test(mobileThroughSlice),
   ],
   [
-    "Morocco secondary: shows Netherlands without duplicate date",
-    /Morocco[\s\S]{0,800}?Netherlands/i.test(mobileThroughSlice) &&
-      !/Morocco[\s\S]{0,800}?Confirmed[\s\S]{0,120}?29 Jun/i.test(mobileThroughSlice),
+    "R32 bracket: no date metadata",
+    !/\d{1,2}\s+Jun/i.test(bracketSlice),
+  ],
+  [
+    "R32 bracket: no stadium names",
+    !stadiumHints.some((s) => bracketSlice.includes(s)),
+  ],
+  [
+    "R32 bracket: no kickoff times",
+    !/\d{1,2}:\d{2}/.test(bracketSlice),
   ],
   [
     "R32 stage ladder: Netherlands vs Morocco once",
@@ -80,11 +94,21 @@ const checks = [
     r32LadderFlagCircles >= 2,
   ],
   [
-    "No duplicate uppercase Confirmed badges",
-    (html.match(/>Confirmed</g) || []).length === 0,
+    "R32 bracket: Twemoji flag images present",
+    bracketTwemojiImages >= 20,
   ],
-  ["Stadium metadata present", stadiumHits >= 2],
-  ["Kickoff time metadata present", /\d{1,2}:\d{2}/.test(html)],
+  [
+    "R32 bracket: team flag circles present",
+    bracketFlagCircles >= 15,
+  ],
+  [
+    "R32 bracket: no country-code initials in flag circles",
+    !/>(AR|BR|NL|MA|US|CO|FR|DE|MX|NO|CH)</.test(bracketSlice),
+  ],
+  [
+    "No duplicate uppercase Confirmed badges",
+    (bracketSlice.match(/>Confirmed</g) || []).length === 0,
+  ],
 ];
 
 let failed = 0;
@@ -102,6 +126,8 @@ console.log(`  Mobile pending badges: ${mobilePendingBadges}`);
 console.log(`  Awaiting qualification badges: ${awaitingPendingBadges}`);
 console.log(`  R32 ladder vs count: ${r32LadderVsCount}`);
 console.log(`  R32 ladder flag circles: ${r32LadderFlagCircles}`);
+console.log(`  R32 bracket twemoji images: ${bracketTwemojiImages}`);
+console.log(`  R32 bracket flag circles: ${bracketFlagCircles}`);
 console.log(`  Stadium names matched: ${stadiumHits}/${stadiumHints.length}`);
 
 const scripts = [...html.matchAll(/src="(\/_next\/static\/[^"]+)"/g)].map((m) => m[1]);

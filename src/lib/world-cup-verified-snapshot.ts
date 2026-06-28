@@ -1,163 +1,199 @@
-/**
- * Manually verified World Cup 2026 group status for family sweep teams.
- * Source: FIFA standings via Wikipedia group pages (updated through 25 Jun 2026).
- * Only teams with FIFA "(A) Advance to a further round" or completed group
- * top-two placement are marked qualified.
- */
-
-export type VerifiedTeamStatus = {
-  teamName: string;
-  status: "active" | "eliminated";
-  stage: string;
-  nextStageProbability: number | null;
-  reason: string;
-  nextFixture: string | null;
-  /** Set only when the Round of 32 opponent is officially locked */
-  r32OpponentLocked?: string | null;
-};
-
-export const VERIFIED_SNAPSHOT_SOURCE =
-  "Wikipedia 2026 FIFA World Cup group pages (FIFA standings, through 26 Jun 2026)";
-
-export const VERIFIED_SNAPSHOT_AS_OF = "2026-06-26T23:59:00Z";
-
-export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
-  {
-    teamName: "Mexico",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group A winners (9 pts, +6 GD). Group complete.",
-    nextFixture: "Round of 32 vs 3rd place from Groups C/E/F/H/I (30 Jun, Mexico City)",
-  },
-  {
-    teamName: "United States",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group D winners (6 pts from 2 wins). Confirmed after Turkey eliminated 19 Jun.",
-    nextFixture: "Round of 32 vs 3rd place from Groups B/E/F/I/J (1 Jul, Santa Clara)",
-  },
-  {
-    teamName: "Germany",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group E winners (6 pts, +7 GD from 2 wins).",
-    nextFixture: "Round of 32 vs 3rd place from Groups A/B/C/D/F (29 Jun, Boston)",
-  },
-  {
-    teamName: "Brazil",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group C winners after 3–0 vs Scotland (24 Jun). Final table: 7 pts, +6 GD.",
-    nextFixture: "Round of 32 vs Group F runner-up (29 Jun, Houston)",
-  },
-  {
-    teamName: "France",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group I winners (6 pts from 2 wins). Advanced with Norway.",
-    nextFixture: "Round of 32 vs 3rd place from Groups C/D/F/G/H (30 Jun, New York)",
-  },
-  {
-    teamName: "Norway",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group I runners-up (6 pts from 2 wins). Advanced with France.",
-    nextFixture: "Round of 32 vs Group E runner-up (30 Jun, Dallas)",
-  },
-  {
-    teamName: "Argentina",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group J winners (6 pts from 2 wins).",
-    nextFixture: "Round of 32 vs Group H runner-up (3 Jul, Miami)",
-  },
-  {
-    teamName: "Switzerland",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group B winners after 2–1 vs Canada (24 Jun). Group complete: 7 pts, +4 GD.",
-    nextFixture: "Round of 32 vs 3rd place from Groups E/F/G/I/J (2 Jul, Vancouver)",
-  },
-  {
-    teamName: "Morocco",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group C runners-up after 4–2 vs Haiti (24 Jun). Group complete: 7 pts, +3 GD.",
-    nextFixture: "Round of 32 vs Netherlands (29 Jun, Monterrey)",
-    r32OpponentLocked: "Netherlands",
-  },
-  {
-    teamName: "Colombia",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group K leaders (6 pts from 2 wins). Mathematically through before final matchday.",
-    nextFixture:
-      "Round of 32 opponent TBC (group match vs Portugal 27 Jun still to play)",
-  },
-  {
-    teamName: "Belgium",
-    status: "active",
-    stage: "Group Stage",
-    nextStageProbability: null,
-    reason:
-      "Group G 3rd, 2 pts (0W 2D). Not eliminated — final match vs New Zealand on 26 Jun; Egypt vs Iran same day decides top two.",
-    nextFixture: "26 Jun — New Zealand vs Belgium (BC Place, Vancouver)",
-  },
-  {
-    teamName: "Spain",
-    status: "active",
-    stage: "Group Stage",
-    nextStageProbability: null,
-    reason:
-      "Group H leaders, 4 pts (1W 1D, +4 GD). Not FIFA (A) — final match vs Uruguay on 26 Jun decides top two.",
-    nextFixture: "26 Jun — Uruguay vs Spain (Estadio Akron, Zapopan)",
-  },
-  {
-    teamName: "Portugal",
-    status: "active",
-    stage: "Group Stage",
-    nextStageProbability: null,
-    reason:
-      "Group K 2nd, 4 pts (+5 GD). Not FIFA (A) individually — final vs Colombia on 27 Jun; DR Congo can still reach 4 pts.",
-    nextFixture: "27 Jun — Colombia vs Portugal (Hard Rock Stadium, Miami)",
-  },
-  {
-    teamName: "England",
-    status: "active",
-    stage: "Group Stage",
-    nextStageProbability: null,
-    reason:
-      "Group L leaders, 4 pts (+2 GD), level with Ghana. Not FIFA (A) — Panama away on 27 Jun; Croatia vs Ghana same day.",
-    nextFixture: "27 Jun — Panama vs England (MetLife Stadium, East Rutherford)",
-  },
-  {
-    teamName: "Netherlands",
-    status: "active",
-    stage: "Round of 32",
-    nextStageProbability: 100,
-    reason:
-      "FIFA (A) — Group F winners after final matchday. Group complete.",
-    nextFixture: "Round of 32 vs Morocco (29 Jun, Monterrey)",
-    r32OpponentLocked: "Morocco",
-  },
-];
+/**
+ * Manually verified World Cup 2026 group status for family sweep teams.
+ * Source: FIFA standings via Wikipedia group pages (updated through 28 Jun 2026).
+ * Only teams with FIFA "(A) Advance to a further round" or completed group
+ * top-two / best-third placement are marked qualified.
+ */
+
+export type VerifiedTeamStatus = {
+  teamName: string;
+  status: "active" | "eliminated";
+  stage: string;
+  nextStageProbability: number | null;
+  reason: string;
+  nextFixture: string | null;
+  /** Set only when the Round of 32 opponent is officially locked */
+  r32OpponentLocked?: string | null;
+  /** UK kickoff time for locked Round of 32 fixtures */
+  r32KickoffUk?: string | null;
+};
+
+export const VERIFIED_SNAPSHOT_SOURCE =
+  "Wikipedia 2026 FIFA World Cup group pages (FIFA standings, through 28 Jun 2026)";
+
+export const VERIFIED_SNAPSHOT_AS_OF = "2026-06-28T20:00:00Z";
+
+export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
+  {
+    teamName: "Mexico",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group A winners (9 pts, +6 GD). Group complete.",
+    nextFixture: "Round of 32 vs Ecuador (1 Jul, 2am UK)",
+    r32OpponentLocked: "Ecuador",
+    r32KickoffUk: "2am UK",
+  },
+  {
+    teamName: "United States",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group D winners (6 pts from 2 wins). Confirmed after Turkey eliminated 19 Jun.",
+    nextFixture: "Round of 32 vs Bosnia and Herzegovina (2 Jul, 1am UK)",
+    r32OpponentLocked: "Bosnia and Herzegovina",
+    r32KickoffUk: "1am UK",
+  },
+  {
+    teamName: "Germany",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group E winners (6 pts, +7 GD from 2 wins).",
+    nextFixture: "Round of 32 vs Paraguay (29 Jun, 9:30pm UK)",
+    r32OpponentLocked: "Paraguay",
+    r32KickoffUk: "9:30pm UK",
+  },
+  {
+    teamName: "Brazil",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group C winners after 3–0 vs Scotland (24 Jun). Final table: 7 pts, +6 GD.",
+    nextFixture: "Round of 32 vs Japan (29 Jun, 6pm UK)",
+    r32OpponentLocked: "Japan",
+    r32KickoffUk: "6pm UK",
+  },
+  {
+    teamName: "France",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group I winners (6 pts from 2 wins). Advanced with Norway.",
+    nextFixture: "Round of 32 vs Sweden (30 Jun, 10pm UK)",
+    r32OpponentLocked: "Sweden",
+    r32KickoffUk: "10pm UK",
+  },
+  {
+    teamName: "Norway",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group I runners-up (6 pts from 2 wins). Advanced with France.",
+    nextFixture: "Round of 32 vs Ivory Coast (30 Jun, 6pm UK)",
+    r32OpponentLocked: "Ivory Coast",
+    r32KickoffUk: "6pm UK",
+  },
+  {
+    teamName: "Argentina",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group J winners after 3–1 vs Jordan (28 Jun). Group complete.",
+    nextFixture: "Round of 32 vs Cape Verde (3 Jul, 11pm UK)",
+    r32OpponentLocked: "Cape Verde",
+    r32KickoffUk: "11pm UK",
+  },
+  {
+    teamName: "Switzerland",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group B winners after 2–1 vs Canada (24 Jun). Group complete: 7 pts, +4 GD.",
+    nextFixture: "Round of 32 vs Algeria (3 Jul, 4am UK)",
+    r32OpponentLocked: "Algeria",
+    r32KickoffUk: "4am UK",
+  },
+  {
+    teamName: "Morocco",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group C runners-up after 4–2 vs Haiti (24 Jun). Group complete: 7 pts, +3 GD.",
+    nextFixture: "Round of 32 vs Netherlands (30 Jun, 2am UK)",
+    r32OpponentLocked: "Netherlands",
+    r32KickoffUk: "2am UK",
+  },
+  {
+    teamName: "Colombia",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group K winners after 0–0 vs Portugal (28 Jun). DR Congo 3–1 Uzbekistan completed Group K.",
+    nextFixture: "Round of 32 vs Ghana (4 Jul, 2:30am UK)",
+    r32OpponentLocked: "Ghana",
+    r32KickoffUk: "2:30am UK",
+  },
+  {
+    teamName: "Belgium",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group G advanced after 5–1 win vs New Zealand (26 Jun).",
+    nextFixture: "Round of 32 vs Senegal (1 Jul, 9pm UK)",
+    r32OpponentLocked: "Senegal",
+    r32KickoffUk: "9pm UK",
+  },
+  {
+    teamName: "Spain",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group H advanced after 1–0 win vs Uruguay (26 Jun).",
+    nextFixture: "Round of 32 vs Austria (2 Jul, 8pm UK)",
+    r32OpponentLocked: "Austria",
+    r32KickoffUk: "8pm UK",
+  },
+  {
+    teamName: "Portugal",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Advanced from Group K after 0–0 vs Colombia (28 Jun); best third-place qualifier from the group.",
+    nextFixture: "Round of 32 vs Croatia (3 Jul, midnight UK)",
+    r32OpponentLocked: "Croatia",
+    r32KickoffUk: "midnight UK",
+  },
+  {
+    teamName: "England",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group L advanced. R32 opponent confirmed after Group L final standings.",
+    nextFixture: "Round of 32 vs DR Congo (1 Jul, 5pm UK)",
+    r32OpponentLocked: "DR Congo",
+    r32KickoffUk: "5pm UK",
+  },
+  {
+    teamName: "Netherlands",
+    status: "active",
+    stage: "Round of 32",
+    nextStageProbability: 100,
+    reason:
+      "FIFA (A) — Group F winners after final matchday. Group complete.",
+    nextFixture: "Round of 32 vs Morocco (30 Jun, 2am UK)",
+    r32OpponentLocked: "Morocco",
+    r32KickoffUk: "2am UK",
+  },
+];
+
+/** Non-sweep nations eliminated on 28 Jun 2026 (reference only — not synced to team_status) */
+export const VERIFIED_ELIMINATED_REFERENCE = [
+  { teamName: "Jordan", reason: "Group J — lost 1–3 vs Argentina (28 Jun)" },
+  { teamName: "Uzbekistan", reason: "Group K — lost 1–3 vs DR Congo (28 Jun)" },
+] as const;
+

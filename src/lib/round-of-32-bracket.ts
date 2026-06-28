@@ -13,11 +13,14 @@ export type BracketOpponent = {
   label: string;
   kind: OpponentKind;
   date?: string;
+  time?: string;
   venue?: string;
 };
 
 export type SweepBracketEntry = {
   row: TrackerRow;
+  /** Denormalized flag for bracket nodes — always set from team row */
+  flagEmoji: string;
   status: BracketStatus;
   /** Round of 32 opponent slot (qualified teams only) */
   r32Opponent: BracketOpponent | null;
@@ -66,12 +69,14 @@ function isNamedNationalTeam(text: string): boolean {
 export function parseR32Opponent(
   fixture: string | null,
   lockedOpponent?: string | null,
+  kickoffUk?: string | null,
 ): BracketOpponent | null {
   if (lockedOpponent?.trim()) {
     return {
       label: lockedOpponent.trim(),
       kind: "confirmed",
       date: fixture ? extractDate(fixture) : undefined,
+      time: kickoffUk?.trim() || undefined,
       venue: fixture ? extractVenue(fixture) : undefined,
     };
   }
@@ -179,6 +184,9 @@ function applyOpponentEnrichment(
   if (enrichment.fixtureDate) {
     next.date = enrichment.fixtureDate;
   }
+  if (enrichment.fixtureTime) {
+    next.time = enrichment.fixtureTime;
+  }
   if (enrichment.stadium) {
     next.venue = enrichment.stadium;
   }
@@ -215,7 +223,25 @@ function applyPendingLineEnrichment(
   return parts.length > 1 ? parts.join(" · ") : line;
 }
 
-/** Flag emoji for a sweep team name within bracket entries */
+/** Non-sweep nations with locked R32 opponents */
+const EXTERNAL_OPPONENT_FLAGS: Record<string, string> = {
+  japan: "🇯🇵",
+  paraguay: "🇵🇾",
+  "ivory coast": "🇨🇮",
+  "côte d'ivoire": "🇨🇮",
+  sweden: "🇸🇪",
+  "bosnia and herzegovina": "🇧🇦",
+  "cape verde": "🇨🇻",
+  ecuador: "🇪🇨",
+  ghana: "🇬🇭",
+  senegal: "🇸🇳",
+  austria: "🇦🇹",
+  croatia: "🇭🇷",
+  algeria: "🇩🇿",
+  "dr congo": "🇨🇩",
+};
+
+/** Flag emoji for sweep team or known external R32 opponent */
 export function getTeamFlagFromEntries(
   entries: SweepBracketEntry[],
   teamName: string,
@@ -223,7 +249,8 @@ export function getTeamFlagFromEntries(
   const found = entries.find(
     (e) => e.row.team?.name?.toLowerCase() === teamName.toLowerCase(),
   );
-  return found?.row.team?.flag_emoji ?? undefined;
+  if (found?.row.team?.flag_emoji) return found.row.team.flag_emoji;
+  return EXTERNAL_OPPONENT_FLAGS[teamName.toLowerCase()];
 }
 
 /**
@@ -316,6 +343,7 @@ export function buildSweepBracketData(
 
     const base = {
       row,
+      flagEmoji: row.team?.flag_emoji?.trim() || "⚽",
       status,
       r32Opponent: null as BracketOpponent | null,
       pendingLine: null as string | null,
@@ -328,6 +356,7 @@ export function buildSweepBracketData(
         parseR32Opponent(
           snapshot?.nextFixture ?? null,
           snapshot?.r32OpponentLocked ?? null,
+          snapshot?.r32KickoffUk ?? null,
         ),
         teamEnrichment,
       );

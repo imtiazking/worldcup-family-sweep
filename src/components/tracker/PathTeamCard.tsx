@@ -1,5 +1,6 @@
 import type { TrackerRow } from "@/lib/tracker";
 import { getNextStageChanceDisplay } from "@/lib/tracker";
+import { BracketFlagCircle } from "./bracket/BracketNodes";
 import { NextStageChance } from "./NextStageChance";
 
 type PathTeamCardProps = {
@@ -29,7 +30,10 @@ export function PathTeamCard({ row }: PathTeamCardProps) {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-2xl sm:text-3xl">{row.team?.flag_emoji}</span>
+            <BracketFlagCircle
+              flag={row.team?.flag_emoji ?? "⚽"}
+              compact
+            />
             {isWinner && (
               <span className="text-xl" aria-hidden>
                 🏆

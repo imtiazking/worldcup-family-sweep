@@ -5,8 +5,32 @@ import {
   getNextStageChanceDisplay,
   type TrackerRow,
 } from "@/lib/tracker";
+import { VERIFIED_FAMILY_TEAM_STATUSES } from "@/lib/world-cup-verified-snapshot";
+import { parseR32Opponent } from "@/lib/round-of-32-bracket";
 import { NextStageChance } from "./NextStageChance";
 import { revealTransition, useMotionSettings } from "./motion-utils";
+
+const SNAPSHOT_BY_TEAM = new Map(
+  VERIFIED_FAMILY_TEAM_STATUSES.map((t) => [t.teamName.toLowerCase(), t]),
+);
+
+function formatNextMatch(row: TrackerRow): string | null {
+  const teamName = row.team?.name ?? "";
+  const snapshot = SNAPSHOT_BY_TEAM.get(teamName.toLowerCase());
+  if (!snapshot || row.team_status.status === "eliminated") return null;
+
+  const opponent = parseR32Opponent(
+    snapshot.nextFixture,
+    snapshot.r32OpponentLocked,
+    snapshot.r32KickoffUk,
+  );
+  if (!opponent || opponent.kind !== "confirmed") return null;
+
+  const parts = [`vs ${opponent.label}`];
+  if (opponent.date) parts.push(opponent.date);
+  if (opponent.time) parts.push(opponent.time);
+  return parts.join(" · ");
+}
 
 type AliveTeamsSectionProps = {
   alive: TrackerRow[];
@@ -36,7 +60,9 @@ export function AliveTeamsSection({
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {alive.map((row, i) => (
+        {alive.map((row, i) => {
+          const nextMatch = formatNextMatch(row);
+          return (
           <motion.div
             key={`${row.team?.id ?? i}`}
             className="tracker-alive-card rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-lg"
@@ -75,13 +101,19 @@ export function AliveTeamsSection({
               <p className="font-[family-name:var(--font-bebas)] text-2xl text-wc-gold">
                 {row.team_status.stage}
               </p>
+              {nextMatch && (
+                <p className="mt-2 text-sm text-white/70">
+                  Next: {nextMatch}
+                </p>
+              )}
               <NextStageChance
                 chance={getNextStageChanceDisplay(row)}
                 compact
               />
             </div>
           </motion.div>
-        ))}
+          );
+        })}
       </div>
     </motion.section>
   );
