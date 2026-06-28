@@ -1,3 +1,5 @@
+import { getTournamentPhaseProgress, type TournamentPhaseProgress } from "@/lib/tournament-progress";
+
 export type TrackerParticipant = {
   id: string;
   name: string;
@@ -108,23 +110,31 @@ export type TournamentStats = {
   alive: number;
   eliminated: number;
   total: number;
-  progressPercent: number;
+  /** Family sweep elimination rate (legacy field; not used for tournament bar). */
+  eliminationPercent: number;
+  tournamentProgress: TournamentPhaseProgress;
 };
 
 export function computeTournamentStats(rows: TrackerRow[]): TournamentStats {
   const total = rows.length;
   const eliminated = rows.filter(
-    (r) => r.team_status.status === "eliminated"
+    (r) => r.team_status.status === "eliminated",
   ).length;
   const alive = rows.filter(
     (r) =>
       r.team_status.status !== "eliminated" &&
-      r.team_status.status !== "winner"
+      r.team_status.status !== "winner",
   ).length;
-  const progressPercent =
+  const eliminationPercent =
     total > 0 ? Math.round((eliminated / total) * 100) : 0;
 
-  return { alive, eliminated, total, progressPercent };
+  return {
+    alive,
+    eliminated,
+    total,
+    eliminationPercent,
+    tournamentProgress: getTournamentPhaseProgress(),
+  };
 }
 
 export type LeaderboardEntry = {

@@ -56,8 +56,27 @@ const stadiumHints = [
 ];
 const stadiumHits = stadiumHints.filter((s) => html.includes(s)).length;
 
+const tournamentProgressMatch = html.match(
+  /Tournament Progress[\s\S]{0,400}?(\d{1,3})%/i,
+);
+const tournamentProgressPercent = tournamentProgressMatch
+  ? Number(tournamentProgressMatch[1])
+  : -1;
+
 const checks = [
   ["HTTP 200", res.status === 200],
+  ["Tournament progress above 0%", tournamentProgressPercent > 0],
+  [
+    "Tournament progress in 50–55% range (R32 active)",
+    tournamentProgressPercent >= 50 && tournamentProgressPercent <= 55,
+  ],
+  ["Group stage complete copy", /Group stage complete/i.test(html)],
+  ["Round of 32 active copy", /Round of 32 active/i.test(html)],
+  [
+    "Next match summary",
+    /South Africa vs Canada[\s\S]{0,80}?28 Jun/i.test(html),
+  ],
+  ["Debug banner hidden", !/Eliminated Count:/i.test(html)],
   ["Round of 32 section", /World Cup Round of 32/i.test(html)],
   ["Tournament Path ladder", /Tournament Path/i.test(html) && /Round of 16/i.test(html)],
   ["Desktop bracket breakpoint", html.includes("hidden px-4 py-8 md:block")],

@@ -17,6 +17,7 @@ import { FloatingTrophy } from "./FloatingTrophy";
 import { KnockedOutTeamsSection } from "./KnockedOutTeamsSection";
 import { LosersWheelTab } from "./loser-wheel/LosersWheelTab";
 import { TournamentPath } from "./TournamentPath";
+import { NextFixtureSummary } from "./NextFixtureSummary";
 import { TournamentStatsStrip } from "./TournamentStatsStrip";
 import { TrackerAtmosphere } from "./TrackerAtmosphere";
 import { TrackerSoundControl } from "./TrackerSoundControl";
@@ -40,7 +41,7 @@ type TrackerExperienceProps = {
   wheelResults: LoserWheelResult[];
   lastStatusSync?: string | null;
   syncInfo?: TrackerSyncInfo;
-  /** Temporary debug — remove after wheel join verified */
+  /** @deprecated Dev-only — not shown in production UI */
   debugEliminatedCount?: number;
   debugStatusesRowCount?: number;
   fixtureEnrichment?: WorldCup26EnrichmentMap | null;
@@ -135,6 +136,10 @@ function DesktopHeroExtras({
       <TournamentStatsStrip stats={stats} />
       {winner && <WinnerBanner winner={winner} />}
       <FloatingTrophy hasWinner={hasWinner} />
+      <NextFixtureSummary
+        fixture={stats.tournamentProgress.nextFixture}
+        className="mt-4"
+      />
       <TrackerSoundControl className="mt-2" />
     </div>
   );
@@ -203,6 +208,10 @@ export function TrackerExperience({
           {/* Mobile: trophy + stats immediately below title, above tabs */}
           <div className="md:hidden">
             <FloatingTrophy hasWinner={hasWinner} />
+            <NextFixtureSummary
+              fixture={stats.tournamentProgress.nextFixture}
+              className="mt-3"
+            />
             <TrackerSoundControl className="mt-2" />
             <TournamentStatsStrip stats={stats} className="mt-2" />
           </div>
@@ -270,19 +279,15 @@ export function TrackerExperience({
           onTabChange={setActiveTab}
         />
 
-        {/* Temporary debug banner — remove after wheel join verified */}
-        {debugEliminatedCount !== undefined && (
+        {/* Dev-only debug banner */}
+        {process.env.NODE_ENV === "development" &&
+          debugEliminatedCount !== undefined && (
           <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-center text-xs text-amber-200">
             Eliminated Count: {debugEliminatedCount}
             {debugStatusesRowCount !== undefined && (
               <>
                 {" "}
                 · team_status rows from API: {debugStatusesRowCount}
-                {debugStatusesRowCount === 0 && (
-                  <span className="block text-amber-400/90">
-                    (0 rows = RLS blocking team_status — run migration 004)
-                  </span>
-                )}
               </>
             )}
           </p>
