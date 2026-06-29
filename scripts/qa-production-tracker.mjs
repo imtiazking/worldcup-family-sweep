@@ -101,10 +101,14 @@ const checks = [
   ["Mobile through section = 14", mobileThroughBadges === 14],
   ["Mobile eliminated section = 1", (mobileEliminatedSlice.match(/>Eliminated</g) || []).length >= 1],
   ["Germany knocked out", /Knocked Out[\s\S]{0,2000}?Germany/i.test(html)],
-  ["First eliminated: Dado — Germany", /First eliminated:\s*Dado[\s\S]{0,40}?Germany/i.test(html)],
+  ["First eliminated: Dado — Germany", /First eliminated:[\s\S]{0,120}?Dado[\s\S]{0,80}?Germany/i.test(html)],
   ["Alive teams count = 14", /Alive Teams[\s\S]{0,120}?>\s*14\s*</i.test(html)],
   ["Eliminated teams count = 1", /Eliminated Teams[\s\S]{0,120}?>\s*1\s*</i.test(html)],
-  ["Paraguay advanced in official bracket", /Paraguay[\s\S]{0,400}?Advanced to Round of 16/i.test(html)],
+  [
+    "Paraguay advanced in official bracket",
+    /Paraguay[\s\S]{0,500}?Round of 16/i.test(html) &&
+      /vs Winner of France vs Sweden/i.test(html),
+  ],
   ["Paraguay not an Owned by family card", !/Owned by[\s\S]{0,80}?Paraguay/i.test(html)],
   ["Mobile pending section = 0", mobilePendingBadges === 0],
   ["Desktop awaiting qualification = 0", awaitingPendingBadges === 0],
