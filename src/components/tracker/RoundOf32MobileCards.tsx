@@ -1,5 +1,6 @@
 import type { SweepBracketData } from "@/lib/round-of-32-bracket";
 import { BracketTeamNode } from "./bracket/BracketNodes";
+import { ExternalAdvancerCard } from "./bracket/ExternalAdvancerCard";
 import {
   BracketMatchOpponent,
   formatBracketPendingSummary,
@@ -37,6 +38,11 @@ function MobileMatchCard({
       {entry.status === "pending" && entry.pendingLine && (
         <p className="mt-3 border-t border-amber-100 pt-3 text-xs text-amber-900/90">
           Pending — {formatBracketPendingSummary(entry.pendingLine)}
+        </p>
+      )}
+      {entry.status === "eliminated" && entry.pendingLine && (
+        <p className="mt-3 border-t border-red-100 pt-3 text-xs text-red-900/90">
+          {formatBracketPendingSummary(entry.pendingLine)}
         </p>
       )}
     </article>
@@ -92,7 +98,20 @@ export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
         </div>
       )}
 
-      {allEntries.length === 0 && (
+      {data.externalAdvancers.length > 0 && (
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+            Official tournament — advanced
+          </p>
+          <div className="space-y-3">
+            {data.externalAdvancers.map((advancer) => (
+              <ExternalAdvancerCard key={advancer.teamName} advancer={advancer} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {allEntries.length === 0 && data.externalAdvancers.length === 0 && (
         <p className="py-8 text-center text-sm text-slate-400">
           No sweep teams to display yet.
         </p>

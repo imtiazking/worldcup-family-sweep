@@ -10,6 +10,9 @@ const mobileThroughSlice =
   html.match(
     /Through to Round of 32[\s\S]*?(?=Still in group stage|Eliminated|No sweep teams)/i,
   )?.[0] ?? "";
+const mobileEliminatedSlice =
+  html.match(/Eliminated[\s\S]*?(?=Official tournament|No sweep teams|$)/i)?.[0] ??
+  "";
 const mobilePendingSlice =
   html.match(/Still in group stage[\s\S]*?(?=Eliminated|No sweep teams|$)/i)?.[0] ??
   "";
@@ -95,7 +98,14 @@ const checks = [
   ["No application error", !/Application error/i.test(html)],
   ["Stage ladder Group Stage = 0", groupStageCount === 0],
   ["Stage ladder Round of 32 = 15", r32StageCount === 15],
-  ["Mobile through section = 15", mobileThroughBadges === 15],
+  ["Mobile through section = 14", mobileThroughBadges === 14],
+  ["Mobile eliminated section = 1", (mobileEliminatedSlice.match(/>Eliminated</g) || []).length >= 1],
+  ["Germany knocked out", /Knocked Out[\s\S]{0,2000}?Germany/i.test(html)],
+  ["First eliminated: Dado — Germany", /First eliminated:\s*Dado[\s\S]{0,40}?Germany/i.test(html)],
+  ["Alive teams count = 14", /Alive Teams[\s\S]{0,120}?>\s*14\s*</i.test(html)],
+  ["Eliminated teams count = 1", /Eliminated Teams[\s\S]{0,120}?>\s*1\s*</i.test(html)],
+  ["Paraguay advanced in official bracket", /Paraguay[\s\S]{0,400}?Advanced to Round of 16/i.test(html)],
+  ["Paraguay not an Owned by family card", !/Owned by[\s\S]{0,80}?Paraguay/i.test(html)],
   ["Mobile pending section = 0", mobilePendingBadges === 0],
   ["Desktop awaiting qualification = 0", awaitingPendingBadges === 0],
   ["Bracket Pending badges (desktop+mobile) = 0", bracketPendingBadges === 0],
@@ -130,7 +140,7 @@ const checks = [
   ],
   [
     "R32 bracket: team flag circles present",
-    bracketFlagCircles >= 15,
+    bracketFlagCircles >= 14,
   ],
   [
     "R32 bracket: no country-code initials in flag circles",

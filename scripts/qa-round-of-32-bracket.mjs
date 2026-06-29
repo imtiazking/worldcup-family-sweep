@@ -125,9 +125,17 @@ const checks = [
   },
   {
     id: 3,
-    name: "Through count = 15",
-    pass: data.through.length === 15,
+    name: "Through count = 14",
+    pass: data.through.length === 14,
     detail: `through=${data.through.length}`,
+  },
+  {
+    id: 3.5,
+    name: "Eliminated count = 1 (Germany)",
+    pass:
+      data.eliminated.length === 1 &&
+      data.eliminated[0]?.row.team?.name === "Germany",
+    detail: `eliminated=${data.eliminated.map((e) => e.row.team?.name).join(", ")}`,
   },
   {
     id: 4,
@@ -158,18 +166,18 @@ const checks = [
   },
   {
     id: 6,
-    name: "Confirmed fixtures = 14",
-    pass: confirmedFixtures === 14,
+    name: "Confirmed fixtures = 13",
+    pass: confirmedFixtures === 13,
     detail: `fixtures=${confirmedFixtures}`,
   },
   {
     id: 16,
-    name: "Locked opponents include Japan, Paraguay, Ghana, DR Congo",
+    name: "Locked opponents include Japan, Ghana, DR Congo (not Paraguay on sweep rows)",
     pass: (() => {
       const labels = confirmed.map((e) => e.r32Opponent?.label);
       return (
         labels.includes("Japan") &&
-        labels.includes("Paraguay") &&
+        !labels.includes("Paraguay") &&
         labels.includes("Sweden") &&
         labels.includes("Cape Verde") &&
         labels.includes("Bosnia and Herzegovina") &&
@@ -207,7 +215,7 @@ const checks = [
     id: 12,
     name: "Confirmed opponents visible on all locked rows",
     pass:
-      confirmed.length === 15 &&
+      confirmed.length === 14 &&
       confirmed.every((e) => Boolean(e.r32Opponent?.label)),
     detail: confirmed.map((e) => e.r32Opponent?.label).join(", "),
   },
@@ -256,7 +264,6 @@ const checks = [
     name: "External opponent flags resolvable",
     pass: [
       "Japan",
-      "Paraguay",
       "Ivory Coast",
       "Sweden",
       "Bosnia and Herzegovina",
@@ -269,7 +276,24 @@ const checks = [
       "Algeria",
       "DR Congo",
     ].every((name) => Boolean(getTeamFlagFromEntries(data.through, name))),
-    detail: "Japan, Paraguay, Ivory Coast, Sweden, Bosnia, Cape Verde, Ecuador, Ghana, Senegal, Austria, Croatia, Algeria, DR Congo",
+    detail: "Japan, Ivory Coast, Sweden, Bosnia, Cape Verde, Ecuador, Ghana, Senegal, Austria, Croatia, Algeria, DR Congo",
+  },
+  {
+    id: 17,
+    name: "Paraguay external advancer present (not a sweep participant)",
+    pass:
+      data.externalAdvancers.length === 1 &&
+      data.externalAdvancers[0]?.teamName === "Paraguay" &&
+      data.externalAdvancers[0]?.nextFixture.includes("France vs Sweden"),
+    detail: data.externalAdvancers.map((a) => `${a.teamName}:${a.nextFixture}`).join(", "),
+  },
+  {
+    id: 18,
+    name: "Germany eliminated with lost-to-Paraguay line",
+    pass:
+      data.eliminated.length === 1 &&
+      data.eliminated[0]?.pendingLine?.includes("Paraguay"),
+    detail: data.eliminated[0]?.pendingLine ?? "none",
   },
 ];
 

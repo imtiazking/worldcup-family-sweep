@@ -80,7 +80,7 @@ const checks = [
   ["Bracket flag circles >= 28", flagCirclesBracket >= 28],
   ["Group Stage count = 0", groupCount === 0],
   ["R32 ladder count = 15", r32Count === 15],
-  ["Through badges = 15", throughBadges === 15],
+  ["Through badges = 14", throughBadges === 14],
   ["Pending badges = 0", pendingBadges === 0],
   ["NL vs MA confirmed in mobile or desktop bracket", nlMaConfirmed || /Netherlands[\s\S]{0,1200}?Morocco/i.test(bracket)],
   [

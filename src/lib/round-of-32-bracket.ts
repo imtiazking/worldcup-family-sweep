@@ -1,7 +1,11 @@
 import {
+  VERIFIED_EXTERNAL_ADVANCERS,
   VERIFIED_FAMILY_TEAM_STATUSES,
+  type ExternalBracketAdvancer,
   type VerifiedTeamStatus,
 } from "@/lib/world-cup-verified-snapshot";
+
+export type { ExternalBracketAdvancer };
 import type { WorldCup26EnrichmentMap } from "@/lib/providers/worldcup26-provider";
 import type { TrackerRow } from "@/lib/tracker";
 
@@ -326,6 +330,8 @@ export type SweepBracketData = {
   through: SweepBracketEntry[];
   pending: SweepBracketEntry[];
   eliminated: SweepBracketEntry[];
+  /** Official tournament advancers that are not family sweep participants */
+  externalAdvancers: ExternalBracketAdvancer[];
 };
 
 export function buildSweepBracketData(
@@ -378,6 +384,16 @@ export function buildSweepBracketData(
       }
       pending.push({ ...base });
     } else {
+      const externalAdvancer = VERIFIED_EXTERNAL_ADVANCERS.find(
+        (a) => a.defeatedSweepTeam?.toLowerCase() === teamName.toLowerCase(),
+      );
+      if (externalAdvancer) {
+        base.pendingLine = `lost to ${externalAdvancer.teamName}`;
+        base.r32Opponent = {
+          label: externalAdvancer.teamName,
+          kind: "confirmed",
+        };
+      }
       eliminated.push({ ...base });
     }
   }
@@ -397,7 +413,12 @@ export function buildSweepBracketData(
     ...through.slice(half).map((e) => ({ ...e, side: "right" as const })),
   ];
 
-  return { through: throughWithSides, pending, eliminated };
+  return {
+    through: throughWithSides,
+    pending,
+    eliminated,
+    externalAdvancers: VERIFIED_EXTERNAL_ADVANCERS,
+  };
 }
 
 /** @deprecated Use buildSweepBracketData */

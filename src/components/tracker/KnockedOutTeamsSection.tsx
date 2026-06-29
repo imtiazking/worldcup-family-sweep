@@ -27,9 +27,17 @@ export function KnockedOutTeamsSection({
       transition={revealTransition(0.6, reduceMotion)}
     >
       <div className="flex items-center justify-between">
-        <h2 className="font-[family-name:var(--font-bebas)] text-4xl text-red-300">
-          Knocked Out
-        </h2>
+        <div>
+          <h2 className="font-[family-name:var(--font-bebas)] text-4xl text-red-300">
+            Knocked Out
+          </h2>
+          {eliminated.length > 0 && (
+            <p className="mt-1 text-sm text-white/50">
+              First eliminated: {eliminated[0].participant?.name} —{" "}
+              {eliminated[0].team?.name}
+            </p>
+          )}
+        </div>
         <span className="rounded-full bg-red-400/10 px-4 py-1 text-sm text-red-300">
           {eliminated.length}
         </span>

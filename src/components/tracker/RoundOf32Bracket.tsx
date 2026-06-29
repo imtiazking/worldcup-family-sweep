@@ -10,6 +10,7 @@ import {
   formatBracketPendingSummary,
 } from "./bracket/BracketMatchOpponent";
 import { RoundOf32MobileCards } from "./RoundOf32MobileCards";
+import { ExternalAdvancerCard } from "./bracket/ExternalAdvancerCard";
 import { revealTransition, useMotionSettings } from "./motion-utils";
 
 type RoundOf32BracketProps = {
@@ -188,6 +189,45 @@ export function RoundOf32Bracket({
                     </p>
                   )}
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.eliminated.length > 0 && (
+          <div className="mt-10 border-t border-slate-100 pt-8">
+            <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+              Eliminated
+            </p>
+            <div className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-2">
+              {data.eliminated.map((entry) => (
+                <div
+                  key={entry.row.team?.id}
+                  className="rounded-2xl border border-red-100 bg-red-50/60 px-4 py-3"
+                >
+                  <BracketTeamNode entry={entry} compact />
+                  {entry.pendingLine && (
+                    <p className="mt-2 text-xs text-red-900/80">
+                      {formatBracketPendingSummary(entry.pendingLine)}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.externalAdvancers.length > 0 && (
+          <div className="mt-10 border-t border-slate-100 pt-8">
+            <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+              Official tournament — advanced
+            </p>
+            <div className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-2">
+              {data.externalAdvancers.map((advancer) => (
+                <ExternalAdvancerCard
+                  key={advancer.teamName}
+                  advancer={advancer}
+                />
               ))}
             </div>
           </div>
