@@ -43,10 +43,6 @@ const groupCount = groupM ? Number(groupM[1]) : -1;
 const r32Count = r32M ? Number(r32M[1]) : -1;
 const throughBadges = (mobileThrough.match(/>Through</g) || []).length;
 const pendingBadges = (mobilePending.match(/>Pending</g) || []).length;
-const bracketThroughOnly = bracket.split(/Eliminated/i)[0] ?? bracket;
-const nlMaInR32Through =
-  /Netherlands[\s\S]{0,1200}?Morocco/i.test(mobileThrough) ||
-  /Netherlands[\s\S]{0,1200}?Morocco/i.test(bracketThroughOnly);
 
 const scripts = [...html.matchAll(/src="(\/_next\/static\/[^"]+)"/g)].map(
   (m) => m[1],
@@ -82,14 +78,14 @@ const checks = [
   ["Bracket Twemoji images >= 28", twemojiBracket >= 28],
   ["Bracket flag circles >= 28", flagCirclesBracket >= 28],
   ["Group Stage count = 0", groupCount === 0],
-  ["R32 ladder count = 13", r32Count === 13],
-  ["Round of 16 ladder count = 2", (() => {
+  ["R32 ladder count = 12", r32Count === 12],
+  ["Round of 16 ladder count = 3", (() => {
     const m = html.match(/Round of 16<\/h3>[\s\S]*?text-white\/40">(\d+)/);
-    return m ? Number(m[1]) === 2 : false;
+    return m ? Number(m[1]) === 3 : false;
   })()],
-  ["Through badges = 11", throughBadges === 11],
+  ["Through badges = 10", throughBadges === 10],
+  ["Non-family teams absent from page", !/Paraguay|Ivory Coast|South Africa|Canada|Japan/i.test(html)],
   ["Pending badges = 0", pendingBadges === 0],
-  ["NL vs MA removed from R32 through bracket", !nlMaInR32Through],
   [
     "R32 bracket: no dates or stadiums",
     !/\d{1,2}\s+Jun/i.test(bracket) &&

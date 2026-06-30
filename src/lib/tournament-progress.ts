@@ -20,12 +20,14 @@ export type NextTournamentFixture = {
 /** Next family sweep knockout fixture (remaining Round of 32 teams). */
 export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = (() => {
   const label = getNextFamilySweepFixtureLabel();
-  const next = label.match(/^(.+?)\s+vs\s+(.+?)\s+—\s+(.+?),\s+(.+)$/);
+  const familyMatch = label.match(
+    /^(.+?)\s+—\s+Round of 32\s+·\s+(.+?),\s+(.+)$/,
+  );
   return {
-    home: next?.[1]?.trim() ?? "Norway",
-    away: next?.[2]?.trim() ?? "Ivory Coast",
-    dateUk: next?.[3]?.trim() ?? "30 Jun",
-    timeUk: next?.[4]?.trim() ?? "6pm UK",
+    home: familyMatch?.[1]?.trim() ?? "France",
+    away: "",
+    dateUk: familyMatch?.[2]?.trim() ?? "30 Jun",
+    timeUk: familyMatch?.[3]?.trim() ?? "10pm UK",
     label,
   };
 })();

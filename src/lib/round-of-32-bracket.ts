@@ -1,5 +1,4 @@
 import {
-  VERIFIED_EXTERNAL_ADVANCERS,
   VERIFIED_FAMILY_TEAM_STATUSES,
   type ExternalBracketAdvancer,
   type VerifiedTeamStatus,
@@ -42,6 +41,27 @@ const SNAPSHOT_BY_TEAM = new Map<string, VerifiedTeamStatus>(
 const GROUP_SLOT_PATTERN =
   /\bgroup\s+[a-l]\s+(?:winner|runners?-up|runner-up|2nd|3rd)\b/i;
 const THIRD_PLACE_PATTERN = /\b3rd\s+place\b/i;
+
+function familyR32ScheduleLine(snapshot: VerifiedTeamStatus | undefined): string | null {
+  if (!snapshot?.nextFixture) return null;
+  const parts = ["Round of 32"];
+  const date = extractDate(snapshot.nextFixture);
+  const time = snapshot.r32KickoffUk?.trim();
+  if (date) parts.push(date);
+  if (time) parts.push(time);
+  return parts.length > 1 ? parts.join(" · ") : null;
+}
+
+function eliminatedSummaryLine(
+  _teamName: string,
+  snapshot: VerifiedTeamStatus | undefined,
+): string {
+  const opponent = snapshot?.r32OpponentLocked?.trim();
+  if (opponent === "Morocco") {
+    return "lost to Morocco";
+  }
+  return "Eliminated in Round of 32";
+}
 
 function extractDate(fixture: string): string | undefined {
   const iso = fixture.match(/(\d{1,2}\s+[A-Za-z]{3})/);
@@ -383,15 +403,7 @@ export function buildSweepBracketData(
     };
 
     if (status === "through") {
-      const teamEnrichment = enrichment?.[teamName];
-      base.r32Opponent = applyOpponentEnrichment(
-        parseR32Opponent(
-          snapshot?.nextFixture ?? null,
-          snapshot?.r32OpponentLocked ?? null,
-          snapshot?.r32KickoffUk ?? null,
-        ),
-        teamEnrichment,
-      );
+      base.pendingLine = familyR32ScheduleLine(snapshot);
       through.push({ ...base });
     } else if (status === "pending") {
       const fixture = snapshot?.nextFixture ?? null;
@@ -410,22 +422,7 @@ export function buildSweepBracketData(
       }
       pending.push({ ...base });
     } else {
-      const externalAdvancer = VERIFIED_EXTERNAL_ADVANCERS.find(
-        (a) => a.defeatedSweepTeam?.toLowerCase() === teamName.toLowerCase(),
-      );
-      if (externalAdvancer) {
-        base.pendingLine = `lost to ${externalAdvancer.teamName}`;
-        base.r32Opponent = {
-          label: externalAdvancer.teamName,
-          kind: "confirmed",
-        };
-      } else if (snapshot?.r32OpponentLocked) {
-        base.pendingLine = `lost to ${snapshot.r32OpponentLocked}`;
-        base.r32Opponent = {
-          label: snapshot.r32OpponentLocked,
-          kind: "confirmed",
-        };
-      }
+      base.pendingLine = eliminatedSummaryLine(teamName, snapshot);
       eliminated.push({ ...base });
     }
   }
@@ -451,7 +448,7 @@ export function buildSweepBracketData(
     pending,
     eliminated,
     roundOf16Qualified,
-    externalAdvancers: VERIFIED_EXTERNAL_ADVANCERS,
+    externalAdvancers: [],
   };
 }
 

@@ -35,6 +35,11 @@ function MobileMatchCard({
           />
         </div>
       )}
+      {entry.status === "through" && entry.pendingLine && (
+        <p className="mt-3 border-t border-slate-200 pt-3 text-xs text-slate-600">
+          {formatBracketPendingSummary(entry.pendingLine)}
+        </p>
+      )}
       {entry.status === "pending" && entry.pendingLine && (
         <p className="mt-3 border-t border-amber-100 pt-3 text-xs text-amber-900/90">
           Pending — {formatBracketPendingSummary(entry.pendingLine)}
@@ -70,7 +75,6 @@ export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
                 key={entry.row.team?.id}
                 entry={entry}
                 through={data.through}
-                showOpponent
               />
             ))}
           </div>

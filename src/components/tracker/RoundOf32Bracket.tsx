@@ -35,6 +35,11 @@ function DesktopMatchRow({
         <>
           <div className="w-[min(100%,220px)] shrink-0">
             <BracketTeamNode entry={entry} align="left" />
+            {entry.pendingLine && (
+              <p className="mt-1 text-[10px] text-slate-500">
+                {formatBracketPendingSummary(entry.pendingLine)}
+              </p>
+            )}
           </div>
           <div className="h-px flex-1 bg-slate-300" />
           <div className="w-[min(100%,160px)] shrink-0">
@@ -49,6 +54,11 @@ function DesktopMatchRow({
           <div className="h-px flex-1 bg-slate-300" />
           <div className="w-[min(100%,220px)] shrink-0">
             <BracketTeamNode entry={entry} align="right" />
+            {entry.pendingLine && (
+              <p className="mt-1 text-right text-[10px] text-slate-500">
+                {formatBracketPendingSummary(entry.pendingLine)}
+              </p>
+            )}
           </div>
         </>
       )}
@@ -138,7 +148,7 @@ export function RoundOf32Bracket({
           World Cup Round of 32
         </h2>
         <p className="mt-2 text-[10px] text-slate-400 sm:text-xs">
-          Family sweep teams · who plays who
+          Family sweep teams
         </p>
       </div>
 

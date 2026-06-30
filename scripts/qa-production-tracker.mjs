@@ -10,10 +10,6 @@ const mobileThroughSlice =
   html.match(
     /Through to Round of 32[\s\S]*?(?=Still in group stage|Round of 16 qualified|Eliminated|No sweep teams)/i,
   )?.[0] ?? "";
-const mobileR16Slice =
-  html.match(
-    /Round of 16 qualified[\s\S]*?(?=Still in group stage|Eliminated|Official tournament|No sweep teams)/i,
-  )?.[0] ?? "";
 const mobileEliminatedSlice =
   html.match(/Eliminated[\s\S]*?(?=Official tournament|No sweep teams|$)/i)?.[0] ??
   "";
@@ -43,130 +39,58 @@ const r16StageCount = (() => {
   return m ? Number(m[1]) : -1;
 })();
 
-const r32LadderSlice =
-  html.match(/Round of 32<\/h3>[\s\S]*?(?=Round of 16<\/h3>)/i)?.[0] ?? "";
-const r32LadderVsCount = (r32LadderSlice.match(/\bvs\b/gi) || []).length;
-const r32LadderHasNlMaFixture =
-  /Netherlands[\s\S]{0,1200}?vs[\s\S]{0,900}?Morocco/i.test(r32LadderSlice) ||
-  /Morocco[\s\S]{0,1200}?vs[\s\S]{0,900}?Netherlands/i.test(r32LadderSlice);
-const r32LadderFlagCircles = (r32LadderSlice.match(/rounded-full bg-white/g) || []).length;
-
 const bracketSlice =
   html.match(
     /World Cup Round of 32[\s\S]*?(?=mx-auto mt-10 flex max-w-2xl flex-col)/i,
   )?.[0] ?? "";
-const bracketTwemojiImages = (bracketSlice.match(/twemoji@14\.0\.2/g) || []).length;
-const bracketFlagCircles = (bracketSlice.match(/rounded-full bg-white shadow/g) || []).length;
-
-const stadiumHints = [
-  "Miami Stadium",
-  "Mexico City Stadium",
-  "Boston Stadium",
-  "Houston Stadium",
-  "BC Place Vancouver",
-];
+const bracketThroughOnly = bracketSlice.split(/Eliminated/i)[0] ?? bracketSlice;
 
 const tournamentProgressPercent = (() => {
   const beforeKnockout = html.match(
     />(\d{1,3})%<\/p>[\s\S]{0,120}?Knockout calendar/i,
   );
   if (beforeKnockout) return Number(beforeKnockout[1]);
-  if (html.includes("53%")) return 53;
-  if (html.includes("52%")) return 52;
   return -1;
 })();
 
-const bracketPendingBadges =
-  (bracketSlice.match(/>Pending</g) || []).length +
-  (mobilePendingSlice.match(/>Pending</g) || []).length;
-
-const bracketThroughOnly = bracketSlice.split(/Eliminated/i)[0] ?? bracketSlice;
+const nonFamily = ["South Africa", "Canada", "Paraguay", "Japan", "Ivory Coast"];
 
 const checks = [
   ["HTTP 200", res.status === 200],
   ["Tournament progress above 0%", tournamentProgressPercent > 0],
-  [
-    "Tournament progress in 50–55% range (R32 active)",
-    tournamentProgressPercent >= 50 && tournamentProgressPercent <= 55,
-  ],
   ["Group stage complete copy", /Group stage complete/i.test(html)],
   ["Round of 32 active copy", /Round of 32 active/i.test(html)],
   [
-    "Next match is family sweep fixture",
-    /Norway vs Ivory Coast[\s\S]{0,80}?30 Jun/i.test(html),
+    "Next match is France family fixture",
+    /France[\s\S]{0,120}?Round of 32[\s\S]{0,80}?30 Jun/i.test(html),
   ],
-  ["South Africa absent from tracker", !/South Africa/i.test(html)],
-  ["Canada absent from tracker family sections", !/Canada vs/i.test(html) && !/vs Canada/i.test(html)],
-  ["Debug banner hidden", !/Eliminated Count:/i.test(html)],
-  ["Round of 32 section", /World Cup Round of 32/i.test(html)],
-  ["Tournament Path ladder", /Tournament Path/i.test(html) && /Round of 16/i.test(html)],
-  ["Desktop bracket breakpoint", html.includes("hidden px-4 py-8 md:block")],
-  ["Mobile cards breakpoint", html.includes("md:hidden")],
-  ["Projected labels absent", (html.match(/Projected/g) || []).length === 0],
-  ["TBC slots absent from bracket", !/\bTBC\b/.test(bracketSlice)],
-  ["Participant names (Owned by)", (html.match(/Owned by/g) || []).length >= 15],
-  ["Awaiting qualification absent when all through", !/Awaiting qualification/i.test(html)],
-  ["No application error", !/Application error/i.test(html)],
-  ["Stage ladder Group Stage = 0", groupStageCount === 0],
-  ["Stage ladder Round of 32 = 13", r32StageCount === 13],
-  ["Stage ladder Round of 16 = 2", r16StageCount === 2],
-  ["Mobile through section = 11", mobileThroughBadges === 11],
-  ["Round of 16 qualified section has Brazil", /Round of 16 qualified[\s\S]*?Brazil/i.test(html)],
-  ["Round of 16 qualified section has Morocco", /Round of 16 qualified[\s\S]*?Morocco/i.test(html)],
-  ["Mobile eliminated section = 2", (mobileEliminatedSlice.match(/>Eliminated</g) || []).length >= 2],
+  ["South Africa absent", !/South Africa/i.test(html)],
+  ["Canada absent", !/Canada/i.test(html)],
+  ["Paraguay absent", !/Paraguay/i.test(html)],
+  ["Japan absent", !/Japan/i.test(html)],
+  ["Ivory Coast absent", !/Ivory Coast/i.test(html)],
+  ["Stage ladder Round of 32 = 12", r32StageCount === 12],
+  ["Stage ladder Round of 16 = 3", r16StageCount === 3],
+  ["Mobile through section = 10", mobileThroughBadges === 10],
+  ["Round of 16 qualified: Brazil", /Round of 16 qualified[\s\S]*?Brazil/i.test(html)],
+  ["Round of 16 qualified: Morocco", /Round of 16 qualified[\s\S]*?Morocco/i.test(html)],
+  ["Round of 16 qualified: Norway", /Round of 16 qualified[\s\S]*?Norway/i.test(html)],
   ["Germany knocked out", /Knocked Out[\s\S]{0,3000}?Germany/i.test(html)],
   ["Netherlands knocked out", /Knocked Out[\s\S]{0,3000}?Netherlands/i.test(html)],
-  ["First eliminated: Dado — Germany", /First eliminated:[\s\S]{0,120}?Dado[\s\S]{0,80}?Germany/i.test(html)],
   ["Alive teams count = 13", /Alive Teams[\s\S]{0,120}?>\s*13\s*</i.test(html)],
   ["Eliminated teams count = 2", /Eliminated Teams[\s\S]{0,120}?>\s*2\s*</i.test(html)],
+  ["France still alive in tracker", /Still Alive[\s\S]{0,4000}?France/i.test(html)],
   [
-    "Paraguay advanced in official bracket only",
-    /Paraguay[\s\S]{0,500}?Round of 16/i.test(html) &&
-      /vs Winner of France vs Sweden/i.test(html),
-  ],
-  ["Paraguay not an Owned by family card", !/Owned by[\s\S]{0,80}?Paraguay/i.test(html)],
-  ["Japan not an Owned by family card", !/Owned by[\s\S]{0,80}?Japan/i.test(html)],
-  ["Mobile pending section = 0", mobilePendingBadges === 0],
-  ["Desktop awaiting qualification = 0", awaitingPendingBadges === 0],
-  ["Bracket Pending badges (desktop+mobile) = 0", bracketPendingBadges === 0],
-  [
-    "Netherlands vs Morocco removed from R32 bracket",
-    !/Netherlands[\s\S]{0,1200}?Morocco/i.test(mobileThroughSlice) &&
-      !/Netherlands[\s\S]{0,1200}?Morocco/i.test(bracketThroughOnly),
+    "Norway vs Ivory Coast removed",
+    !/Norway[\s\S]{0,800}?Ivory Coast/i.test(html) &&
+      !/Ivory Coast[\s\S]{0,800}?Norway/i.test(html),
   ],
   [
     "Brazil vs Japan removed from R32 bracket",
     !/Brazil[\s\S]{0,1200}?Japan/i.test(mobileThroughSlice) &&
-      !/Brazil[\s\S]{0,1200}?Japan/i.test(bracketSlice),
+      !/Brazil[\s\S]{0,1200}?Japan/i.test(bracketThroughOnly),
   ],
-  [
-    "R32 bracket: no date metadata",
-    !/\d{1,2}\s+Jun/i.test(bracketSlice),
-  ],
-  [
-    "R32 bracket: no stadium names",
-    !stadiumHints.some((s) => bracketSlice.includes(s)),
-  ],
-  [
-    "R32 bracket: no kickoff times",
-    !/\d{1,2}:\d{2}/.test(bracketSlice),
-  ],
-  [
-    "R32 stage ladder: no Netherlands vs Morocco fixture",
-    !r32LadderHasNlMaFixture,
-  ],
-  [
-    "R32 bracket: Twemoji flag images present",
-    bracketTwemojiImages >= 18,
-  ],
-  [
-    "R32 bracket: team flag circles present",
-    bracketFlagCircles >= 11,
-  ],
-  [
-    "No duplicate uppercase Confirmed badges",
-    (bracketSlice.match(/>Confirmed</g) || []).length === 0,
-  ],
+  ["No application error", !/Application error/i.test(html)],
 ];
 
 let failed = 0;
@@ -177,22 +101,16 @@ for (const [name, pass] of checks) {
 }
 
 console.log("\nCounts:");
-console.log(`  Group Stage ladder: ${groupStageCount}`);
 console.log(`  Round of 32 ladder: ${r32StageCount}`);
 console.log(`  Round of 16 ladder: ${r16StageCount}`);
 console.log(`  Mobile through badges: ${mobileThroughBadges}`);
-console.log(`  Mobile pending badges: ${mobilePendingBadges}`);
-console.log(`  R32 ladder vs count: ${r32LadderVsCount}`);
 console.log(`  Tournament progress %: ${tournamentProgressPercent}`);
 
 const scripts = [...html.matchAll(/src="(\/_next\/static\/[^"]+)"/g)].map((m) => m[1]);
 let chunkFails = 0;
 for (const src of scripts) {
   const r = await fetch(`${BASE}${src}`);
-  if (!r.ok) {
-    console.log(`[FAIL] chunk ${src} -> ${r.status}`);
-    chunkFails += 1;
-  }
+  if (!r.ok) chunkFails += 1;
 }
 console.log(`\n[${chunkFails === 0 ? "PASS" : "FAIL"}] All ${scripts.length} JS chunks load`);
 

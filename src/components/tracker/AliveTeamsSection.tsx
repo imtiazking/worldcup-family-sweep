@@ -29,7 +29,7 @@ function formatNextMatch(row: TrackerRow): string | null {
   );
   if (!opponent || opponent.kind !== "confirmed") return null;
 
-  const parts = [`vs ${opponent.label}`];
+  const parts = ["Round of 32"];
   if (opponent.date) parts.push(opponent.date);
   if (opponent.time) parts.push(opponent.time);
   return parts.join(" · ");
