@@ -16,8 +16,11 @@ const SNAPSHOT_BY_TEAM = new Map(
 
 function formatNextMatch(row: TrackerRow): string | null {
   const teamName = row.team?.name ?? "";
+  if (row.team_status.status === "eliminated") return null;
+  if (row.team_status.stage !== "Round of 32") return null;
+
   const snapshot = SNAPSHOT_BY_TEAM.get(teamName.toLowerCase());
-  if (!snapshot || row.team_status.status === "eliminated") return null;
+  if (!snapshot?.nextFixture) return null;
 
   const opponent = parseR32Opponent(
     snapshot.nextFixture,

@@ -1,4 +1,4 @@
-import { VERIFIED_SNAPSHOT_AS_OF } from "@/lib/world-cup-verified-snapshot";
+import { VERIFIED_SNAPSHOT_AS_OF, getNextFamilySweepFixtureLabel } from "@/lib/world-cup-verified-snapshot";
 import type { TournamentStage } from "@/lib/tracker";
 
 export type PhaseStatus = "complete" | "in_progress" | "pending";
@@ -17,14 +17,18 @@ export type NextTournamentFixture = {
   timeUk: string;
 };
 
-/** Next World Cup fixture in the knockout schedule (28 Jun 2026). */
-export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = {
-  home: "South Africa",
-  away: "Canada",
-  dateUk: "28 Jun",
-  timeUk: "8pm UK",
-  label: "South Africa vs Canada — 28 Jun, 8pm UK",
-};
+/** Next family sweep knockout fixture (remaining Round of 32 teams). */
+export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = (() => {
+  const label = getNextFamilySweepFixtureLabel();
+  const next = label.match(/^(.+?)\s+vs\s+(.+?)\s+—\s+(.+?),\s+(.+)$/);
+  return {
+    home: next?.[1]?.trim() ?? "Norway",
+    away: next?.[2]?.trim() ?? "Ivory Coast",
+    dateUk: next?.[3]?.trim() ?? "30 Jun",
+    timeUk: next?.[4]?.trim() ?? "6pm UK",
+    label,
+  };
+})();
 
 const PHASE_WEIGHTS: Partial<Record<TournamentStage, number>> = {
   "Group Stage": 50,

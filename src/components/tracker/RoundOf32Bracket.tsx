@@ -194,6 +194,29 @@ export function RoundOf32Bracket({
           </div>
         )}
 
+        {data.roundOf16Qualified.length > 0 && (
+          <div className="mt-10 border-t border-slate-100 pt-8">
+            <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+              Round of 16 qualified
+            </p>
+            <div className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-2">
+              {data.roundOf16Qualified.map((entry) => (
+                <div
+                  key={entry.row.team?.id}
+                  className="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3"
+                >
+                  <BracketTeamNode entry={entry} compact />
+                  {entry.pendingLine && (
+                    <p className="mt-2 text-xs text-emerald-900/80">
+                      {formatBracketPendingSummary(entry.pendingLine)}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {data.eliminated.length > 0 && (
           <div className="mt-10 border-t border-slate-100 pt-8">
             <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">

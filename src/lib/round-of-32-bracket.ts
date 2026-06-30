@@ -330,9 +330,21 @@ export type SweepBracketData = {
   through: SweepBracketEntry[];
   pending: SweepBracketEntry[];
   eliminated: SweepBracketEntry[];
+  /** Family sweep teams qualified to Round of 16 */
+  roundOf16Qualified: SweepBracketEntry[];
   /** Official tournament advancers that are not family sweep participants */
   externalAdvancers: ExternalBracketAdvancer[];
 };
+
+function isRoundOf16Qualified(row: TrackerRow): boolean {
+  const { status, stage, next_stage_probability } = row.team_status;
+  return (
+    status === "active" &&
+    stage === "Round of 16" &&
+    next_stage_probability !== null &&
+    Number(next_stage_probability) >= 100
+  );
+}
 
 export function buildSweepBracketData(
   rows: TrackerRow[],
@@ -341,10 +353,24 @@ export function buildSweepBracketData(
   const through: SweepBracketEntry[] = [];
   const pending: SweepBracketEntry[] = [];
   const eliminated: SweepBracketEntry[] = [];
+  const roundOf16Qualified: SweepBracketEntry[] = [];
 
   for (const row of rows) {
     const teamName = row.team?.name ?? "";
     const snapshot = snapshotForTeam(teamName);
+
+    if (isRoundOf16Qualified(row)) {
+      roundOf16Qualified.push({
+        row,
+        flagEmoji: row.team?.flag_emoji?.trim() || "⚽",
+        status: "through",
+        r32Opponent: null,
+        pendingLine: "Qualified to Round of 16",
+        side: "left",
+      });
+      continue;
+    }
+
     const status = getBracketStatus(row);
 
     const base = {
@@ -393,6 +419,12 @@ export function buildSweepBracketData(
           label: externalAdvancer.teamName,
           kind: "confirmed",
         };
+      } else if (snapshot?.r32OpponentLocked) {
+        base.pendingLine = `lost to ${snapshot.r32OpponentLocked}`;
+        base.r32Opponent = {
+          label: snapshot.r32OpponentLocked,
+          kind: "confirmed",
+        };
       }
       eliminated.push({ ...base });
     }
@@ -404,6 +436,7 @@ export function buildSweepBracketData(
   through.sort(sortByName);
   pending.sort(sortByName);
   eliminated.sort(sortByName);
+  roundOf16Qualified.sort(sortByName);
 
   assignConfirmedFixtureRoles(through);
 
@@ -417,6 +450,7 @@ export function buildSweepBracketData(
     through: throughWithSides,
     pending,
     eliminated,
+    roundOf16Qualified,
     externalAdvancers: VERIFIED_EXTERNAL_ADVANCERS,
   };
 }

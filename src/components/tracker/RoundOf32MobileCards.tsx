@@ -50,7 +50,12 @@ function MobileMatchCard({
 }
 
 export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
-  const allEntries = [...data.through, ...data.pending, ...data.eliminated];
+  const allEntries = [
+    ...data.through,
+    ...data.roundOf16Qualified,
+    ...data.pending,
+    ...data.eliminated,
+  ];
 
   return (
     <div className="space-y-6 px-4 py-6">
@@ -67,6 +72,19 @@ export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
                 through={data.through}
                 showOpponent
               />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.roundOf16Qualified.length > 0 && (
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+            Round of 16 qualified
+          </p>
+          <div className="space-y-3">
+            {data.roundOf16Qualified.map((entry) => (
+              <MobileMatchCard key={entry.row.team?.id} entry={entry} />
             ))}
           </div>
         </div>
@@ -111,7 +129,8 @@ export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
         </div>
       )}
 
-      {allEntries.length === 0 && data.externalAdvancers.length === 0 && (
+      {allEntries.length === 0 &&
+        data.externalAdvancers.length === 0 && (
         <p className="py-8 text-center text-sm text-slate-400">
           No sweep teams to display yet.
         </p>

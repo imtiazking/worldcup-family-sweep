@@ -19,9 +19,9 @@ export type VerifiedTeamStatus = {
 };
 
 export const VERIFIED_SNAPSHOT_SOURCE =
-  "Wikipedia 2026 FIFA World Cup group pages (FIFA standings, through 29 Jun 2026)";
+  "Wikipedia 2026 FIFA World Cup group pages (FIFA standings, through 30 Jun 2026)";
 
-export const VERIFIED_SNAPSHOT_AS_OF = "2026-06-29T22:30:00Z";
+export const VERIFIED_SNAPSHOT_AS_OF = "2026-06-30T22:00:00Z";
 
 /** Non-sweep nations that advanced in the official knockout bracket */
 export type ExternalBracketAdvancer = {
@@ -78,13 +78,11 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   {
     teamName: "Brazil",
     status: "active",
-    stage: "Round of 32",
+    stage: "Round of 16",
     nextStageProbability: 100,
     reason:
-      "FIFA (A) — Group C winners after 3–0 vs Scotland (24 Jun). Final table: 7 pts, +6 GD.",
-    nextFixture: "Round of 32 vs Japan (29 Jun, 6pm UK)",
-    r32OpponentLocked: "Japan",
-    r32KickoffUk: "6pm UK",
+      "Advanced to Round of 16 — beat Japan in Round of 32 (29 Jun).",
+    nextFixture: null,
   },
   {
     teamName: "France",
@@ -125,7 +123,7 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Round of 32",
     nextStageProbability: 100,
     reason:
-      "FIFA (A) — Group B winners after 2–1 vs Canada (24 Jun). Group complete: 7 pts, +4 GD.",
+      "FIFA (A) — Group B winners (7 pts, +4 GD). Group complete.",
     nextFixture: "Round of 32 vs Algeria (3 Jul, 4am UK)",
     r32OpponentLocked: "Algeria",
     r32KickoffUk: "4am UK",
@@ -133,13 +131,11 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   {
     teamName: "Morocco",
     status: "active",
-    stage: "Round of 32",
+    stage: "Round of 16",
     nextStageProbability: 100,
     reason:
-      "FIFA (A) — Group C runners-up after 4–2 vs Haiti (24 Jun). Group complete: 7 pts, +3 GD.",
-    nextFixture: "Round of 32 vs Netherlands (30 Jun, 2am UK)",
-    r32OpponentLocked: "Netherlands",
-    r32KickoffUk: "2am UK",
+      "Advanced to Round of 16 — beat Netherlands in Round of 32 (30 Jun).",
+    nextFixture: null,
   },
   {
     teamName: "Colombia",
@@ -198,20 +194,43 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   },
   {
     teamName: "Netherlands",
-    status: "active",
+    status: "eliminated",
     stage: "Round of 32",
-    nextStageProbability: 100,
+    nextStageProbability: 0,
     reason:
-      "FIFA (A) — Group F winners after final matchday. Group complete.",
-    nextFixture: "Round of 32 vs Morocco (30 Jun, 2am UK)",
+      "Eliminated in Round of 32 — lost to Morocco (30 Jun).",
+    nextFixture: null,
     r32OpponentLocked: "Morocco",
-    r32KickoffUk: "2am UK",
   },
 ];
+
+/** Chronological upcoming Round of 32 fixtures for family sweep teams only */
+export const VERIFIED_UPCOMING_FAMILY_FIXTURES: Array<{
+  home: string;
+  away: string;
+  dateUk: string;
+  timeUk: string;
+}> = [
+  { home: "Norway", away: "Ivory Coast", dateUk: "30 Jun", timeUk: "6pm UK" },
+  { home: "France", away: "Sweden", dateUk: "30 Jun", timeUk: "10pm UK" },
+  { home: "England", away: "DR Congo", dateUk: "1 Jul", timeUk: "5pm UK" },
+  { home: "Mexico", away: "Ecuador", dateUk: "1 Jul", timeUk: "2am UK" },
+  { home: "Belgium", away: "Senegal", dateUk: "1 Jul", timeUk: "9pm UK" },
+  { home: "United States", away: "Bosnia and Herzegovina", dateUk: "2 Jul", timeUk: "1am UK" },
+  { home: "Spain", away: "Austria", dateUk: "2 Jul", timeUk: "8pm UK" },
+  { home: "Switzerland", away: "Algeria", dateUk: "3 Jul", timeUk: "4am UK" },
+  { home: "Portugal", away: "Croatia", dateUk: "3 Jul", timeUk: "midnight UK" },
+  { home: "Argentina", away: "Cape Verde", dateUk: "3 Jul", timeUk: "11pm UK" },
+  { home: "Colombia", away: "Ghana", dateUk: "4 Jul", timeUk: "2:30am UK" },
+];
+
+export function getNextFamilySweepFixtureLabel(): string {
+  const next = VERIFIED_UPCOMING_FAMILY_FIXTURES[0];
+  return `${next.home} vs ${next.away} — ${next.dateUk}, ${next.timeUk}`;
+}
 
 /** Non-sweep nations eliminated on 28 Jun 2026 (reference only — not synced to team_status) */
 export const VERIFIED_ELIMINATED_REFERENCE = [
   { teamName: "Jordan", reason: "Group J — lost 1–3 vs Argentina (28 Jun)" },
   { teamName: "Uzbekistan", reason: "Group K — lost 1–3 vs DR Congo (28 Jun)" },
 ] as const;
-

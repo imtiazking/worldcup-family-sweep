@@ -79,8 +79,12 @@ const checks = [
   ["Bracket Twemoji images >= 28", twemojiBracket >= 28],
   ["Bracket flag circles >= 28", flagCirclesBracket >= 28],
   ["Group Stage count = 0", groupCount === 0],
-  ["R32 ladder count = 15", r32Count === 15],
-  ["Through badges = 14", throughBadges === 14],
+  ["R32 ladder count = 13", r32Count === 13],
+  ["Round of 16 ladder count = 2", (() => {
+    const m = html.match(/Round of 16<\/h3>[\s\S]*?text-white\/40">(\d+)/);
+    return m ? Number(m[1]) === 2 : false;
+  })()],
+  ["Through badges = 11", throughBadges === 11],
   ["Pending badges = 0", pendingBadges === 0],
   ["NL vs MA confirmed in mobile or desktop bracket", nlMaConfirmed || /Netherlands[\s\S]{0,1200}?Morocco/i.test(bracket)],
   [

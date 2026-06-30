@@ -80,6 +80,7 @@ const rows = (assignments ?? []).map((a) => {
 const data = buildSweepBracketData(rows);
 const allNames = [
   ...data.through.map((e) => e.row.team?.name),
+  ...data.roundOf16Qualified.map((e) => e.row.team?.name),
   ...data.pending.map((e) => e.row.team?.name),
   ...data.eliminated.map((e) => e.row.team?.name),
 ];
@@ -102,7 +103,12 @@ function countConfirmedFixtures(entries) {
 }
 
 const confirmedFixtures = countConfirmedFixtures(data.through);
-const allEntries = [...data.through, ...data.pending, ...data.eliminated];
+const allEntries = [
+  ...data.through,
+  ...data.roundOf16Qualified,
+  ...data.pending,
+  ...data.eliminated,
+];
 const missingFlags = allEntries.filter(
   (e) => !e.flagEmoji || e.flagEmoji === "⚽" || !e.row.team?.flag_emoji,
 );
@@ -125,16 +131,26 @@ const checks = [
   },
   {
     id: 3,
-    name: "Through count = 14",
-    pass: data.through.length === 14,
+    name: "Through count = 11",
+    pass: data.through.length === 11,
     detail: `through=${data.through.length}`,
   },
   {
     id: 3.5,
-    name: "Eliminated count = 1 (Germany)",
+    name: "Round of 16 qualified = Brazil, Morocco",
     pass:
-      data.eliminated.length === 1 &&
-      data.eliminated[0]?.row.team?.name === "Germany",
+      data.roundOf16Qualified.length === 2 &&
+      data.roundOf16Qualified.some((e) => e.row.team?.name === "Brazil") &&
+      data.roundOf16Qualified.some((e) => e.row.team?.name === "Morocco"),
+    detail: `r16=${data.roundOf16Qualified.map((e) => e.row.team?.name).join(", ")}`,
+  },
+  {
+    id: 3.6,
+    name: "Eliminated = Germany, Netherlands",
+    pass:
+      data.eliminated.length === 2 &&
+      data.eliminated.some((e) => e.row.team?.name === "Germany") &&
+      data.eliminated.some((e) => e.row.team?.name === "Netherlands"),
     detail: `eliminated=${data.eliminated.map((e) => e.row.team?.name).join(", ")}`,
   },
   {
@@ -166,18 +182,19 @@ const checks = [
   },
   {
     id: 6,
-    name: "Confirmed fixtures = 13",
-    pass: confirmedFixtures === 13,
+    name: "Confirmed fixtures = 11",
+    pass: confirmedFixtures === 11,
     detail: `fixtures=${confirmedFixtures}`,
   },
   {
     id: 16,
-    name: "Locked opponents include Japan, Ghana, DR Congo (not Paraguay on sweep rows)",
+    name: "Locked opponents exclude Japan, Paraguay, Morocco (completed R32)",
     pass: (() => {
       const labels = confirmed.map((e) => e.r32Opponent?.label);
       return (
-        labels.includes("Japan") &&
+        !labels.includes("Japan") &&
         !labels.includes("Paraguay") &&
+        !labels.includes("Morocco") &&
         labels.includes("Sweden") &&
         labels.includes("Cape Verde") &&
         labels.includes("Bosnia and Herzegovina") &&
@@ -197,25 +214,19 @@ const checks = [
   },
   {
     id: 11,
-    name: "NL-Morocco mutual pairing roles preserved",
-    pass: (() => {
-      const nl = data.through.find((e) => e.row.team?.name === "Netherlands");
-      const ma = data.through.find((e) => e.row.team?.name === "Morocco");
-      return (
-        nl?.confirmedFixtureRole === "primary" &&
-        ma?.confirmedFixtureRole === "secondary"
-      );
-    })(),
-    detail: `primary=${data.through
-      .filter((e) => e.confirmedFixtureRole === "primary")
-      .map((e) => e.row.team?.name)
-      .join(", ")}`,
+    name: "NL-Morocco pairing removed from R32 through list",
+    pass:
+      !data.through.some((e) => e.row.team?.name === "Netherlands") &&
+      !data.through.some((e) => e.row.team?.name === "Morocco") &&
+      !data.through.some((e) => e.r32Opponent?.label === "Morocco") &&
+      !data.through.some((e) => e.r32Opponent?.label === "Netherlands"),
+    detail: `through=${data.through.map((e) => e.row.team?.name).join(", ")}`,
   },
   {
     id: 12,
     name: "Confirmed opponents visible on all locked rows",
     pass:
-      confirmed.length === 14 &&
+      confirmed.length === 11 &&
       confirmed.every((e) => Boolean(e.r32Opponent?.label)),
     detail: confirmed.map((e) => e.r32Opponent?.label).join(", "),
   },
@@ -290,10 +301,28 @@ const checks = [
   {
     id: 18,
     name: "Germany eliminated with lost-to-Paraguay line",
-    pass:
-      data.eliminated.length === 1 &&
-      data.eliminated[0]?.pendingLine?.includes("Paraguay"),
-    detail: data.eliminated[0]?.pendingLine ?? "none",
+    pass: data.eliminated
+      .find((e) => e.row.team?.name === "Germany")
+      ?.pendingLine?.includes("Paraguay"),
+    detail:
+      data.eliminated.find((e) => e.row.team?.name === "Germany")?.pendingLine ??
+      "none",
+  },
+  {
+    id: 19,
+    name: "Netherlands eliminated with lost-to-Morocco line",
+    pass: data.eliminated
+      .find((e) => e.row.team?.name === "Netherlands")
+      ?.pendingLine?.includes("Morocco"),
+    detail:
+      data.eliminated.find((e) => e.row.team?.name === "Netherlands")
+        ?.pendingLine ?? "none",
+  },
+  {
+    id: 20,
+    name: "Brazil not in R32 through (advanced to R16)",
+    pass: !data.through.some((e) => e.row.team?.name === "Brazil"),
+    detail: data.roundOf16Qualified.map((e) => e.row.team?.name).join(", "),
   },
 ];
 
