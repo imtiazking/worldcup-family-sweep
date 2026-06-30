@@ -14,7 +14,7 @@ const ladder =
   html.match(/Round of 32<\/h3>[\s\S]*?(?=Round of 16<\/h3>)/i)?.[0] ?? "";
 const mobileThrough =
   html.match(
-    /Through to Round of 32[\s\S]*?(?=Still in group stage|Eliminated|No sweep teams)/i,
+    /Through to Round of 32[\s\S]*?(?=Still in group stage|Round of 16 qualified|Eliminated|No sweep teams)/i,
   )?.[0] ?? "";
 const mobilePending =
   html.match(/Still in group stage[\s\S]*?(?=Eliminated|No sweep teams|$)/i)?.[0] ??
@@ -43,7 +43,10 @@ const groupCount = groupM ? Number(groupM[1]) : -1;
 const r32Count = r32M ? Number(r32M[1]) : -1;
 const throughBadges = (mobileThrough.match(/>Through</g) || []).length;
 const pendingBadges = (mobilePending.match(/>Pending</g) || []).length;
-const nlMaConfirmed = /Netherlands[\s\S]{0,800}?Morocco/i.test(mobileThrough);
+const bracketThroughOnly = bracket.split(/Eliminated/i)[0] ?? bracket;
+const nlMaInR32Through =
+  /Netherlands[\s\S]{0,1200}?Morocco/i.test(mobileThrough) ||
+  /Netherlands[\s\S]{0,1200}?Morocco/i.test(bracketThroughOnly);
 
 const scripts = [...html.matchAll(/src="(\/_next\/static\/[^"]+)"/g)].map(
   (m) => m[1],
@@ -86,7 +89,7 @@ const checks = [
   })()],
   ["Through badges = 11", throughBadges === 11],
   ["Pending badges = 0", pendingBadges === 0],
-  ["NL vs MA confirmed in mobile or desktop bracket", nlMaConfirmed || /Netherlands[\s\S]{0,1200}?Morocco/i.test(bracket)],
+  ["NL vs MA removed from R32 through bracket", !nlMaInR32Through],
   [
     "R32 bracket: no dates or stadiums",
     !/\d{1,2}\s+Jun/i.test(bracket) &&

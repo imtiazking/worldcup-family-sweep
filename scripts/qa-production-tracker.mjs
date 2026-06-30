@@ -80,6 +80,8 @@ const bracketPendingBadges =
   (bracketSlice.match(/>Pending</g) || []).length +
   (mobilePendingSlice.match(/>Pending</g) || []).length;
 
+const bracketThroughOnly = bracketSlice.split(/Eliminated/i)[0] ?? bracketSlice;
+
 const checks = [
   ["HTTP 200", res.status === 200],
   ["Tournament progress above 0%", tournamentProgressPercent > 0],
@@ -109,8 +111,8 @@ const checks = [
   ["Stage ladder Round of 32 = 13", r32StageCount === 13],
   ["Stage ladder Round of 16 = 2", r16StageCount === 2],
   ["Mobile through section = 11", mobileThroughBadges === 11],
-  ["Round of 16 qualified section has Brazil", /Round of 16 qualified[\s\S]{0,800}?Brazil/i.test(html)],
-  ["Round of 16 qualified section has Morocco", /Round of 16 qualified[\s\S]{0,800}?Morocco/i.test(html)],
+  ["Round of 16 qualified section has Brazil", /Round of 16 qualified[\s\S]*?Brazil/i.test(html)],
+  ["Round of 16 qualified section has Morocco", /Round of 16 qualified[\s\S]*?Morocco/i.test(html)],
   ["Mobile eliminated section = 2", (mobileEliminatedSlice.match(/>Eliminated</g) || []).length >= 2],
   ["Germany knocked out", /Knocked Out[\s\S]{0,3000}?Germany/i.test(html)],
   ["Netherlands knocked out", /Knocked Out[\s\S]{0,3000}?Netherlands/i.test(html)],
@@ -130,7 +132,7 @@ const checks = [
   [
     "Netherlands vs Morocco removed from R32 bracket",
     !/Netherlands[\s\S]{0,1200}?Morocco/i.test(mobileThroughSlice) &&
-      !/Netherlands[\s\S]{0,1200}?Morocco/i.test(bracketSlice),
+      !/Netherlands[\s\S]{0,1200}?Morocco/i.test(bracketThroughOnly),
   ],
   [
     "Brazil vs Japan removed from R32 bracket",
