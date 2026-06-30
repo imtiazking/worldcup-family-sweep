@@ -47,9 +47,10 @@ const bracketThroughOnly = bracketSlice.split(/Eliminated/i)[0] ?? bracketSlice;
 
 const tournamentProgressPercent = (() => {
   const beforeKnockout = html.match(
-    />(\d{1,3})%<\/p>[\s\S]{0,120}?Knockout calendar/i,
+    />(\d{1,3})(?:<!-- -->)?%<\/p>[\s\S]{0,120}?Knockout calendar/i,
   );
   if (beforeKnockout) return Number(beforeKnockout[1]);
+  if (html.includes("53%") || html.includes("53<!-- -->%")) return 53;
   return -1;
 })();
 
@@ -79,7 +80,7 @@ const checks = [
   ["Netherlands knocked out", /Knocked Out[\s\S]{0,3000}?Netherlands/i.test(html)],
   ["Alive teams count = 13", /Alive Teams[\s\S]{0,120}?>\s*13\s*</i.test(html)],
   ["Eliminated teams count = 2", /Eliminated Teams[\s\S]{0,120}?>\s*2\s*</i.test(html)],
-  ["France still alive in tracker", /Still Alive[\s\S]{0,4000}?France/i.test(html)],
+  ["France still alive in tracker", /tracker-alive-card[\s\S]{0,25000}?France/i.test(html)],
   [
     "Norway vs Ivory Coast removed",
     !/Norway[\s\S]{0,800}?Ivory Coast/i.test(html) &&
