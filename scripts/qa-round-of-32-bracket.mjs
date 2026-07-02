@@ -128,16 +128,25 @@ const checks = [
   },
   {
     id: 3,
-    name: "Through count = 10",
-    pass: data.through.length === 10,
+    name: "Through count = 5",
+    pass: data.through.length === 5,
     detail: `through=${data.through.length}`,
   },
   {
     id: 3.5,
-    name: "Round of 16 qualified = Brazil, Morocco, Norway",
+    name: "Round of 16 qualified = 8 teams",
     pass:
-      data.roundOf16Qualified.length === 3 &&
-      ["Brazil", "Morocco", "Norway"].every((name) =>
+      data.roundOf16Qualified.length === 8 &&
+      [
+        "Brazil",
+        "Morocco",
+        "Norway",
+        "France",
+        "Mexico",
+        "England",
+        "Belgium",
+        "United States",
+      ].every((name) =>
         data.roundOf16Qualified.some((e) => e.row.team?.name === name),
       ),
     detail: `r16=${data.roundOf16Qualified.map((e) => e.row.team?.name).join(", ")}`,
@@ -159,8 +168,10 @@ const checks = [
   },
   {
     id: 5,
-    name: "France still in R32 through (live/pending)",
-    pass: data.through.some((e) => e.row.team?.name === "France"),
+    name: "Pending R32 teams in through",
+    pass: ["Spain", "Portugal", "Switzerland", "Argentina", "Colombia"].every(
+      (name) => data.through.some((e) => e.row.team?.name === name),
+    ),
     detail: data.through.map((e) => e.row.team?.name).join(", "),
   },
   {
@@ -229,9 +240,9 @@ const checks = [
         ?.pendingLine ?? "none",
   },
   {
-    id: 20,
-    name: "Norway not in R32 through (advanced to R16)",
-    pass: !data.through.some((e) => e.row.team?.name === "Norway"),
+    id: 21,
+    name: "France not in R32 through (advanced to R16)",
+    pass: !data.through.some((e) => e.row.team?.name === "France"),
     detail: data.roundOf16Qualified.map((e) => e.row.team?.name).join(", "),
   },
 ];

@@ -24,10 +24,10 @@ export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = (() => {
     /^(.+?)\s+—\s+Round of 32\s+·\s+(.+?),\s+(.+)$/,
   );
   return {
-    home: familyMatch?.[1]?.trim() ?? "France",
+    home: familyMatch?.[1]?.trim() ?? "Spain",
     away: "",
-    dateUk: familyMatch?.[2]?.trim() ?? "30 Jun",
-    timeUk: familyMatch?.[3]?.trim() ?? "10pm UK",
+    dateUk: familyMatch?.[2]?.trim() ?? "2 Jul",
+    timeUk: familyMatch?.[3]?.trim() ?? "8pm UK",
     label,
   };
 })();

@@ -44,6 +44,9 @@ const bracketSlice =
     /World Cup Round of 32[\s\S]*?(?=mx-auto mt-10 flex max-w-2xl flex-col)/i,
   )?.[0] ?? "";
 const bracketThroughOnly = bracketSlice.split(/Eliminated/i)[0] ?? bracketSlice;
+const r16QualifiedSlice =
+  html.match(/Round of 16 qualified[\s\S]*?(?=Eliminated|Through to Round of 32|$)/i)?.[0] ??
+  "";
 
 const tournamentProgressPercent = (() => {
   const beforeKnockout = html.match(
@@ -54,7 +57,18 @@ const tournamentProgressPercent = (() => {
   return -1;
 })();
 
-const nonFamily = ["South Africa", "Canada", "Paraguay", "Japan", "Ivory Coast"];
+const nonFamily = [
+  "South Africa",
+  "Canada",
+  "Paraguay",
+  "Japan",
+  "Ivory Coast",
+  "Sweden",
+  "Ecuador",
+  "Senegal",
+  "Bosnia and Herzegovina",
+  "DR Congo",
+];
 
 const checks = [
   ["HTTP 200", res.status === 200],
@@ -62,34 +76,39 @@ const checks = [
   ["Group stage complete copy", /Group stage complete/i.test(html)],
   ["Round of 32 active copy", /Round of 32 active/i.test(html)],
   [
-    "Next match is France family fixture",
-    /France[\s\S]{0,120}?Round of 32[\s\S]{0,80}?30 Jun/i.test(html),
+    "Next match is Spain family fixture",
+    /Spain[\s\S]{0,120}?Round of 32[\s\S]{0,80}?2 Jul/i.test(html),
   ],
-  ["South Africa absent", !/South Africa/i.test(html)],
-  ["Canada absent", !/Canada/i.test(html)],
-  ["Paraguay absent", !/Paraguay/i.test(html)],
-  ["Japan absent", !/Japan/i.test(html)],
-  ["Ivory Coast absent", !/Ivory Coast/i.test(html)],
-  ["Stage ladder Round of 32 = 12", r32StageCount === 12],
-  ["Stage ladder Round of 16 = 3", r16StageCount === 3],
-  ["Mobile through section = 10", mobileThroughBadges === 10],
-  ["Round of 16 qualified: Brazil", /Round of 16 qualified[\s\S]*?Brazil/i.test(html)],
-  ["Round of 16 qualified: Morocco", /Round of 16 qualified[\s\S]*?Morocco/i.test(html)],
-  ["Round of 16 qualified: Norway", /Round of 16 qualified[\s\S]*?Norway/i.test(html)],
+  ...nonFamily.map((name) => [`${name} absent`, !new RegExp(name, "i").test(html)]),
+  ["Stage ladder Round of 32 = 7", r32StageCount === 7],
+  ["Stage ladder Round of 16 = 8", r16StageCount === 8],
+  ["Mobile through section = 5", mobileThroughBadges === 5],
+  ...[
+    "Brazil",
+    "Morocco",
+    "Norway",
+    "France",
+    "Mexico",
+    "England",
+    "Belgium",
+    "United States",
+  ].map((team) => [
+    `Round of 16 qualified: ${team}`,
+    new RegExp(`Round of 16 qualified[\\s\\S]*?${team}`, "i").test(html),
+  ]),
   ["Germany knocked out", /Knocked Out[\s\S]{0,3000}?Germany/i.test(html)],
   ["Netherlands knocked out", /Knocked Out[\s\S]{0,3000}?Netherlands/i.test(html)],
   ["Alive teams count = 13", /Alive Teams[\s\S]{0,120}?>\s*13\s*</i.test(html)],
   ["Eliminated teams count = 2", /Eliminated Teams[\s\S]{0,120}?>\s*2\s*</i.test(html)],
   ["France still alive in tracker", /tracker-alive-card[\s\S]{0,25000}?France/i.test(html)],
   [
-    "Norway vs Ivory Coast removed",
-    !/Norway[\s\S]{0,800}?Ivory Coast/i.test(html) &&
-      !/Ivory Coast[\s\S]{0,800}?Norway/i.test(html),
-  ],
-  [
     "Brazil vs Japan removed from R32 bracket",
     !/Brazil[\s\S]{0,1200}?Japan/i.test(mobileThroughSlice) &&
       !/Brazil[\s\S]{0,1200}?Japan/i.test(bracketThroughOnly),
+  ],
+  [
+    "France not in R32 through section",
+    !/Through to Round of 32[\s\S]{0,4000}?France/i.test(mobileThroughSlice),
   ],
   ["No application error", !/Application error/i.test(html)],
 ];
