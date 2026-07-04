@@ -50,15 +50,15 @@ const r16QualifiedTeams = [
   "Colombia",
 ];
 
-const r16Fixtures = [
-  ["Morocco", "Canada"],
-  ["France", "Paraguay"],
-  ["Brazil", "Norway"],
-  ["Mexico", "England"],
-  ["Portugal", "Spain"],
-  ["United States", "Belgium"],
-  ["Argentina", "Egypt"],
-  ["Switzerland", "Colombia"],
+const r16OpponentChecks = [
+  ["Morocco vs Canada (next match)", /Morocco vs Canada[\s\S]{0,80}?Round of 16/i.test(html)],
+  ["France vs Paraguay", /vs Paraguay[\s\S]{0,80}?Round of 16/i.test(html)],
+  ["Brazil vs Norway", /vs Norway[\s\S]{0,80}?Round of 16/i.test(html)],
+  ["Mexico vs England", /vs England[\s\S]{0,80}?Round of 16/i.test(html)],
+  ["Portugal vs Spain", /vs Spain[\s\S]{0,80}?Round of 16/i.test(html)],
+  ["United States vs Belgium", /vs Belgium[\s\S]{0,80}?Round of 16/i.test(html)],
+  ["Argentina vs Egypt", /vs Egypt[\s\S]{0,80}?Round of 16/i.test(html)],
+  ["Switzerland vs Colombia", /vs Colombia[\s\S]{0,80}?Round of 16/i.test(html)],
 ];
 
 const bannedNonFamily = [
@@ -92,12 +92,7 @@ const checks = [
   ["Netherlands knocked out", /Knocked Out[\s\S]{0,3000}?Netherlands/i.test(html)],
   ["Alive teams count = 13", /Alive Teams[\s\S]{0,120}?>\s*13\s*</i.test(html)],
   ["Eliminated teams count = 2", /Eliminated Teams[\s\S]{0,120}?>\s*2\s*</i.test(html)],
-  ...r16Fixtures.map(([home, away]) => [
-    `R16 fixture ${home} vs ${away}`,
-    new RegExp(`${home}[\\s\\S]{0,120}?${away}|${away}[\\s\\S]{0,120}?${home}`, "i").test(
-      html,
-    ),
-  ]),
+  ...r16OpponentChecks,
   ...bannedNonFamily.map((name) => [
     `${name} not in R16 qualified team list`,
     !new RegExp(

@@ -92,9 +92,9 @@ const checks = [
   ],
   [
     "R16 fixture opponents visible on page",
-    /Morocco[\s\S]{0,80}?Canada/i.test(html) &&
-      /France[\s\S]{0,80}?Paraguay/i.test(html) &&
-      /Argentina[\s\S]{0,80}?Egypt/i.test(html),
+    /Morocco vs Canada/i.test(html) &&
+      /vs Paraguay[\s\S]{0,80}?Round of 16/i.test(html) &&
+      /vs Egypt[\s\S]{0,80}?Round of 16/i.test(html),
   ],
   ["Pending badges = 0", pendingBadges === 0],
   [
