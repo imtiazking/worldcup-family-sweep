@@ -52,6 +52,17 @@ function familyR32ScheduleLine(snapshot: VerifiedTeamStatus | undefined): string
   return parts.length > 1 ? parts.join(" · ") : null;
 }
 
+function familyR16ScheduleLine(snapshot: VerifiedTeamStatus | undefined): string | null {
+  const opponent = snapshot?.r16OpponentLocked?.trim();
+  if (!opponent || !snapshot?.nextFixture) return null;
+  const parts = [`vs ${opponent}`, "Round of 16"];
+  const date = extractDate(snapshot.nextFixture);
+  const time = snapshot.r16KickoffUk?.trim();
+  if (date) parts.push(date);
+  if (time) parts.push(time);
+  return parts.length > 2 ? parts.join(" · ") : null;
+}
+
 function eliminatedSummaryLine(
   _teamName: string,
   snapshot: VerifiedTeamStatus | undefined,
@@ -385,7 +396,8 @@ export function buildSweepBracketData(
         flagEmoji: row.team?.flag_emoji?.trim() || "⚽",
         status: "through",
         r32Opponent: null,
-        pendingLine: "Qualified to Round of 16",
+        pendingLine:
+          familyR16ScheduleLine(snapshot) ?? "Qualified to Round of 16",
         side: "left",
       });
       continue;

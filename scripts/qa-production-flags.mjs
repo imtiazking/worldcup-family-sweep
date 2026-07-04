@@ -78,13 +78,24 @@ const checks = [
   ["Bracket Twemoji images >= 28", twemojiBracket >= 28],
   ["Bracket flag circles >= 28", flagCirclesBracket >= 28],
   ["Group Stage count = 0", groupCount === 0],
-  ["R32 ladder count = 7", r32Count === 7],
-  ["Round of 16 ladder count = 8", (() => {
+  ["R32 ladder count = 2", r32Count === 2],
+  ["Round of 16 ladder count = 13", (() => {
     const m = html.match(/Round of 16<\/h3>[\s\S]*?text-white\/40">(\d+)/);
-    return m ? Number(m[1]) === 8 : false;
+    return m ? Number(m[1]) === 13 : false;
   })()],
-  ["Through badges = 5", throughBadges === 5],
-  ["Non-family teams absent from page", !/Paraguay|Ivory Coast|South Africa|Canada|Japan|Sweden|Ecuador|Senegal|Bosnia|DR Congo/i.test(html)],
+  ["Through badges = 0", throughBadges === 0],
+  [
+    "Non-family teams absent from R32 through",
+    !/Paraguay|Ivory Coast|South Africa|Canada|Japan|Sweden|Ecuador|Senegal|Bosnia|DR Congo/i.test(
+      mobileThrough,
+    ),
+  ],
+  [
+    "R16 fixture opponents visible on page",
+    /Morocco[\s\S]{0,80}?Canada/i.test(html) &&
+      /France[\s\S]{0,80}?Paraguay/i.test(html) &&
+      /Argentina[\s\S]{0,80}?Egypt/i.test(html),
+  ],
   ["Pending badges = 0", pendingBadges === 0],
   [
     "R32 bracket: no dates or stadiums",

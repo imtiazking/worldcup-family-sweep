@@ -17,17 +17,17 @@ export type NextTournamentFixture = {
   timeUk: string;
 };
 
-/** Next family sweep knockout fixture (remaining Round of 32 teams). */
+/** Next family sweep knockout fixture (next Round of 16 tie). */
 export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = (() => {
   const label = getNextFamilySweepFixtureLabel();
   const familyMatch = label.match(
-    /^(.+?)\s+—\s+Round of 32\s+·\s+(.+?),\s+(.+)$/,
+    /^(.+?)\s+vs\s+(.+?)\s+—\s+Round of 16\s+·\s+(.+?),\s+(.+)$/,
   );
   return {
-    home: familyMatch?.[1]?.trim() ?? "Spain",
-    away: "",
-    dateUk: familyMatch?.[2]?.trim() ?? "2 Jul",
-    timeUk: familyMatch?.[3]?.trim() ?? "8pm UK",
+    home: familyMatch?.[1]?.trim() ?? "Morocco",
+    away: familyMatch?.[2]?.trim() ?? "Canada",
+    dateUk: familyMatch?.[3]?.trim() ?? "4 Jul",
+    timeUk: familyMatch?.[4]?.trim() ?? "6pm UK",
     label,
   };
 })();
@@ -64,12 +64,12 @@ export type TournamentPhaseProgress = {
   nextFixture: NextTournamentFixture;
 };
 
-function buildPhasesForRoundOf32(): TournamentPhase[] {
+function buildPhasesForRoundOf16(): TournamentPhase[] {
   return DISPLAY_PHASES.map((phase) => {
-    if (phase.id === "Group Stage") {
+    if (phase.id === "Group Stage" || phase.id === "Round of 32") {
       return { ...phase, status: "complete" as const };
     }
-    if (phase.id === "Round of 32") {
+    if (phase.id === "Round of 16") {
       return { ...phase, status: "in_progress" as const };
     }
     return { ...phase, status: "pending" as const };
@@ -123,10 +123,10 @@ function buildProgressCaption(phases: TournamentPhase[]): string {
 
 /**
  * Tournament-wide knockout progress (independent of family sweep eliminations).
- * Updated with verified snapshot through 28 Jun 2026 — group stage complete, R32 underway.
+ * Updated with verified snapshot through 4 Jul 2026 — group stage and R32 complete, R16 underway.
  */
 export function getTournamentPhaseProgress(): TournamentPhaseProgress {
-  const phases = buildPhasesForRoundOf32();
+  const phases = buildPhasesForRoundOf16();
   const current = phases.find((p) => p.status === "in_progress") ?? phases[0];
 
   return {

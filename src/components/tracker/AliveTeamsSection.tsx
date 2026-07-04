@@ -17,10 +17,23 @@ const SNAPSHOT_BY_TEAM = new Map(
 function formatNextMatch(row: TrackerRow): string | null {
   const teamName = row.team?.name ?? "";
   if (row.team_status.status === "eliminated") return null;
-  if (row.team_status.stage !== "Round of 32") return null;
+
+  const stage = row.team_status.stage;
+  if (stage !== "Round of 32" && stage !== "Round of 16") return null;
 
   const snapshot = SNAPSHOT_BY_TEAM.get(teamName.toLowerCase());
   if (!snapshot?.nextFixture) return null;
+
+  if (stage === "Round of 16") {
+    const opponent = snapshot.r16OpponentLocked?.trim();
+    if (!opponent) return null;
+    const parts = [`vs ${opponent}`, "Round of 16"];
+    const date = snapshot.nextFixture.match(/(\d{1,2}\s+[A-Za-z]{3})/)?.[1];
+    const time = snapshot.r16KickoffUk?.trim();
+    if (date) parts.push(date);
+    if (time) parts.push(time);
+    return parts.join(" · ");
+  }
 
   const opponent = parseR32Opponent(
     snapshot.nextFixture,

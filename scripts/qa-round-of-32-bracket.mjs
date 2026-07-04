@@ -107,10 +107,13 @@ const nonFamilyNames = [
   "South Africa",
   "Canada",
   "Sweden",
+  "Egypt",
 ];
-const serialized = JSON.stringify(data);
-const nonFamilyVisible = nonFamilyNames.filter((name) =>
-  serialized.includes(name),
+const teamNamesInBracket = allEntries
+  .map((e) => e.row.team?.name)
+  .filter(Boolean);
+const nonFamilyAsSweepTeam = nonFamilyNames.filter((name) =>
+  teamNamesInBracket.includes(name),
 );
 
 const checks = [
@@ -128,15 +131,15 @@ const checks = [
   },
   {
     id: 3,
-    name: "Through count = 5",
-    pass: data.through.length === 5,
+    name: "Through count = 0 (R32 complete)",
+    pass: data.through.length === 0,
     detail: `through=${data.through.length}`,
   },
   {
     id: 3.5,
-    name: "Round of 16 qualified = 8 teams",
+    name: "Round of 16 qualified = 13 teams",
     pass:
-      data.roundOf16Qualified.length === 8 &&
+      data.roundOf16Qualified.length === 13 &&
       [
         "Brazil",
         "Morocco",
@@ -146,6 +149,11 @@ const checks = [
         "England",
         "Belgium",
         "United States",
+        "Spain",
+        "Portugal",
+        "Switzerland",
+        "Argentina",
+        "Colombia",
       ].every((name) =>
         data.roundOf16Qualified.some((e) => e.row.team?.name === name),
       ),
@@ -168,11 +176,9 @@ const checks = [
   },
   {
     id: 5,
-    name: "Pending R32 teams in through",
-    pass: ["Spain", "Portugal", "Switzerland", "Argentina", "Colombia"].every(
-      (name) => data.through.some((e) => e.row.team?.name === name),
-    ),
-    detail: data.through.map((e) => e.row.team?.name).join(", "),
+    name: "No teams left in R32 through",
+    pass: data.through.length === 0,
+    detail: data.through.map((e) => e.row.team?.name).join(", ") || "none",
   },
   {
     id: 6,
@@ -182,12 +188,12 @@ const checks = [
   },
   {
     id: 7,
-    name: "Non-family teams absent from bracket data",
-    pass: nonFamilyVisible.length === 0,
+    name: "Non-family teams not listed as sweep teams",
+    pass: nonFamilyAsSweepTeam.length === 0,
     detail:
-      nonFamilyVisible.length === 0
+      nonFamilyAsSweepTeam.length === 0
         ? "ok"
-        : `found: ${nonFamilyVisible.join(", ")}`,
+        : `found: ${nonFamilyAsSweepTeam.join(", ")}`,
   },
   {
     id: 8,
@@ -240,10 +246,14 @@ const checks = [
         ?.pendingLine ?? "none",
   },
   {
-    id: 21,
-    name: "France not in R32 through (advanced to R16)",
-    pass: !data.through.some((e) => e.row.team?.name === "France"),
-    detail: data.roundOf16Qualified.map((e) => e.row.team?.name).join(", "),
+    id: 22,
+    name: "Morocco R16 line includes Canada opponent",
+    pass: data.roundOf16Qualified
+      .find((e) => e.row.team?.name === "Morocco")
+      ?.pendingLine?.includes("Canada"),
+    detail:
+      data.roundOf16Qualified.find((e) => e.row.team?.name === "Morocco")
+        ?.pendingLine ?? "none",
   },
 ];
 

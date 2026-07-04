@@ -1,6 +1,6 @@
 /**
  * Manually verified World Cup 2026 group status for family sweep teams.
- * Source: FIFA standings via Wikipedia group pages (updated through 2 Jul 2026).
+ * Source: FIFA standings via Wikipedia group pages (updated through 4 Jul 2026).
  * Only teams with FIFA "(A) Advance to a further round" or completed group
  * top-two / best-third placement are marked qualified.
  */
@@ -16,12 +16,16 @@ export type VerifiedTeamStatus = {
   r32OpponentLocked?: string | null;
   /** UK kickoff time for locked Round of 32 fixtures */
   r32KickoffUk?: string | null;
+  /** Set only when the Round of 16 opponent is officially locked */
+  r16OpponentLocked?: string | null;
+  /** UK kickoff time for locked Round of 16 fixtures */
+  r16KickoffUk?: string | null;
 };
 
 export const VERIFIED_SNAPSHOT_SOURCE =
-  "Wikipedia 2026 FIFA World Cup group pages (FIFA standings, through 2 Jul 2026)";
+  "Wikipedia 2026 FIFA World Cup group pages (FIFA standings, through 4 Jul 2026)";
 
-export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-02T12:00:00Z";
+export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-04T12:00:00Z";
 
 /** Non-sweep nations that advanced in the official knockout bracket (reference only — not shown in family UI) */
 export type ExternalBracketAdvancer = {
@@ -41,7 +45,9 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Round of 16",
     nextStageProbability: 100,
     reason: "Advanced to Round of 16 — Round of 32 complete (1 Jul).",
-    nextFixture: null,
+    nextFixture: "Round of 16 vs England (6 Jul, 1am UK)",
+    r16OpponentLocked: "England",
+    r16KickoffUk: "1am UK",
   },
   {
     teamName: "United States",
@@ -49,7 +55,9 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Round of 16",
     nextStageProbability: 100,
     reason: "Advanced to Round of 16 — Round of 32 complete (2 Jul).",
-    nextFixture: null,
+    nextFixture: "Round of 16 vs Belgium (7 Jul, 1am UK)",
+    r16OpponentLocked: "Belgium",
+    r16KickoffUk: "1am UK",
   },
   {
     teamName: "Germany",
@@ -66,7 +74,9 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Round of 16",
     nextStageProbability: 100,
     reason: "Advanced to Round of 16 — Round of 32 complete (29 Jun).",
-    nextFixture: null,
+    nextFixture: "Round of 16 vs Norway (5 Jul, 9pm UK)",
+    r16OpponentLocked: "Norway",
+    r16KickoffUk: "9pm UK",
   },
   {
     teamName: "France",
@@ -74,7 +84,9 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Round of 16",
     nextStageProbability: 100,
     reason: "Advanced to Round of 16 — Round of 32 complete (30 Jun).",
-    nextFixture: null,
+    nextFixture: "Round of 16 vs Paraguay (4 Jul, 10pm UK)",
+    r16OpponentLocked: "Paraguay",
+    r16KickoffUk: "10pm UK",
   },
   {
     teamName: "Norway",
@@ -82,27 +94,29 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Round of 16",
     nextStageProbability: 100,
     reason: "Advanced to Round of 16 — Round of 32 complete (30 Jun).",
-    nextFixture: null,
+    nextFixture: "Round of 16 vs Brazil (5 Jul, 9pm UK)",
+    r16OpponentLocked: "Brazil",
+    r16KickoffUk: "9pm UK",
   },
   {
     teamName: "Argentina",
     status: "active",
-    stage: "Round of 32",
+    stage: "Round of 16",
     nextStageProbability: 100,
-    reason: "FIFA (A) — Group J winners. Round of 32 fixture pending.",
-    nextFixture: "Round of 32 vs Cape Verde (3 Jul, 11pm UK)",
-    r32OpponentLocked: "Cape Verde",
-    r32KickoffUk: "11pm UK",
+    reason: "Advanced to Round of 16 — Round of 32 complete (3 Jul).",
+    nextFixture: "Round of 16 vs Egypt (7 Jul, 5pm UK)",
+    r16OpponentLocked: "Egypt",
+    r16KickoffUk: "5pm UK",
   },
   {
     teamName: "Switzerland",
     status: "active",
-    stage: "Round of 32",
+    stage: "Round of 16",
     nextStageProbability: 100,
-    reason: "FIFA (A) — Group B winners. Round of 32 fixture pending.",
-    nextFixture: "Round of 32 vs Algeria (3 Jul, 4am UK)",
-    r32OpponentLocked: "Algeria",
-    r32KickoffUk: "4am UK",
+    reason: "Advanced to Round of 16 — Round of 32 complete (3 Jul).",
+    nextFixture: "Round of 16 vs Colombia (7 Jul, 9pm UK)",
+    r16OpponentLocked: "Colombia",
+    r16KickoffUk: "9pm UK",
   },
   {
     teamName: "Morocco",
@@ -110,17 +124,19 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Round of 16",
     nextStageProbability: 100,
     reason: "Advanced to Round of 16 — Round of 32 complete (30 Jun).",
-    nextFixture: null,
+    nextFixture: "Round of 16 vs Canada (4 Jul, 6pm UK)",
+    r16OpponentLocked: "Canada",
+    r16KickoffUk: "6pm UK",
   },
   {
     teamName: "Colombia",
     status: "active",
-    stage: "Round of 32",
+    stage: "Round of 16",
     nextStageProbability: 100,
-    reason: "FIFA (A) — Group K winners. Round of 32 fixture pending.",
-    nextFixture: "Round of 32 vs Ghana (4 Jul, 2:30am UK)",
-    r32OpponentLocked: "Ghana",
-    r32KickoffUk: "2:30am UK",
+    reason: "Advanced to Round of 16 — Round of 32 complete (4 Jul).",
+    nextFixture: "Round of 16 vs Switzerland (7 Jul, 9pm UK)",
+    r16OpponentLocked: "Switzerland",
+    r16KickoffUk: "9pm UK",
   },
   {
     teamName: "Belgium",
@@ -128,27 +144,29 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Round of 16",
     nextStageProbability: 100,
     reason: "Advanced to Round of 16 — Round of 32 complete (1 Jul).",
-    nextFixture: null,
+    nextFixture: "Round of 16 vs United States (7 Jul, 1am UK)",
+    r16OpponentLocked: "United States",
+    r16KickoffUk: "1am UK",
   },
   {
     teamName: "Spain",
     status: "active",
-    stage: "Round of 32",
+    stage: "Round of 16",
     nextStageProbability: 100,
-    reason: "FIFA (A) — Group H advanced. Round of 32 fixture pending.",
-    nextFixture: "Round of 32 vs Austria (2 Jul, 8pm UK)",
-    r32OpponentLocked: "Austria",
-    r32KickoffUk: "8pm UK",
+    reason: "Advanced to Round of 16 — Round of 32 complete (2 Jul).",
+    nextFixture: "Round of 16 vs Portugal (6 Jul, 8pm UK)",
+    r16OpponentLocked: "Portugal",
+    r16KickoffUk: "8pm UK",
   },
   {
     teamName: "Portugal",
     status: "active",
-    stage: "Round of 32",
+    stage: "Round of 16",
     nextStageProbability: 100,
-    reason: "FIFA (A) — Advanced from Group K. Round of 32 fixture pending.",
-    nextFixture: "Round of 32 vs Croatia (3 Jul, midnight UK)",
-    r32OpponentLocked: "Croatia",
-    r32KickoffUk: "midnight UK",
+    reason: "Advanced to Round of 16 — Round of 32 complete (3 Jul).",
+    nextFixture: "Round of 16 vs Spain (6 Jul, 8pm UK)",
+    r16OpponentLocked: "Spain",
+    r16KickoffUk: "8pm UK",
   },
   {
     teamName: "England",
@@ -156,7 +174,9 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Round of 16",
     nextStageProbability: 100,
     reason: "Advanced to Round of 16 — Round of 32 complete (1 Jul).",
-    nextFixture: null,
+    nextFixture: "Round of 16 vs Mexico (6 Jul, 1am UK)",
+    r16OpponentLocked: "Mexico",
+    r16KickoffUk: "1am UK",
   },
   {
     teamName: "Netherlands",
@@ -169,22 +189,26 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   },
 ];
 
-/** Upcoming Round of 32 fixtures — pending family sweep teams only (no opponent names) */
+/** Upcoming Round of 16 fixtures — family sweep teams with official opponents */
 export const VERIFIED_UPCOMING_FAMILY_FIXTURES: Array<{
-  teamName: string;
+  homeTeam: string;
+  awayOpponent: string;
   dateUk: string;
   timeUk: string;
 }> = [
-  { teamName: "Spain", dateUk: "2 Jul", timeUk: "8pm UK" },
-  { teamName: "Switzerland", dateUk: "3 Jul", timeUk: "4am UK" },
-  { teamName: "Portugal", dateUk: "3 Jul", timeUk: "midnight UK" },
-  { teamName: "Argentina", dateUk: "3 Jul", timeUk: "11pm UK" },
-  { teamName: "Colombia", dateUk: "4 Jul", timeUk: "2:30am UK" },
+  { homeTeam: "Morocco", awayOpponent: "Canada", dateUk: "4 Jul", timeUk: "6pm UK" },
+  { homeTeam: "France", awayOpponent: "Paraguay", dateUk: "4 Jul", timeUk: "10pm UK" },
+  { homeTeam: "Brazil", awayOpponent: "Norway", dateUk: "5 Jul", timeUk: "9pm UK" },
+  { homeTeam: "Mexico", awayOpponent: "England", dateUk: "6 Jul", timeUk: "1am UK" },
+  { homeTeam: "Portugal", awayOpponent: "Spain", dateUk: "6 Jul", timeUk: "8pm UK" },
+  { homeTeam: "United States", awayOpponent: "Belgium", dateUk: "7 Jul", timeUk: "1am UK" },
+  { homeTeam: "Argentina", awayOpponent: "Egypt", dateUk: "7 Jul", timeUk: "5pm UK" },
+  { homeTeam: "Switzerland", awayOpponent: "Colombia", dateUk: "7 Jul", timeUk: "9pm UK" },
 ];
 
 export function getNextFamilySweepFixtureLabel(): string {
   const next = VERIFIED_UPCOMING_FAMILY_FIXTURES[0];
-  return `${next.teamName} — Round of 32 · ${next.dateUk}, ${next.timeUk}`;
+  return `${next.homeTeam} vs ${next.awayOpponent} — Round of 16 · ${next.dateUk}, ${next.timeUk}`;
 }
 
 /** Non-sweep nations eliminated on 28 Jun 2026 (reference only — not synced to team_status) */
