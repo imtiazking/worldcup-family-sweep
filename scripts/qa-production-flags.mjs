@@ -84,7 +84,7 @@ const checks = [
     return m ? Number(m[1]) === 10 : false;
   })()],
   ["Quarter-finals ladder count = 3", (() => {
-    const m = html.match(/Quarter-finals<\/h3>[\s\S]*?text-white\/40">(\d+)/);
+    const m = html.match(/Quarter Final<\/h3>[\s\S]*?text-white\/40">(\d+)/);
     return m ? Number(m[1]) === 3 : false;
   })()],
   ["Through badges = 0", throughBadges === 0],

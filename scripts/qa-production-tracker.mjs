@@ -24,7 +24,7 @@ const r16StageCount = (() => {
 })();
 
 const qfStageCount = (() => {
-  const m = html.match(/Quarter-finals<\/h3>[\s\S]*?text-white\/40">(\d+)/);
+  const m = html.match(/Quarter Final<\/h3>[\s\S]*?text-white\/40">(\d+)/);
   return m ? Number(m[1]) : -1;
 })();
 
@@ -85,8 +85,8 @@ const checks = [
     `Round of 16 qualified: ${team}`,
     new RegExp(`Round of 16 qualified[\\s\\S]*?${team}`, "i").test(html),
   ]),
-  ["Brazil not in QF qualified", !new RegExp(`Quarter-final qualified[\\s\\S]*?Brazil`, "i").test(html)],
-  ["Mexico not in QF qualified", !new RegExp(`Quarter-final qualified[\\s\\S]*?Mexico`, "i").test(html)],
+  ["Brazil not in QF qualified", !/font-semibold[^"]*">Brazil<\/p>/i.test(qfQualifiedSlice)],
+  ["Mexico not in QF qualified", !/font-semibold[^"]*">Mexico<\/p>/i.test(qfQualifiedSlice)],
   ...eliminatedTeams.map((team) => [
     `${team} knocked out`,
     new RegExp(`Knocked Out[\\s\\S]{0,4000}?${team}`, "i").test(html),
