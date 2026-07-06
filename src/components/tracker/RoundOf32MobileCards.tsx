@@ -57,6 +57,7 @@ function MobileMatchCard({
 export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
   const allEntries = [
     ...data.through,
+    ...data.quarterFinalQualified,
     ...data.roundOf16Qualified,
     ...data.pending,
     ...data.eliminated,
@@ -76,6 +77,19 @@ export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
                 entry={entry}
                 through={data.through}
               />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.quarterFinalQualified.length > 0 && (
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+            Quarter-final qualified
+          </p>
+          <div className="space-y-3">
+            {data.quarterFinalQualified.map((entry) => (
+              <MobileMatchCard key={entry.row.team?.id} entry={entry} />
             ))}
           </div>
         </div>

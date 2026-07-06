@@ -24,10 +24,10 @@ export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = (() => {
     /^(.+?)\s+vs\s+(.+?)\s+—\s+Round of 16\s+·\s+(.+?),\s+(.+)$/,
   );
   return {
-    home: familyMatch?.[1]?.trim() ?? "Morocco",
-    away: familyMatch?.[2]?.trim() ?? "Canada",
-    dateUk: familyMatch?.[3]?.trim() ?? "4 Jul",
-    timeUk: familyMatch?.[4]?.trim() ?? "6pm UK",
+    home: familyMatch?.[1]?.trim() ?? "Portugal",
+    away: familyMatch?.[2]?.trim() ?? "Spain",
+    dateUk: familyMatch?.[3]?.trim() ?? "6 Jul",
+    timeUk: familyMatch?.[4]?.trim() ?? "8pm UK",
     label,
   };
 })();
@@ -123,7 +123,7 @@ function buildProgressCaption(phases: TournamentPhase[]): string {
 
 /**
  * Tournament-wide knockout progress (independent of family sweep eliminations).
- * Updated with verified snapshot through 4 Jul 2026 — group stage and R32 complete, R16 underway.
+ * Updated with verified snapshot through 6 Jul 2026 — R16 underway, first quarter-finalists confirmed.
  */
 export function getTournamentPhaseProgress(): TournamentPhaseProgress {
   const phases = buildPhasesForRoundOf16();

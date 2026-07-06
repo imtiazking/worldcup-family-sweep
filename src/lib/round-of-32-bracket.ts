@@ -67,6 +67,12 @@ function eliminatedSummaryLine(
   _teamName: string,
   snapshot: VerifiedTeamStatus | undefined,
 ): string {
+  if (snapshot?.stage === "Round of 16") {
+    const opponent = snapshot.r16OpponentLocked?.trim();
+    if (opponent === "Norway") return "lost to Norway";
+    if (opponent === "England") return "lost to England";
+    return "Eliminated in Round of 16";
+  }
   const opponent = snapshot?.r32OpponentLocked?.trim();
   if (opponent === "Morocco") {
     return "lost to Morocco";
@@ -363,9 +369,21 @@ export type SweepBracketData = {
   eliminated: SweepBracketEntry[];
   /** Family sweep teams qualified to Round of 16 */
   roundOf16Qualified: SweepBracketEntry[];
+  /** Family sweep teams qualified to Quarter-finals */
+  quarterFinalQualified: SweepBracketEntry[];
   /** Official tournament advancers that are not family sweep participants */
   externalAdvancers: ExternalBracketAdvancer[];
 };
+
+function isQuarterFinalQualified(row: TrackerRow): boolean {
+  const { status, stage, next_stage_probability } = row.team_status;
+  return (
+    status === "active" &&
+    stage === "Quarter Final" &&
+    next_stage_probability !== null &&
+    Number(next_stage_probability) >= 100
+  );
+}
 
 function isRoundOf16Qualified(row: TrackerRow): boolean {
   const { status, stage, next_stage_probability } = row.team_status;
@@ -385,10 +403,23 @@ export function buildSweepBracketData(
   const pending: SweepBracketEntry[] = [];
   const eliminated: SweepBracketEntry[] = [];
   const roundOf16Qualified: SweepBracketEntry[] = [];
+  const quarterFinalQualified: SweepBracketEntry[] = [];
 
   for (const row of rows) {
     const teamName = row.team?.name ?? "";
     const snapshot = snapshotForTeam(teamName);
+
+    if (isQuarterFinalQualified(row)) {
+      quarterFinalQualified.push({
+        row,
+        flagEmoji: row.team?.flag_emoji?.trim() || "⚽",
+        status: "through",
+        r32Opponent: null,
+        pendingLine: "Qualified to Quarter-finals",
+        side: "left",
+      });
+      continue;
+    }
 
     if (isRoundOf16Qualified(row)) {
       roundOf16Qualified.push({
@@ -397,7 +428,10 @@ export function buildSweepBracketData(
         status: "through",
         r32Opponent: null,
         pendingLine:
-          familyR16ScheduleLine(snapshot) ?? "Qualified to Round of 16",
+          familyR16ScheduleLine(snapshot) ??
+          (snapshot?.nextFixture
+            ? "Qualified to Round of 16"
+            : "Awaiting next fixture"),
         side: "left",
       });
       continue;
@@ -446,6 +480,7 @@ export function buildSweepBracketData(
   pending.sort(sortByName);
   eliminated.sort(sortByName);
   roundOf16Qualified.sort(sortByName);
+  quarterFinalQualified.sort(sortByName);
 
   assignConfirmedFixtureRoles(through);
 
@@ -460,6 +495,7 @@ export function buildSweepBracketData(
     pending,
     eliminated,
     roundOf16Qualified,
+    quarterFinalQualified,
     externalAdvancers: [],
   };
 }

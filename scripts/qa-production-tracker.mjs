@@ -6,15 +6,12 @@ const BASE = "https://worldcup-family-sweep.vercel.app";
 const res = await fetch(`${BASE}/tracker`);
 const html = await res.text();
 
-const mobileThroughSlice =
-  html.match(
-    /Through to Round of 32[\s\S]*?(?=Still in group stage|Round of 16 qualified|Eliminated|No sweep teams)/i,
-  )?.[0] ?? "";
 const r16QualifiedSlice =
-  html.match(/Round of 16 qualified[\s\S]*?(?=Eliminated|Through to Round of 32|$)/i)?.[0] ??
+  html.match(/Round of 16 qualified[\s\S]*?(?=Eliminated|Quarter-final|Through to Round of 32|$)/i)?.[0] ??
   "";
-
-const mobileThroughBadges = (mobileThroughSlice.match(/>Through</g) || []).length;
+const qfQualifiedSlice =
+  html.match(/Quarter-final qualified[\s\S]*?(?=Round of 16 qualified|Eliminated|$)/i)?.[0] ??
+  "";
 
 const r32StageCount = (() => {
   const m = html.match(/Round of 32<\/h3>[\s\S]*?text-white\/40">(\d+)/);
@@ -26,6 +23,11 @@ const r16StageCount = (() => {
   return m ? Number(m[1]) : -1;
 })();
 
+const qfStageCount = (() => {
+  const m = html.match(/Quarter-finals<\/h3>[\s\S]*?text-white\/40">(\d+)/);
+  return m ? Number(m[1]) : -1;
+})();
+
 const tournamentProgressPercent = (() => {
   const beforeKnockout = html.match(
     />(\d{1,3})(?:<!-- -->)?%<\/p>[\s\S]{0,120}?Knockout calendar/i,
@@ -34,71 +36,71 @@ const tournamentProgressPercent = (() => {
   return -1;
 })();
 
-const r16QualifiedTeams = [
-  "Brazil",
+const qfTeams = ["France", "Norway", "England"];
+const r16RemainingTeams = [
   "Morocco",
-  "Norway",
-  "France",
-  "Mexico",
-  "England",
+  "Portugal",
+  "Spain",
   "Belgium",
   "United States",
-  "Spain",
-  "Portugal",
-  "Switzerland",
   "Argentina",
+  "Switzerland",
   "Colombia",
 ];
+const eliminatedTeams = ["Germany", "Netherlands", "Brazil", "Mexico"];
 
-const r16OpponentChecks = [
-  ["Morocco vs Canada (next match)", /Morocco vs Canada[\s\S]{0,80}?Round of 16/i.test(html)],
-  ["France vs Paraguay", /vs Paraguay[\s\S]{0,80}?Round of 16/i.test(html)],
-  ["Brazil vs Norway", /vs Norway[\s\S]{0,80}?Round of 16/i.test(html)],
-  ["Mexico vs England", /vs England[\s\S]{0,80}?Round of 16/i.test(html)],
-  ["Portugal vs Spain", /vs Spain[\s\S]{0,80}?Round of 16/i.test(html)],
+const remainingR16Checks = [
+  ["Portugal vs Spain", /Portugal vs Spain[\s\S]{0,80}?Round of 16/i.test(html)],
   ["United States vs Belgium", /vs Belgium[\s\S]{0,80}?Round of 16/i.test(html)],
   ["Argentina vs Egypt", /vs Egypt[\s\S]{0,80}?Round of 16/i.test(html)],
   ["Switzerland vs Colombia", /vs Colombia[\s\S]{0,80}?Round of 16/i.test(html)],
 ];
 
-const bannedNonFamily = [
-  "South Africa",
-  "Japan",
-  "Ivory Coast",
-  "Paraguay",
-  "Egypt",
-  "Canada",
+const completedR16Absent = [
+  ["France vs Paraguay removed", !/France vs Paraguay/i.test(html)],
+  ["Brazil vs Norway removed from next match", !/Brazil vs Norway[\s\S]{0,80}?Round of 16/i.test(html)],
+  ["Mexico vs England removed from next match", !/Mexico vs England[\s\S]{0,80}?Round of 16/i.test(html)],
+  ["Morocco vs Canada removed from next match", !/Morocco vs Canada[\s\S]{0,80}?Round of 16/i.test(html)],
 ];
+
+const bannedNonFamily = ["South Africa", "Japan", "Ivory Coast", "Paraguay", "Egypt", "Canada"];
 
 const checks = [
   ["HTTP 200", res.status === 200],
-  ["Tournament progress above 50%", tournamentProgressPercent >= 60],
+  ["Tournament progress above 60%", tournamentProgressPercent >= 60],
   ["Group stage complete copy", /Group stage complete/i.test(html)],
   ["Round of 16 active copy", /Round of 16 active/i.test(html)],
   [
-    "Next match is Morocco vs Canada R16",
-    /Morocco[\s\S]{0,80}?vs[\s\S]{0,80}?Canada[\s\S]{0,120}?Round of 16[\s\S]{0,80}?4 Jul/i.test(
-      html,
-    ),
+    "Next match is Portugal vs Spain R16",
+    /Portugal vs Spain[\s\S]{0,120}?Round of 16[\s\S]{0,80}?6 Jul/i.test(html),
   ],
   ["Stage ladder Round of 32 = 2", r32StageCount === 2],
-  ["Stage ladder Round of 16 = 13", r16StageCount === 13],
-  ["Mobile R32 through section = 0", mobileThroughBadges === 0],
-  ...r16QualifiedTeams.map((team) => [
+  ["Stage ladder Round of 16 = 10", r16StageCount === 10],
+  ["Stage ladder Quarter-finals = 3", qfStageCount === 3],
+  ...qfTeams.map((team) => [
+    `Quarter-final qualified: ${team}`,
+    new RegExp(`Quarter-final qualified[\\s\\S]*?${team}`, "i").test(html),
+  ]),
+  ...r16RemainingTeams.map((team) => [
     `Round of 16 qualified: ${team}`,
     new RegExp(`Round of 16 qualified[\\s\\S]*?${team}`, "i").test(html),
   ]),
-  ["Germany knocked out", /Knocked Out[\s\S]{0,3000}?Germany/i.test(html)],
-  ["Netherlands knocked out", /Knocked Out[\s\S]{0,3000}?Netherlands/i.test(html)],
-  ["Alive teams count = 13", /Alive Teams[\s\S]{0,120}?>\s*13\s*</i.test(html)],
-  ["Eliminated teams count = 2", /Eliminated Teams[\s\S]{0,120}?>\s*2\s*</i.test(html)],
-  ...r16OpponentChecks,
+  ["Brazil not in QF qualified", !new RegExp(`Quarter-final qualified[\\s\\S]*?Brazil`, "i").test(html)],
+  ["Mexico not in QF qualified", !new RegExp(`Quarter-final qualified[\\s\\S]*?Mexico`, "i").test(html)],
+  ...eliminatedTeams.map((team) => [
+    `${team} knocked out`,
+    new RegExp(`Knocked Out[\\s\\S]{0,4000}?${team}`, "i").test(html),
+  ]),
+  ["Alive teams count = 11", /Alive Teams[\s\S]{0,120}?>\s*11\s*</i.test(html)],
+  ["Eliminated teams count = 4", /Eliminated Teams[\s\S]{0,120}?>\s*4\s*</i.test(html)],
+  ...remainingR16Checks,
+  ...completedR16Absent,
   ...bannedNonFamily.map((name) => [
-    `${name} not in R16 qualified team list`,
+    `${name} not in QF qualified team list`,
     !new RegExp(
-      `Round of 16 qualified[\\s\\S]*?font-bebas[\\s\\S]{0,200}?${name}`,
+      `Quarter-final qualified[\\s\\S]*?font-bebas[\\s\\S]{0,200}?${name}`,
       "i",
-    ).test(r16QualifiedSlice),
+    ).test(qfQualifiedSlice),
   ]),
   ["No application error", !/Application error/i.test(html)],
 ];
@@ -113,7 +115,7 @@ for (const [name, pass] of checks) {
 console.log("\nCounts:");
 console.log(`  Round of 32 ladder: ${r32StageCount}`);
 console.log(`  Round of 16 ladder: ${r16StageCount}`);
-console.log(`  Mobile through badges: ${mobileThroughBadges}`);
+console.log(`  Quarter-finals ladder: ${qfStageCount}`);
 console.log(`  Tournament progress %: ${tournamentProgressPercent}`);
 
 const scripts = [...html.matchAll(/src="(\/_next\/static\/[^"]+)"/g)].map((m) => m[1]);

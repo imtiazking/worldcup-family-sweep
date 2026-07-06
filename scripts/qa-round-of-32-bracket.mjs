@@ -80,6 +80,7 @@ const rows = (assignments ?? []).map((a) => {
 const data = buildSweepBracketData(rows);
 const allNames = [
   ...data.through.map((e) => e.row.team?.name),
+  ...data.quarterFinalQualified.map((e) => e.row.team?.name),
   ...data.roundOf16Qualified.map((e) => e.row.team?.name),
   ...data.pending.map((e) => e.row.team?.name),
   ...data.eliminated.map((e) => e.row.team?.name),
@@ -89,6 +90,7 @@ const missingParticipants = rows.filter((r) => !r.participant?.name);
 
 const allEntries = [
   ...data.through,
+  ...data.quarterFinalQualified,
   ...data.roundOf16Qualified,
   ...data.pending,
   ...data.eliminated,
@@ -137,22 +139,27 @@ const checks = [
   },
   {
     id: 3.5,
-    name: "Round of 16 qualified = 13 teams",
+    name: "Quarter-final qualified = France, Norway, England",
     pass:
-      data.roundOf16Qualified.length === 13 &&
+      data.quarterFinalQualified.length === 3 &&
+      ["France", "Norway", "England"].every((name) =>
+        data.quarterFinalQualified.some((e) => e.row.team?.name === name),
+      ),
+    detail: `qf=${data.quarterFinalQualified.map((e) => e.row.team?.name).join(", ")}`,
+  },
+  {
+    id: 3.55,
+    name: "Round of 16 qualified = 8 remaining teams",
+    pass:
+      data.roundOf16Qualified.length === 8 &&
       [
-        "Brazil",
         "Morocco",
-        "Norway",
-        "France",
-        "Mexico",
-        "England",
+        "Portugal",
+        "Spain",
         "Belgium",
         "United States",
-        "Spain",
-        "Portugal",
-        "Switzerland",
         "Argentina",
+        "Switzerland",
         "Colombia",
       ].every((name) =>
         data.roundOf16Qualified.some((e) => e.row.team?.name === name),
@@ -161,11 +168,12 @@ const checks = [
   },
   {
     id: 3.6,
-    name: "Eliminated = Germany, Netherlands",
+    name: "Eliminated = Germany, Netherlands, Brazil, Mexico",
     pass:
-      data.eliminated.length === 2 &&
-      data.eliminated.some((e) => e.row.team?.name === "Germany") &&
-      data.eliminated.some((e) => e.row.team?.name === "Netherlands"),
+      data.eliminated.length === 4 &&
+      ["Germany", "Netherlands", "Brazil", "Mexico"].every((name) =>
+        data.eliminated.some((e) => e.row.team?.name === name),
+      ),
     detail: `eliminated=${data.eliminated.map((e) => e.row.team?.name).join(", ")}`,
   },
   {
@@ -247,10 +255,21 @@ const checks = [
   },
   {
     id: 22,
-    name: "Morocco R16 line includes Canada opponent",
-    pass: data.roundOf16Qualified
-      .find((e) => e.row.team?.name === "Morocco")
-      ?.pendingLine?.includes("Canada"),
+    name: "Brazil eliminated in R16 (lost to Norway)",
+    pass: data.eliminated
+      .find((e) => e.row.team?.name === "Brazil")
+      ?.pendingLine?.includes("Norway"),
+    detail:
+      data.eliminated.find((e) => e.row.team?.name === "Brazil")?.pendingLine ??
+      "none",
+  },
+  {
+    id: 23,
+    name: "Morocco awaiting next fixture (no Canada in schedule line)",
+    pass:
+      data.roundOf16Qualified
+        .find((e) => e.row.team?.name === "Morocco")
+        ?.pendingLine?.includes("Awaiting") ?? false,
     detail:
       data.roundOf16Qualified.find((e) => e.row.team?.name === "Morocco")
         ?.pendingLine ?? "none",
@@ -268,5 +287,6 @@ for (const c of checks) {
 
 console.log("Through teams:", data.through.map((e) => e.row.team?.name).join(", "));
 console.log("R16 teams:", data.roundOf16Qualified.map((e) => e.row.team?.name).join(", "));
+console.log("QF teams:", data.quarterFinalQualified.map((e) => e.row.team?.name).join(", "));
 
 process.exit(failed > 0 ? 1 : 0);

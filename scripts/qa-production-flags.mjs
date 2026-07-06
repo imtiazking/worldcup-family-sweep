@@ -79,22 +79,24 @@ const checks = [
   ["Bracket flag circles >= 28", flagCirclesBracket >= 28],
   ["Group Stage count = 0", groupCount === 0],
   ["R32 ladder count = 2", r32Count === 2],
-  ["Round of 16 ladder count = 13", (() => {
+  ["Round of 16 ladder count = 10", (() => {
     const m = html.match(/Round of 16<\/h3>[\s\S]*?text-white\/40">(\d+)/);
-    return m ? Number(m[1]) === 13 : false;
+    return m ? Number(m[1]) === 10 : false;
+  })()],
+  ["Quarter-finals ladder count = 3", (() => {
+    const m = html.match(/Quarter-finals<\/h3>[\s\S]*?text-white\/40">(\d+)/);
+    return m ? Number(m[1]) === 3 : false;
   })()],
   ["Through badges = 0", throughBadges === 0],
   [
-    "Non-family teams absent from R32 through",
-    !/Paraguay|Ivory Coast|South Africa|Canada|Japan|Sweden|Ecuador|Senegal|Bosnia|DR Congo/i.test(
-      mobileThrough,
-    ),
+    "Remaining R16 fixtures on page",
+    /Portugal vs Spain/i.test(html) &&
+      /vs Belgium[\s\S]{0,80}?Round of 16/i.test(html) &&
+      /vs Egypt[\s\S]{0,80}?Round of 16/i.test(html),
   ],
   [
-    "R16 fixture opponents visible on page",
-    /Morocco vs Canada/i.test(html) &&
-      /vs Paraguay[\s\S]{0,80}?Round of 16/i.test(html) &&
-      /vs Egypt[\s\S]{0,80}?Round of 16/i.test(html),
+    "Completed R16 fixtures removed from next match",
+    !/Morocco vs Canada/i.test(html) && !/France vs Paraguay/i.test(html),
   ],
   ["Pending badges = 0", pendingBadges === 0],
   [
