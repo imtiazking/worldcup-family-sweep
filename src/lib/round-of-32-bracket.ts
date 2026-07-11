@@ -67,6 +67,11 @@ function eliminatedSummaryLine(
   _teamName: string,
   snapshot: VerifiedTeamStatus | undefined,
 ): string {
+  if (snapshot?.stage === "Quarter Final") {
+    if (snapshot.reason.includes("Spain")) return "lost to Spain";
+    if (snapshot.reason.includes("France")) return "lost to France";
+    return "Eliminated in Quarter-finals";
+  }
   if (snapshot?.stage === "Round of 16") {
     const opponent = snapshot.r16OpponentLocked?.trim();
     if (opponent === "Norway") return "lost to Norway";

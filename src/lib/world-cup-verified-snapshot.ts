@@ -1,6 +1,6 @@
 /**
  * Manually verified World Cup 2026 knockout status for family sweep teams.
- * Source: Official Round of 16 results (updated through 7 Jul 2026).
+ * Source: Official quarter-final results (updated through 11 Jul 2026).
  */
 
 export type VerifiedTeamStatus = {
@@ -17,9 +17,9 @@ export type VerifiedTeamStatus = {
 };
 
 export const VERIFIED_SNAPSHOT_SOURCE =
-  "Official 2026 FIFA World Cup Round of 16 results (through 7 Jul 2026)";
+  "Official 2026 FIFA World Cup quarter-final results (through 11 Jul 2026)";
 
-export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-07T09:00:00Z";
+export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-11T12:00:00Z";
 
 export type ExternalBracketAdvancer = {
   teamName: string;
@@ -71,9 +71,9 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   {
     teamName: "France",
     status: "active",
-    stage: "Quarter Final",
+    stage: "Semi Final",
     nextStageProbability: 100,
-    reason: "Advanced to Quarter-finals — beat Paraguay 1-0 (4 Jul).",
+    reason: "Advanced to Semi-finals — beat Morocco 2-0 (11 Jul).",
     nextFixture: null,
   },
   {
@@ -82,61 +82,58 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Quarter Final",
     nextStageProbability: 100,
     reason: "Advanced to Quarter-finals — beat Brazil 2-1 (5 Jul).",
-    nextFixture: null,
+    nextFixture: "Quarter-finals vs England (11 Jul, Today)",
   },
   {
     teamName: "Argentina",
     status: "active",
-    stage: "Round of 16",
+    stage: "Quarter Final",
     nextStageProbability: 100,
-    reason: "Round of 16 fixture pending.",
-    nextFixture: "Round of 16 vs Egypt (7 Jul, 5pm UK)",
+    reason: "Advanced to Quarter-finals — beat Egypt (7 Jul).",
+    nextFixture: "Quarter-finals vs Switzerland (11 Jul, Today)",
     r16OpponentLocked: "Egypt",
-    r16KickoffUk: "5pm UK",
   },
   {
     teamName: "Switzerland",
     status: "active",
-    stage: "Round of 16",
+    stage: "Quarter Final",
     nextStageProbability: 100,
-    reason: "Round of 16 fixture pending.",
-    nextFixture: "Round of 16 vs Colombia (7 Jul, 9pm UK)",
+    reason: "Advanced to Quarter-finals — beat Colombia (7 Jul).",
+    nextFixture: "Quarter-finals vs Argentina (11 Jul, Today)",
     r16OpponentLocked: "Colombia",
-    r16KickoffUk: "9pm UK",
   },
   {
     teamName: "Morocco",
-    status: "active",
+    status: "eliminated",
     stage: "Quarter Final",
-    nextStageProbability: 100,
-    reason: "Advanced to Quarter-finals — beat Canada 3-0.",
+    nextStageProbability: 0,
+    reason: "Eliminated in Quarter-finals — lost to France 2-0 (11 Jul).",
     nextFixture: null,
   },
   {
     teamName: "Colombia",
-    status: "active",
+    status: "eliminated",
     stage: "Round of 16",
-    nextStageProbability: 100,
-    reason: "Round of 16 fixture pending.",
-    nextFixture: "Round of 16 vs Switzerland (7 Jul, 9pm UK)",
+    nextStageProbability: 0,
+    reason: "Eliminated in Round of 16 — lost to Switzerland (7 Jul).",
+    nextFixture: null,
     r16OpponentLocked: "Switzerland",
-    r16KickoffUk: "9pm UK",
   },
   {
     teamName: "Belgium",
-    status: "active",
+    status: "eliminated",
     stage: "Quarter Final",
-    nextStageProbability: 100,
-    reason: "Advanced to Quarter-finals — beat United States 4-1 (7 Jul).",
+    nextStageProbability: 0,
+    reason: "Eliminated in Quarter-finals — lost to Spain 2-1 (11 Jul).",
     nextFixture: null,
     r16OpponentLocked: "United States",
   },
   {
     teamName: "Spain",
     status: "active",
-    stage: "Quarter Final",
+    stage: "Semi Final",
     nextStageProbability: 100,
-    reason: "Advanced to Quarter-finals — beat Portugal (6 Jul).",
+    reason: "Advanced to Semi-finals — beat Belgium 2-1 (11 Jul).",
     nextFixture: null,
     r16OpponentLocked: "Portugal",
   },
@@ -155,7 +152,7 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Quarter Final",
     nextStageProbability: 100,
     reason: "Advanced to Quarter-finals — beat Mexico 3-2 (6 Jul).",
-    nextFixture: null,
+    nextFixture: "Quarter-finals vs Norway (11 Jul, Today)",
   },
   {
     teamName: "Netherlands",
@@ -168,20 +165,25 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   },
 ];
 
-/** Upcoming Round of 16 fixtures — remaining family sweep ties only */
+/** Upcoming quarter-final fixtures — remaining family sweep ties only */
 export const VERIFIED_UPCOMING_FAMILY_FIXTURES: Array<{
   homeTeam: string;
   awayOpponent: string;
   dateUk: string;
   timeUk: string;
 }> = [
-  { homeTeam: "Argentina", awayOpponent: "Egypt", dateUk: "7 Jul", timeUk: "5pm UK" },
-  { homeTeam: "Switzerland", awayOpponent: "Colombia", dateUk: "7 Jul", timeUk: "9pm UK" },
+  { homeTeam: "England", awayOpponent: "Norway", dateUk: "11 Jul", timeUk: "Today" },
+  {
+    homeTeam: "Argentina",
+    awayOpponent: "Switzerland",
+    dateUk: "11 Jul",
+    timeUk: "Today",
+  },
 ];
 
 export function getNextFamilySweepFixtureLabel(): string {
   const next = VERIFIED_UPCOMING_FAMILY_FIXTURES[0];
-  return `${next.homeTeam} vs ${next.awayOpponent} — Round of 16 · ${next.dateUk}, ${next.timeUk}`;
+  return `${next.homeTeam} vs ${next.awayOpponent} — Quarter-finals · ${next.dateUk}, ${next.timeUk}`;
 }
 
 export const VERIFIED_ELIMINATED_REFERENCE = [
