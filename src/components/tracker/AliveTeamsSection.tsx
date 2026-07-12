@@ -8,7 +8,12 @@ import {
 import { VERIFIED_FAMILY_TEAM_STATUSES } from "@/lib/world-cup-verified-snapshot";
 import { parseR32Opponent } from "@/lib/round-of-32-bracket";
 import { NextStageChance } from "./NextStageChance";
-import { revealTransition, useMotionSettings } from "./motion-utils";
+import { revealTransition, LAYOUT_SPRING, useMotionSettings } from "./motion-utils";
+import { usePremiumTracker } from "./premium/PremiumTrackerContext";
+import { BroadcastStrap } from "./premium/BroadcastStrap";
+import { milestoneGlowClass } from "./premium/milestone-glow";
+import { isSameParticipant } from "@/lib/premium-event-director";
+import { usePremiumEventDirector } from "./premium/PremiumEventDirectorContext";
 
 const SNAPSHOT_BY_TEAM = new Map(
   VERIFIED_FAMILY_TEAM_STATUSES.map((t) => [t.teamName.toLowerCase(), t]),
@@ -19,10 +24,26 @@ function formatNextMatch(row: TrackerRow): string | null {
   if (row.team_status.status === "eliminated") return null;
 
   const stage = row.team_status.stage;
-  if (stage !== "Round of 32" && stage !== "Round of 16") return null;
+  if (
+    stage !== "Round of 32" &&
+    stage !== "Round of 16" &&
+    stage !== "Semi Final"
+  ) {
+    return null;
+  }
 
   const snapshot = SNAPSHOT_BY_TEAM.get(teamName.toLowerCase());
   if (!snapshot?.nextFixture) return null;
+
+  if (stage === "Semi Final") {
+    const vsMatch = snapshot.nextFixture.match(/vs\s+(.+?)(?:\s*\(|$)/i);
+    const opponent = vsMatch?.[1]?.trim();
+    if (!opponent) return null;
+    const parts = [`vs ${opponent}`, "Semi-finals"];
+    const date = snapshot.nextFixture.match(/(\d{1,2}\s+[A-Za-z]{3})/)?.[1];
+    if (date) parts.push(date);
+    return parts.join(" · ");
+  }
 
   if (stage === "Round of 16") {
     const opponent = snapshot.r16OpponentLocked?.trim();
@@ -58,6 +79,8 @@ export function AliveTeamsSection({
   className = "",
 }: AliveTeamsSectionProps) {
   const { reduceMotion, intensity } = useMotionSettings();
+  const premium = usePremiumTracker();
+  const { focusedParticipant } = usePremiumEventDirector();
 
   return (
     <motion.section
@@ -67,9 +90,13 @@ export function AliveTeamsSection({
       transition={revealTransition(0.6, reduceMotion)}
     >
       <div className="flex items-center justify-between">
-        <h2 className="font-[family-name:var(--font-bebas)] text-4xl text-wc-gold">
-          Still Alive
-        </h2>
+        {premium ? (
+          <BroadcastStrap align="left">Survivors</BroadcastStrap>
+        ) : (
+          <h2 className="font-[family-name:var(--font-bebas)] text-4xl text-wc-gold">
+            Still Alive
+          </h2>
+        )}
         <span className="rounded-full bg-wc-gold/10 px-4 py-1 text-sm text-wc-gold">
           {alive.length} teams
         </span>
@@ -80,18 +107,31 @@ export function AliveTeamsSection({
           const nextMatch = formatNextMatch(row);
           return (
           <motion.div
-            key={`${row.team?.id ?? i}`}
-            className="tracker-alive-card rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-lg"
+            key={`${row.team?.id ?? row.team?.name ?? i}`}
+            layout={premium && !reduceMotion}
+            layoutId={premium ? `alive-${row.team?.id}` : undefined}
+            className={[
+              "tracker-alive-card rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-lg",
+              premium ? milestoneGlowClass(row) : "",
+              premium ? "premium-alive-breathe" : "",
+              premium && isSameParticipant(row, focusedParticipant)
+                ? "premium-family-emotion"
+                : "",
+            ].join(" ")}
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: reduceMotion ? 0 : 0.45,
-              delay: reduceMotion ? 0 : 0.65 + i * 0.05 * intensity,
-            }}
+            transition={
+              premium && !reduceMotion
+                ? { ...LAYOUT_SPRING, delay: 0.65 + i * 0.05 * intensity }
+                : {
+                    duration: reduceMotion ? 0 : 0.45,
+                    delay: reduceMotion ? 0 : 0.65 + i * 0.05 * intensity,
+                  }
+            }
             whileHover={
               reduceMotion
                 ? undefined
-                : { y: -8, scale: 1.02, transition: { duration: 0.25 } }
+                : { y: -10 * intensity, scale: 1.03, transition: { duration: 0.22 } }
             }
           >
             <div className="flex items-start justify-between gap-4">

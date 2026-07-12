@@ -1,5 +1,7 @@
 import {
+  VERIFIED_COMPLETED_FAMILY_FIXTURES,
   VERIFIED_FAMILY_TEAM_STATUSES,
+  type CompletedFamilyFixture,
   type ExternalBracketAdvancer,
   type VerifiedTeamStatus,
 } from "@/lib/world-cup-verified-snapshot";
@@ -63,13 +65,26 @@ function familyR16ScheduleLine(snapshot: VerifiedTeamStatus | undefined): string
   return parts.length > 2 ? parts.join(" · ") : null;
 }
 
+function familySemiScheduleLine(snapshot: VerifiedTeamStatus | undefined): string | null {
+  if (!snapshot?.nextFixture) return null;
+  const vsMatch = snapshot.nextFixture.match(/vs\s+(.+?)(?:\s*\(|$)/i);
+  const opponent = vsMatch?.[1]?.trim();
+  if (!opponent) return null;
+  const parts = [`vs ${opponent}`, "Semi-finals"];
+  const date = extractDate(snapshot.nextFixture);
+  if (date) parts.push(date);
+  return parts.length > 2 ? parts.join(" · ") : null;
+}
+
 function eliminatedSummaryLine(
   _teamName: string,
   snapshot: VerifiedTeamStatus | undefined,
 ): string {
   if (snapshot?.stage === "Quarter Final") {
-    if (snapshot.reason.includes("Spain")) return "lost to Spain";
-    if (snapshot.reason.includes("France")) return "lost to France";
+    if (snapshot.reason.includes("England")) return "lost to England 1–2 (AET)";
+    if (snapshot.reason.includes("Argentina")) return "lost to Argentina 1–3 (AET)";
+    if (snapshot.reason.includes("Spain")) return "lost to Spain 1–2";
+    if (snapshot.reason.includes("France")) return "lost to France 0–2";
     return "Eliminated in Quarter-finals";
   }
   if (snapshot?.stage === "Round of 16") {
@@ -376,9 +391,23 @@ export type SweepBracketData = {
   roundOf16Qualified: SweepBracketEntry[];
   /** Family sweep teams qualified to Quarter-finals */
   quarterFinalQualified: SweepBracketEntry[];
+  /** Family sweep teams qualified to Semi-finals */
+  semiFinalQualified: SweepBracketEntry[];
+  /** Confirmed family-sweep knockout results */
+  completedQuarterFinals: CompletedFamilyFixture[];
   /** Official tournament advancers that are not family sweep participants */
   externalAdvancers: ExternalBracketAdvancer[];
 };
+
+function isSemiFinalQualified(row: TrackerRow): boolean {
+  const { status, stage, next_stage_probability } = row.team_status;
+  return (
+    status === "active" &&
+    stage === "Semi Final" &&
+    next_stage_probability !== null &&
+    Number(next_stage_probability) >= 100
+  );
+}
 
 function isQuarterFinalQualified(row: TrackerRow): boolean {
   const { status, stage, next_stage_probability } = row.team_status;
@@ -409,10 +438,24 @@ export function buildSweepBracketData(
   const eliminated: SweepBracketEntry[] = [];
   const roundOf16Qualified: SweepBracketEntry[] = [];
   const quarterFinalQualified: SweepBracketEntry[] = [];
+  const semiFinalQualified: SweepBracketEntry[] = [];
 
   for (const row of rows) {
     const teamName = row.team?.name ?? "";
     const snapshot = snapshotForTeam(teamName);
+
+    if (isSemiFinalQualified(row)) {
+      semiFinalQualified.push({
+        row,
+        flagEmoji: row.team?.flag_emoji?.trim() || "⚽",
+        status: "through",
+        r32Opponent: null,
+        pendingLine:
+          familySemiScheduleLine(snapshot) ?? "Qualified to Semi-finals",
+        side: "left",
+      });
+      continue;
+    }
 
     if (isQuarterFinalQualified(row)) {
       quarterFinalQualified.push({
@@ -486,6 +529,7 @@ export function buildSweepBracketData(
   eliminated.sort(sortByName);
   roundOf16Qualified.sort(sortByName);
   quarterFinalQualified.sort(sortByName);
+  semiFinalQualified.sort(sortByName);
 
   assignConfirmedFixtureRoles(through);
 
@@ -501,6 +545,8 @@ export function buildSweepBracketData(
     eliminated,
     roundOf16Qualified,
     quarterFinalQualified,
+    semiFinalQualified,
+    completedQuarterFinals: VERIFIED_COMPLETED_FAMILY_FIXTURES,
     externalAdvancers: [],
   };
 }

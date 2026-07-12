@@ -17,17 +17,17 @@ export type NextTournamentFixture = {
   timeUk: string;
 };
 
-/** Next family sweep knockout fixture (next quarter-final tie). */
+/** Next family sweep knockout fixture (next semi-final tie). */
 export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = (() => {
   const label = getNextFamilySweepFixtureLabel();
   const familyMatch = label.match(
-    /^(.+?)\s+vs\s+(.+?)\s+—\s+Quarter-finals\s+·\s+(.+?),\s+(.+)$/,
+    /^(.+?)\s+vs\s+(.+?)\s+—\s+Semi-finals\s+·\s+(.+?),\s+(.+)$/,
   );
   return {
-    home: familyMatch?.[1]?.trim() ?? "England",
-    away: familyMatch?.[2]?.trim() ?? "Norway",
-    dateUk: familyMatch?.[3]?.trim() ?? "11 Jul",
-    timeUk: familyMatch?.[4]?.trim() ?? "Today",
+    home: familyMatch?.[1]?.trim() ?? "France",
+    away: familyMatch?.[2]?.trim() ?? "Spain",
+    dateUk: familyMatch?.[3]?.trim() ?? "14 Jul",
+    timeUk: familyMatch?.[4]?.trim() ?? "TBC",
     label,
   };
 })();
@@ -64,16 +64,17 @@ export type TournamentPhaseProgress = {
   nextFixture: NextTournamentFixture;
 };
 
-function buildPhasesForQuarterFinals(): TournamentPhase[] {
+function buildPhasesForSemiFinals(): TournamentPhase[] {
   return DISPLAY_PHASES.map((phase) => {
     if (
       phase.id === "Group Stage" ||
       phase.id === "Round of 32" ||
-      phase.id === "Round of 16"
+      phase.id === "Round of 16" ||
+      phase.id === "Quarter Final"
     ) {
       return { ...phase, status: "complete" as const };
     }
-    if (phase.id === "Quarter Final") {
+    if (phase.id === "Semi Final") {
       return { ...phase, status: "in_progress" as const };
     }
     return { ...phase, status: "pending" as const };
@@ -127,11 +128,11 @@ function buildProgressCaption(phases: TournamentPhase[]): string {
 
 /**
  * Tournament-wide knockout progress (independent of family sweep eliminations).
- * Updated with verified snapshot through 11 Jul 2026 — Spain and France in the semi-finals;
- * two quarter-finals remain today (England vs Norway, Argentina vs Switzerland).
+ * Updated through 12 Jul 2026 — all quarter-finals complete; four semi-finalists
+ * confirmed (France, Spain, England, Argentina).
  */
 export function getTournamentPhaseProgress(): TournamentPhaseProgress {
-  const phases = buildPhasesForQuarterFinals();
+  const phases = buildPhasesForSemiFinals();
   const current = phases.find((p) => p.status === "in_progress") ?? phases[0];
 
   return {
