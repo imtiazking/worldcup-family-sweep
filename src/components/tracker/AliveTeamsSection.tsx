@@ -8,12 +8,7 @@ import {
 import { VERIFIED_FAMILY_TEAM_STATUSES } from "@/lib/world-cup-verified-snapshot";
 import { parseR32Opponent } from "@/lib/round-of-32-bracket";
 import { NextStageChance } from "./NextStageChance";
-import { revealTransition, LAYOUT_SPRING, useMotionSettings } from "./motion-utils";
-import { usePremiumTracker } from "./premium/PremiumTrackerContext";
-import { BroadcastStrap } from "./premium/BroadcastStrap";
-import { milestoneGlowClass } from "./premium/milestone-glow";
-import { isSameParticipant } from "@/lib/premium-event-director";
-import { usePremiumEventDirector } from "./premium/PremiumEventDirectorContext";
+import { revealTransition, useMotionSettings } from "./motion-utils";
 
 const SNAPSHOT_BY_TEAM = new Map(
   VERIFIED_FAMILY_TEAM_STATUSES.map((t) => [t.teamName.toLowerCase(), t]),
@@ -79,8 +74,6 @@ export function AliveTeamsSection({
   className = "",
 }: AliveTeamsSectionProps) {
   const { reduceMotion, intensity } = useMotionSettings();
-  const premium = usePremiumTracker();
-  const { focusedParticipant } = usePremiumEventDirector();
 
   return (
     <motion.section
@@ -90,13 +83,9 @@ export function AliveTeamsSection({
       transition={revealTransition(0.6, reduceMotion)}
     >
       <div className="flex items-center justify-between">
-        {premium ? (
-          <BroadcastStrap align="left">Survivors</BroadcastStrap>
-        ) : (
-          <h2 className="font-[family-name:var(--font-bebas)] text-4xl text-wc-gold">
-            Still Alive
-          </h2>
-        )}
+        <h2 className="font-[family-name:var(--font-bebas)] text-4xl text-wc-gold">
+          Still Alive
+        </h2>
         <span className="rounded-full bg-wc-gold/10 px-4 py-1 text-sm text-wc-gold">
           {alive.length} teams
         </span>
@@ -107,31 +96,18 @@ export function AliveTeamsSection({
           const nextMatch = formatNextMatch(row);
           return (
           <motion.div
-            key={`${row.team?.id ?? row.team?.name ?? i}`}
-            layout={premium && !reduceMotion}
-            layoutId={premium ? `alive-${row.team?.id}` : undefined}
-            className={[
-              "tracker-alive-card rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-lg",
-              premium ? milestoneGlowClass(row) : "",
-              premium ? "premium-alive-breathe" : "",
-              premium && isSameParticipant(row, focusedParticipant)
-                ? "premium-family-emotion"
-                : "",
-            ].join(" ")}
+            key={`${row.team?.id ?? i}`}
+            className="tracker-alive-card rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-lg"
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={
-              premium && !reduceMotion
-                ? { ...LAYOUT_SPRING, delay: 0.65 + i * 0.05 * intensity }
-                : {
-                    duration: reduceMotion ? 0 : 0.45,
-                    delay: reduceMotion ? 0 : 0.65 + i * 0.05 * intensity,
-                  }
-            }
+            transition={{
+              duration: reduceMotion ? 0 : 0.45,
+              delay: reduceMotion ? 0 : 0.65 + i * 0.05 * intensity,
+            }}
             whileHover={
               reduceMotion
                 ? undefined
-                : { y: -10 * intensity, scale: 1.03, transition: { duration: 0.22 } }
+                : { y: -8, scale: 1.02, transition: { duration: 0.25 } }
             }
           >
             <div className="flex items-start justify-between gap-4">
