@@ -1,6 +1,6 @@
 /**
  * Manually verified World Cup 2026 knockout status for family sweep teams.
- * Source: Official quarter-final results (updated through 12 Jul 2026).
+ * Source: Official semi-final results (updated through 15 Jul 2026).
  */
 
 export type VerifiedTeamStatus = {
@@ -17,9 +17,9 @@ export type VerifiedTeamStatus = {
 };
 
 export const VERIFIED_SNAPSHOT_SOURCE =
-  "Official 2026 FIFA World Cup quarter-final results (through 12 Jul 2026)";
+  "Official 2026 FIFA World Cup semi-final results (verified snapshot, through 15 Jul 2026)";
 
-export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-12T08:00:00Z";
+export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-15T21:00:00Z";
 
 export type ExternalBracketAdvancer = {
   teamName: string;
@@ -42,6 +42,20 @@ export type CompletedFamilyFixture = {
 
 /** Confirmed family-sweep knockout results (most recent first). */
 export const VERIFIED_COMPLETED_FAMILY_FIXTURES: CompletedFamilyFixture[] = [
+  {
+    homeTeam: "England",
+    awayTeam: "Argentina",
+    scoreHome: 1,
+    scoreAway: 2,
+    stage: "Semi-finals",
+  },
+  {
+    homeTeam: "France",
+    awayTeam: "Spain",
+    scoreHome: 0,
+    scoreAway: 2,
+    stage: "Semi-finals",
+  },
   {
     homeTeam: "Argentina",
     awayTeam: "Switzerland",
@@ -99,11 +113,11 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   },
   {
     teamName: "France",
-    status: "active",
+    status: "eliminated",
     stage: "Semi Final",
-    nextStageProbability: 100,
-    reason: "Advanced to Semi-finals — beat Morocco 2-0 (11 Jul).",
-    nextFixture: "Semi-finals vs Spain (14 Jul 2026)",
+    nextStageProbability: 0,
+    reason: "Eliminated in Semi-finals — lost to Spain 0-2 (14 Jul).",
+    nextFixture: null,
   },
   {
     teamName: "Norway",
@@ -117,10 +131,10 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   {
     teamName: "Argentina",
     status: "active",
-    stage: "Semi Final",
+    stage: "Final",
     nextStageProbability: 100,
-    reason: "Advanced to Semi-finals — beat Switzerland 3-1 (AET, 11 Jul).",
-    nextFixture: "Semi-finals vs England (15 Jul 2026)",
+    reason: "Advanced to Final — beat England 2-1 (15 Jul).",
+    nextFixture: "Final vs Spain (19 Jul 2026, 8pm UK)",
     r16OpponentLocked: "Egypt",
   },
   {
@@ -161,10 +175,10 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   {
     teamName: "Spain",
     status: "active",
-    stage: "Semi Final",
+    stage: "Final",
     nextStageProbability: 100,
-    reason: "Advanced to Semi-finals — beat Belgium 2-1 (11 Jul).",
-    nextFixture: "Semi-finals vs France (14 Jul 2026)",
+    reason: "Advanced to Final — beat France 2-0 (14 Jul).",
+    nextFixture: "Final vs Argentina (19 Jul 2026, 8pm UK)",
     r16OpponentLocked: "Portugal",
   },
   {
@@ -178,11 +192,11 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   },
   {
     teamName: "England",
-    status: "active",
+    status: "eliminated",
     stage: "Semi Final",
-    nextStageProbability: 100,
-    reason: "Advanced to Semi-finals — beat Norway 2-1 (AET, 11 Jul).",
-    nextFixture: "Semi-finals vs Argentina (15 Jul 2026)",
+    nextStageProbability: 0,
+    reason: "Eliminated in Semi-finals — lost to Argentina 1-2 (15 Jul).",
+    nextFixture: null,
   },
   {
     teamName: "Netherlands",
@@ -195,25 +209,32 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   },
 ];
 
-/** Upcoming semi-final fixtures — remaining family sweep ties only */
+/** Upcoming final fixture — remaining family sweep tie only */
 export const VERIFIED_UPCOMING_FAMILY_FIXTURES: Array<{
   homeTeam: string;
   awayOpponent: string;
   dateUk: string;
   timeUk: string;
+  venue?: string;
 }> = [
-  { homeTeam: "France", awayOpponent: "Spain", dateUk: "14 Jul", timeUk: "TBC" },
   {
-    homeTeam: "England",
+    homeTeam: "Spain",
     awayOpponent: "Argentina",
-    dateUk: "15 Jul",
-    timeUk: "TBC",
+    dateUk: "19 Jul",
+    timeUk: "20:00",
+    venue: "New York/New Jersey Stadium, East Rutherford",
   },
 ];
 
 export function getNextFamilySweepFixtureLabel(): string {
   const next = VERIFIED_UPCOMING_FAMILY_FIXTURES[0];
-  return `${next.homeTeam} vs ${next.awayOpponent} — Semi-finals · ${next.dateUk}, ${next.timeUk}`;
+  return `${next.homeTeam} vs ${next.awayOpponent} — Final · ${next.dateUk}, ${next.timeUk}`;
+}
+
+export function getCompletedFixturesForStage(
+  stage: string,
+): CompletedFamilyFixture[] {
+  return VERIFIED_COMPLETED_FAMILY_FIXTURES.filter((f) => f.stage === stage);
 }
 
 export function formatCompletedFixtureScore(

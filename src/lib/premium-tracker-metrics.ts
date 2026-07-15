@@ -18,6 +18,7 @@ const FIXTURE_VENUES: Record<string, string> = {
   "Switzerland|Colombia": "Vancouver Stadium",
   "France|Spain": "TBC",
   "England|Argentina": "TBC",
+  "Spain|Argentina": "New York/New Jersey Stadium, East Rutherford",
 };
 
 export type PremiumTrackerMetrics = {

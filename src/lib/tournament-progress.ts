@@ -17,17 +17,17 @@ export type NextTournamentFixture = {
   timeUk: string;
 };
 
-/** Next family sweep knockout fixture (next semi-final tie). */
+/** Next family sweep knockout fixture (World Cup Final). */
 export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = (() => {
   const label = getNextFamilySweepFixtureLabel();
   const familyMatch = label.match(
-    /^(.+?)\s+vs\s+(.+?)\s+—\s+Semi-finals\s+·\s+(.+?),\s+(.+)$/,
+    /^(.+?)\s+vs\s+(.+?)\s+—\s+Final\s+·\s+(.+?),\s+(.+)$/,
   );
   return {
-    home: familyMatch?.[1]?.trim() ?? "France",
-    away: familyMatch?.[2]?.trim() ?? "Spain",
-    dateUk: familyMatch?.[3]?.trim() ?? "14 Jul",
-    timeUk: familyMatch?.[4]?.trim() ?? "TBC",
+    home: familyMatch?.[1]?.trim() ?? "Spain",
+    away: familyMatch?.[2]?.trim() ?? "Argentina",
+    dateUk: familyMatch?.[3]?.trim() ?? "19 Jul",
+    timeUk: familyMatch?.[4]?.trim() ?? "20:00",
     label,
   };
 })();
@@ -64,17 +64,18 @@ export type TournamentPhaseProgress = {
   nextFixture: NextTournamentFixture;
 };
 
-function buildPhasesForSemiFinals(): TournamentPhase[] {
+function buildPhasesForFinal(): TournamentPhase[] {
   return DISPLAY_PHASES.map((phase) => {
     if (
       phase.id === "Group Stage" ||
       phase.id === "Round of 32" ||
       phase.id === "Round of 16" ||
-      phase.id === "Quarter Final"
+      phase.id === "Quarter Final" ||
+      phase.id === "Semi Final"
     ) {
       return { ...phase, status: "complete" as const };
     }
-    if (phase.id === "Semi Final") {
+    if (phase.id === "Final") {
       return { ...phase, status: "in_progress" as const };
     }
     return { ...phase, status: "pending" as const };
@@ -128,11 +129,10 @@ function buildProgressCaption(phases: TournamentPhase[]): string {
 
 /**
  * Tournament-wide knockout progress (independent of family sweep eliminations).
- * Updated through 12 Jul 2026 — all quarter-finals complete; four semi-finalists
- * confirmed (France, Spain, England, Argentina).
+ * Updated through 15 Jul 2026 — semi-finals complete; Spain vs Argentina in the Final.
  */
 export function getTournamentPhaseProgress(): TournamentPhaseProgress {
-  const phases = buildPhasesForSemiFinals();
+  const phases = buildPhasesForFinal();
   const current = phases.find((p) => p.status === "in_progress") ?? phases[0];
 
   return {

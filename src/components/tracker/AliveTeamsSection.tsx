@@ -22,13 +22,26 @@ function formatNextMatch(row: TrackerRow): string | null {
   if (
     stage !== "Round of 32" &&
     stage !== "Round of 16" &&
-    stage !== "Semi Final"
+    stage !== "Semi Final" &&
+    stage !== "Final"
   ) {
     return null;
   }
 
   const snapshot = SNAPSHOT_BY_TEAM.get(teamName.toLowerCase());
   if (!snapshot?.nextFixture) return null;
+
+  if (stage === "Final") {
+    const vsMatch = snapshot.nextFixture.match(/vs\s+(.+?)(?:\s*\(|$)/i);
+    const opponent = vsMatch?.[1]?.trim();
+    if (!opponent) return null;
+    const parts = [`vs ${opponent}`, "Final"];
+    const date = snapshot.nextFixture.match(/(\d{1,2}\s+[A-Za-z]{3})/)?.[1];
+    const time = snapshot.nextFixture.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*UK)/i)?.[1];
+    if (date) parts.push(date);
+    if (time) parts.push(time.trim());
+    return parts.join(" · ");
+  }
 
   if (stage === "Semi Final") {
     const vsMatch = snapshot.nextFixture.match(/vs\s+(.+?)(?:\s*\(|$)/i);

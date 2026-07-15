@@ -205,6 +205,77 @@ export function RoundOf32Bracket({
           </div>
         )}
 
+        {data.finalMatchup && (
+          <div className="mt-10 border-t border-slate-100 pt-8">
+            <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+              World Cup Final
+            </p>
+            <div className="mx-auto max-w-lg rounded-2xl border border-amber-200 bg-amber-50/80 px-6 py-5 text-center">
+              <p className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide text-slate-900">
+                {data.finalMatchup.homeTeam} vs {data.finalMatchup.awayTeam}
+              </p>
+              {data.finalMatchup.homeParticipant &&
+                data.finalMatchup.awayParticipant && (
+                  <p className="mt-2 text-sm font-medium text-slate-700">
+                    {data.finalMatchup.homeParticipant} vs{" "}
+                    {data.finalMatchup.awayParticipant}
+                  </p>
+                )}
+              <p className="mt-3 text-xs text-slate-600">
+                {data.finalMatchup.dateUk} · {data.finalMatchup.timeUk} UK
+              </p>
+              {data.finalMatchup.venue && (
+                <p className="mt-1 text-xs text-slate-500">
+                  {data.finalMatchup.venue}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {data.finalQualified.length > 0 && (
+          <div className="mt-10 border-t border-slate-100 pt-8">
+            <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+              Finalists
+            </p>
+            <div className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-2">
+              {data.finalQualified.map((entry) => (
+                <div
+                  key={entry.row.team?.id}
+                  className="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3"
+                >
+                  <BracketTeamNode entry={entry} compact />
+                  {entry.pendingLine && (
+                    <p className="mt-2 text-xs text-emerald-900/80">
+                      {formatBracketPendingSummary(entry.pendingLine)}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.completedSemiFinals.length > 0 && (
+          <div className="mt-10 border-t border-slate-100 pt-8">
+            <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+              Semi-finals complete
+            </p>
+            <div className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-2">
+              {data.completedSemiFinals.map((fixture) => (
+                <div
+                  key={`${fixture.homeTeam}-${fixture.awayTeam}`}
+                  className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center"
+                >
+                  <p className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-slate-800">
+                    {formatCompletedFixtureScore(fixture)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {data.semiFinalQualified.length > 0 && (
           <div className="mt-10 border-t border-slate-100 pt-8">
             <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
