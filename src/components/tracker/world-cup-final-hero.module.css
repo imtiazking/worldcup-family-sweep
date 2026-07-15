@@ -1,0 +1,519 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  margin: 0 -1rem 1.5rem;
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(212, 175, 55, 0.14), transparent 65%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(15, 23, 42, 0.9), transparent),
+    linear-gradient(180deg, #0a1224 0%, #050a14 42%, #02060f 100%);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(212, 175, 55, 0.12);
+}
+
+@media (min-width: 768px) {
+  .hero {
+    margin: 0 0 2rem;
+    border-radius: 1.75rem;
+  }
+}
+
+.atmosphere {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.stadiumLights {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 35% at 18% 0%, rgba(255, 220, 120, 0.16), transparent 70%),
+    radial-gradient(ellipse 55% 35% at 82% 0%, rgba(255, 220, 120, 0.16), transparent 70%),
+    radial-gradient(ellipse 80% 40% at 50% -5%, rgba(212, 175, 55, 0.22), transparent 72%);
+}
+
+.ambientLight {
+  position: absolute;
+  inset: -20% -10%;
+  background: radial-gradient(circle at 50% 40%, rgba(245, 197, 66, 0.08), transparent 55%);
+  animation: final-ambient-drift 18s ease-in-out infinite;
+}
+
+@keyframes final-ambient-drift {
+  0%,
+  100% {
+    transform: translate3d(-2%, 0, 0) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate3d(2%, 1%, 0) scale(1.04);
+    opacity: 1;
+  }
+}
+
+.confettiLayer {
+  position: absolute;
+  inset: 0;
+}
+
+.confettiPiece {
+  position: absolute;
+  top: -8%;
+  width: 4px;
+  height: 10px;
+  border-radius: 1px;
+  opacity: 0.55;
+  animation: final-confetti-drift linear infinite;
+}
+
+.confettiPiece:nth-child(odd) {
+  background: rgba(212, 175, 55, 0.85);
+}
+
+.confettiPiece:nth-child(even) {
+  background: rgba(255, 255, 255, 0.45);
+  width: 3px;
+  height: 8px;
+}
+
+@keyframes final-confetti-drift {
+  0% {
+    transform: translate3d(0, -10%, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(12px, 110vh, 0) rotate(280deg);
+    opacity: 0;
+  }
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  padding: 1.75rem 1rem 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .inner {
+    padding: 2.5rem 2rem 2rem;
+  }
+}
+
+.header {
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.65);
+}
+
+.title {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  line-height: 0.95;
+  letter-spacing: 0.06em;
+  color: #f0d060;
+  text-shadow: 0 0 40px rgba(212, 175, 55, 0.35);
+}
+
+.titleStars {
+  color: rgba(212, 175, 55, 0.75);
+  font-size: 0.85em;
+}
+
+.subtitle {
+  margin: 0.75rem auto 0;
+  max-width: 24rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.subtitleRule {
+  display: block;
+  height: 1px;
+  margin: 0.65rem auto 0;
+  max-width: 12rem;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.55) 20%,
+    rgba(212, 175, 55, 0.55) 80%,
+    transparent
+  );
+}
+
+.matchup {
+  display: grid;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  .matchup {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 1.25rem 0.75rem;
+    margin-top: 2rem;
+  }
+}
+
+.trophyStage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  order: 2;
+}
+
+@media (min-width: 768px) {
+  .trophyStage {
+    order: unset;
+    min-width: 13rem;
+  }
+}
+
+.vsLeft,
+.vsRight {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: rgba(240, 208, 96, 0.92);
+  text-shadow:
+    0 0 24px rgba(212, 175, 55, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.6);
+  transform: translateY(-50%) skewX(-8deg);
+  pointer-events: none;
+}
+
+.vsLeft {
+  left: -0.15rem;
+}
+
+.vsRight {
+  right: -0.15rem;
+}
+
+@media (min-width: 768px) {
+  .vsLeft {
+    left: 0.25rem;
+  }
+
+  .vsRight {
+    right: 0.25rem;
+  }
+}
+
+.finalistCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.1rem;
+  padding: 1.1rem 1rem 1.15rem;
+  text-align: center;
+  border: 1px solid transparent;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.finalistCardHome {
+  order: 1;
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 0%, rgba(220, 38, 38, 0.22), transparent 70%),
+    linear-gradient(165deg, rgba(40, 8, 8, 0.95), rgba(12, 4, 4, 0.98));
+  border-color: rgba(239, 68, 68, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.12) inset,
+    0 0 28px rgba(220, 38, 38, 0.18),
+    0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.finalistCardAway {
+  order: 3;
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 0%, rgba(59, 130, 246, 0.2), transparent 70%),
+    linear-gradient(165deg, rgba(8, 20, 48, 0.95), rgba(4, 10, 24, 0.98));
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 0 28px rgba(59, 130, 246, 0.16),
+    0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.cardFlag {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.cardCountry {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+
+.cardStars {
+  margin: 0.35rem 0 0;
+  font-size: 0.55rem;
+  letter-spacing: 0.35em;
+  color: rgba(212, 175, 55, 0.8);
+}
+
+.cardParticipant {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: clamp(1.35rem, 4vw, 1.75rem);
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.trophyWrap {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 11.5rem;
+  min-height: 10.5rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .trophyWrap {
+    max-width: 14rem;
+    min-height: 13rem;
+  }
+}
+
+.trophyGlowInner {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  z-index: 0;
+  height: 115%;
+  width: 95%;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(245, 197, 66, 0.22) 0%,
+    rgba(212, 175, 55, 0.08) 42%,
+    transparent 72%
+  );
+  animation: tracker-trophy-glow-inner-pulse 4s ease-in-out infinite;
+}
+
+.trophyFloat {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trophyImage {
+  height: auto;
+  width: 100%;
+  max-height: 11.5rem;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.55));
+}
+
+@media (min-width: 768px) {
+  .trophyImage {
+    max-height: 14.5rem;
+  }
+}
+
+.trophyFallback {
+  height: 9.5rem;
+  width: auto;
+}
+
+@media (min-width: 768px) {
+  .trophyFallback {
+    height: 12rem;
+  }
+}
+
+.matchInfo {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.85rem 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .matchInfo {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 1.75rem;
+    padding: 0.9rem 1rem;
+  }
+}
+
+.matchInfoItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.matchInfoLabel {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.65);
+}
+
+.matchInfoValue {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.35;
+}
+
+.matchInfoSub {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.grandPrize {
+  margin-top: 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  background: linear-gradient(
+    180deg,
+    rgba(212, 175, 55, 0.08) 0%,
+    rgba(0, 0, 0, 0.28) 100%
+  );
+  padding: 0.9rem 1rem;
+  text-align: center;
+}
+
+.grandPrizeTitle {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #f0d060;
+}
+
+.grandPrizeTagline {
+  margin: 0.45rem 0 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.grandPrizeFootnote {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: rgba(212, 175, 55, 0.75);
+}
+
+.semiFinalSection {
+  margin-top: 1.25rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.semiFinalHeading {
+  margin: 0 0 0.85rem;
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.semiFinalGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .semiFinalGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.semiFinalCard {
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.28);
+  padding: 0.85rem 0.9rem;
+}
+
+.semiFinalScore {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: 1.55rem;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.semiFinalOutcomes {
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.semiFinalOutcome {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.semiFinalOutcome strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.semiFinalOutcomeEliminated {
+  color: rgba(248, 113, 113, 0.85);
+}
+
+.semiFinalOutcomeThrough {
+  color: rgba(110, 231, 183, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambientLight,
+  .confettiPiece,
+  .trophyGlowInner {
+    animation: none !important;
+  }
+}

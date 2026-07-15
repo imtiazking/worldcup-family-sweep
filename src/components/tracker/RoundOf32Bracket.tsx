@@ -12,6 +12,7 @@ import {
 } from "./bracket/BracketMatchOpponent";
 import { RoundOf32MobileCards } from "./RoundOf32MobileCards";
 import { ExternalAdvancerCard } from "./bracket/ExternalAdvancerCard";
+import { WorldCupFinalHeroFromData } from "./WorldCupFinalHero";
 import { revealTransition, useMotionSettings } from "./motion-utils";
 
 type RoundOf32BracketProps = {
@@ -136,14 +137,18 @@ export function RoundOf32Bracket({
   const left = data.through.filter((e) => e.side === "left");
   const right = data.through.filter((e) => e.side === "right");
   const pairCount = Math.max(left.length, right.length);
+  const inFinalStage = Boolean(data.finalMatchup);
 
   return (
-    <motion.section
-      className="mt-6 overflow-hidden rounded-3xl bg-white shadow-[0_8px_40px_rgba(0,0,0,0.18)] ring-1 ring-slate-200/80 md:mt-10"
-      initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={revealTransition(0.15, reduceMotion)}
-    >
+    <>
+      {inFinalStage && <WorldCupFinalHeroFromData data={data} />}
+
+      <motion.section
+        className="mt-6 overflow-hidden rounded-3xl bg-white shadow-[0_8px_40px_rgba(0,0,0,0.18)] ring-1 ring-slate-200/80 md:mt-10"
+        initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={revealTransition(0.15, reduceMotion)}
+      >
       <div className="border-b border-slate-100 px-4 py-6 text-center sm:px-8 sm:py-8">
         <h2 className="text-xs font-medium uppercase tracking-[0.45em] text-slate-400 sm:text-sm">
           World Cup Round of 32
@@ -153,34 +158,38 @@ export function RoundOf32Bracket({
         </p>
       </div>
 
-      {/* Desktop bracket */}
-      <div className="hidden px-4 py-8 md:block lg:px-10 lg:py-10">
-        <div className="mx-auto flex max-w-6xl items-stretch justify-between gap-4">
-          <div className="flex flex-1 flex-col justify-center gap-10">
-            {left.map((entry) => (
-              <DesktopMatchRow
-                key={entry.row.team?.id}
-                entry={entry}
-                side="left"
-                through={data.through}
-              />
-            ))}
-          </div>
+      {/* Desktop bracket — hidden during the final when empty layout would show */}
+      {!inFinalStage && (
+        <div className="hidden px-4 py-8 md:block lg:px-10 lg:py-10">
+          <div className="mx-auto flex max-w-6xl items-stretch justify-between gap-4">
+            <div className="flex flex-1 flex-col justify-center gap-10">
+              {left.map((entry) => (
+                <DesktopMatchRow
+                  key={entry.row.team?.id}
+                  entry={entry}
+                  side="left"
+                  through={data.through}
+                />
+              ))}
+            </div>
 
-          <CenterSpine pairCount={pairCount} />
+            <CenterSpine pairCount={pairCount} />
 
-          <div className="flex flex-1 flex-col justify-center gap-10">
-            {right.map((entry) => (
-              <DesktopMatchRow
-                key={entry.row.team?.id}
-                entry={entry}
-                side="right"
-                through={data.through}
-              />
-            ))}
+            <div className="flex flex-1 flex-col justify-center gap-10">
+              {right.map((entry) => (
+                <DesktopMatchRow
+                  key={entry.row.team?.id}
+                  entry={entry}
+                  side="right"
+                  through={data.through}
+                />
+              ))}
+            </div>
           </div>
         </div>
+      )}
 
+      <div className="hidden px-4 py-8 md:block lg:px-10 lg:py-10">
         {data.pending.length > 0 && (
           <div className="mt-10 border-t border-slate-100 pt-8">
             <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
@@ -205,7 +214,7 @@ export function RoundOf32Bracket({
           </div>
         )}
 
-        {data.finalMatchup && (
+        {!inFinalStage && data.finalMatchup && (
           <div className="mt-10 border-t border-slate-100 pt-8">
             <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
               World Cup Final
@@ -233,7 +242,7 @@ export function RoundOf32Bracket({
           </div>
         )}
 
-        {data.finalQualified.length > 0 && (
+        {!inFinalStage && data.finalQualified.length > 0 && (
           <div className="mt-10 border-t border-slate-100 pt-8">
             <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
               Finalists
@@ -256,7 +265,7 @@ export function RoundOf32Bracket({
           </div>
         )}
 
-        {data.completedSemiFinals.length > 0 && (
+        {!inFinalStage && data.completedSemiFinals.length > 0 && (
           <div className="mt-10 border-t border-slate-100 pt-8">
             <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
               Semi-finals complete
@@ -407,8 +416,9 @@ export function RoundOf32Bracket({
 
       {/* Mobile stacked cards */}
       <div className="md:hidden">
-        <RoundOf32MobileCards data={data} />
+        <RoundOf32MobileCards data={data} omitFinalPresentation={inFinalStage} />
       </div>
     </motion.section>
+    </>
   );
 }

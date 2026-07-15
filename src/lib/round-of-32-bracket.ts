@@ -400,6 +400,27 @@ export function getConfirmedMutualFixtures(
   return result;
 }
 
+export type FinalMatchupData = {
+  homeTeam: string;
+  awayTeam: string;
+  homeParticipant: string | null;
+  awayParticipant: string | null;
+  homeFlagEmoji: string;
+  awayFlagEmoji: string;
+  dateUk: string;
+  timeUk: string;
+  venue: string | null;
+  venueStadium: string | null;
+  venueCity: string | null;
+};
+
+export type SemiFinalResultDetail = CompletedFamilyFixture & {
+  winnerTeam: string;
+  loserTeam: string;
+  winnerParticipant: string | null;
+  loserParticipant: string | null;
+};
+
 export type SweepBracketData = {
   through: SweepBracketEntry[];
   pending: SweepBracketEntry[];
@@ -414,21 +435,54 @@ export type SweepBracketData = {
   finalQualified: SweepBracketEntry[];
   /** Confirmed semi-final results */
   completedSemiFinals: CompletedFamilyFixture[];
+  /** Semi-finals enriched with family sweep participant outcomes */
+  completedSemiFinalDetails: SemiFinalResultDetail[];
   /** Confirmed quarter-final results */
   completedQuarterFinals: CompletedFamilyFixture[];
   /** World Cup Final matchup metadata */
-  finalMatchup: {
-    homeTeam: string;
-    awayTeam: string;
-    homeParticipant: string | null;
-    awayParticipant: string | null;
-    dateUk: string;
-    timeUk: string;
-    venue: string | null;
-  } | null;
+  finalMatchup: FinalMatchupData | null;
   /** Official tournament advancers that are not family sweep participants */
   externalAdvancers: ExternalBracketAdvancer[];
 };
+
+function parseVenueParts(venue: string | null | undefined): {
+  stadium: string | null;
+  city: string | null;
+} {
+  if (!venue?.trim()) return { stadium: null, city: null };
+  const [stadium, city] = venue.split(",").map((part) => part.trim());
+  return {
+    stadium: stadium || null,
+    city: city || null,
+  };
+}
+
+function buildSemiFinalDetails(
+  fixtures: CompletedFamilyFixture[],
+  rows: TrackerRow[],
+): SemiFinalResultDetail[] {
+  const byTeam = new Map(
+    rows
+      .filter((row) => row.team?.name)
+      .map((row) => [row.team!.name.toLowerCase(), row]),
+  );
+
+  return fixtures.map((fixture) => {
+    const homeWins = fixture.scoreHome > fixture.scoreAway;
+    const winnerTeam = homeWins ? fixture.homeTeam : fixture.awayTeam;
+    const loserTeam = homeWins ? fixture.awayTeam : fixture.homeTeam;
+    const winnerRow = byTeam.get(winnerTeam.toLowerCase());
+    const loserRow = byTeam.get(loserTeam.toLowerCase());
+
+    return {
+      ...fixture,
+      winnerTeam,
+      loserTeam,
+      winnerParticipant: winnerRow?.participant?.name ?? null,
+      loserParticipant: loserRow?.participant?.name ?? null,
+    };
+  });
+}
 
 function isFinalQualified(row: TrackerRow): boolean {
   const { status, stage, next_stage_probability } = row.team_status;
@@ -600,18 +654,29 @@ export function buildSweepBracketData(
       e.row.team?.name?.toLowerCase() ===
       upcomingFinal?.awayOpponent.toLowerCase(),
   );
-  const finalMatchup =
+  const venueParts = parseVenueParts(upcomingFinal?.venue);
+  const finalMatchup: FinalMatchupData | null =
     upcomingFinal && homeFinalist && awayFinalist
       ? {
           homeTeam: upcomingFinal.homeTeam,
           awayTeam: upcomingFinal.awayOpponent,
           homeParticipant: homeFinalist.row.participant?.name ?? null,
           awayParticipant: awayFinalist.row.participant?.name ?? null,
+          homeFlagEmoji: homeFinalist.flagEmoji,
+          awayFlagEmoji: awayFinalist.flagEmoji,
           dateUk: upcomingFinal.dateUk,
           timeUk: upcomingFinal.timeUk,
           venue: upcomingFinal.venue ?? null,
+          venueStadium: venueParts.stadium,
+          venueCity: venueParts.city,
         }
       : null;
+
+  const completedSemiFinals = getCompletedFixturesForStage("Semi-finals");
+  const completedSemiFinalDetails = buildSemiFinalDetails(
+    completedSemiFinals,
+    rows,
+  );
 
   const half = Math.ceil(through.length / 2);
   const throughWithSides = [
@@ -627,7 +692,8 @@ export function buildSweepBracketData(
     quarterFinalQualified,
     semiFinalQualified,
     finalQualified,
-    completedSemiFinals: getCompletedFixturesForStage("Semi-finals"),
+    completedSemiFinals,
+    completedSemiFinalDetails,
     completedQuarterFinals: getCompletedFixturesForStage("Quarter-finals"),
     finalMatchup,
     externalAdvancers: [],

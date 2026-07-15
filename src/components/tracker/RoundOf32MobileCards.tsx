@@ -9,6 +9,7 @@ import {
 
 type RoundOf32MobileCardsProps = {
   data: SweepBracketData;
+  omitFinalPresentation?: boolean;
 };
 
 function MobileMatchCard({
@@ -55,7 +56,10 @@ function MobileMatchCard({
   );
 }
 
-export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
+export function RoundOf32MobileCards({
+  data,
+  omitFinalPresentation = false,
+}: RoundOf32MobileCardsProps) {
   const allEntries = [
     ...data.through,
     ...data.finalQualified,
@@ -85,7 +89,7 @@ export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
         </div>
       )}
 
-      {data.finalMatchup && (
+      {!omitFinalPresentation && data.finalMatchup && (
         <div>
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
             World Cup Final
@@ -113,7 +117,7 @@ export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
         </div>
       )}
 
-      {data.finalQualified.length > 0 && (
+      {!omitFinalPresentation && data.finalQualified.length > 0 && (
         <div>
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
             Finalists
@@ -126,7 +130,7 @@ export function RoundOf32MobileCards({ data }: RoundOf32MobileCardsProps) {
         </div>
       )}
 
-      {data.completedSemiFinals.length > 0 && (
+      {!omitFinalPresentation && data.completedSemiFinals.length > 0 && (
         <div>
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
             Semi-finals complete
