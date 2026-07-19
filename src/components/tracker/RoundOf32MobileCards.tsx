@@ -6,6 +6,7 @@ import {
   BracketMatchOpponent,
   formatBracketPendingSummary,
 } from "./bracket/BracketMatchOpponent";
+import { FinalMatchupSummary } from "./FinalMatchupSummary";
 
 type RoundOf32MobileCardsProps = {
   data: SweepBracketData;
@@ -94,26 +95,7 @@ export function RoundOf32MobileCards({
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
             World Cup Final
           </p>
-          <article className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-center shadow-sm">
-            <p className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide text-slate-900">
-              {data.finalMatchup.homeTeam} vs {data.finalMatchup.awayTeam}
-            </p>
-            {data.finalMatchup.homeParticipant &&
-              data.finalMatchup.awayParticipant && (
-                <p className="mt-2 text-sm font-medium text-slate-700">
-                  {data.finalMatchup.homeParticipant} vs{" "}
-                  {data.finalMatchup.awayParticipant}
-                </p>
-              )}
-            <p className="mt-3 text-xs text-slate-600">
-              {data.finalMatchup.dateUk} · {data.finalMatchup.timeUk} UK
-            </p>
-            {data.finalMatchup.venue && (
-              <p className="mt-1 text-xs text-slate-500">
-                {data.finalMatchup.venue}
-              </p>
-            )}
-          </article>
+          <FinalMatchupSummary matchup={data.finalMatchup} className="px-4 py-4" />
         </div>
       )}
 

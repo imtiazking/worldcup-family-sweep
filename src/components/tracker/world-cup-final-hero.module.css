@@ -510,10 +510,116 @@
   color: rgba(110, 231, 183, 0.9);
 }
 
+.liveBanner {
+  margin: 0 auto;
+  max-width: 36rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(239, 68, 68, 0.12), transparent 70%),
+    rgba(15, 23, 42, 0.55);
+}
+
+.liveIndicator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.liveDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #ef4444;
+  animation: final-live-pulse 1.4s ease-in-out infinite;
+}
+
+.liveLabel,
+.liveStatus {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(252, 165, 165, 0.95);
+}
+
+.liveBannerTitle {
+  margin: 0.85rem 0 0;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  line-height: 0.95;
+  letter-spacing: 0.08em;
+  color: #f0d060;
+}
+
+.liveScore {
+  margin: 0.65rem 0 0;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: clamp(2.25rem, 8vw, 4rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+.livePhase {
+  margin: 0.5rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(252, 165, 165, 0.9);
+}
+
+.liveAfter90 {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.liveNote {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.liveCentreScore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: clamp(3rem, 10vw, 5rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+}
+
+.liveCentreScoreSep {
+  color: rgba(240, 208, 96, 0.85);
+}
+
+@keyframes final-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ambientLight,
   .confettiPiece,
-  .trophyGlowInner {
+  .trophyGlowInner,
+  .liveDot {
     animation: none !important;
   }
 }

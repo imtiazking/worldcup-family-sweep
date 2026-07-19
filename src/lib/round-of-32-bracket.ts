@@ -1,9 +1,11 @@
 import {
+  buildFinalMatchLiveState,
   getCompletedFixturesForStage,
   VERIFIED_FAMILY_TEAM_STATUSES,
   VERIFIED_UPCOMING_FAMILY_FIXTURES,
   type CompletedFamilyFixture,
   type ExternalBracketAdvancer,
+  type FinalMatchLiveState,
   type VerifiedTeamStatus,
 } from "@/lib/world-cup-verified-snapshot";
 
@@ -68,6 +70,9 @@ function familyR16ScheduleLine(snapshot: VerifiedTeamStatus | undefined): string
 
 function familyFinalScheduleLine(snapshot: VerifiedTeamStatus | undefined): string | null {
   if (!snapshot?.nextFixture) return null;
+  if (snapshot.nextFixture.startsWith("LIVE")) {
+    return snapshot.nextFixture.replace(/^LIVE\s+/i, "Live — ");
+  }
   const vsMatch = snapshot.nextFixture.match(/vs\s+(.+?)(?:\s*\(|$)/i);
   const opponent = vsMatch?.[1]?.trim();
   if (!opponent) return "Finalist";
@@ -412,6 +417,7 @@ export type FinalMatchupData = {
   venue: string | null;
   venueStadium: string | null;
   venueCity: string | null;
+  live: FinalMatchLiveState | null;
 };
 
 export type SemiFinalResultDetail = CompletedFamilyFixture & {
@@ -669,6 +675,7 @@ export function buildSweepBracketData(
           venue: upcomingFinal.venue ?? null,
           venueStadium: venueParts.stadium,
           venueCity: venueParts.city,
+          live: buildFinalMatchLiveState(upcomingFinal),
         }
       : null;
 

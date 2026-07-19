@@ -32,6 +32,16 @@ function formatNextMatch(row: TrackerRow): string | null {
   if (!snapshot?.nextFixture) return null;
 
   if (stage === "Final") {
+    if (snapshot.nextFixture.startsWith("LIVE")) {
+      const vsMatch = snapshot.nextFixture.match(/vs\s+(.+?)\s+—/i);
+      const scoreMatch = snapshot.nextFixture.match(/(\d+–\d+)/);
+      const opponent = vsMatch?.[1]?.trim();
+      const score = scoreMatch?.[1];
+      if (opponent && score) {
+        return `LIVE · ${score} vs ${opponent} · Extra time`;
+      }
+    }
+
     const vsMatch = snapshot.nextFixture.match(/vs\s+(.+?)(?:\s*\(|$)/i);
     const opponent = vsMatch?.[1]?.trim();
     if (!opponent) return null;

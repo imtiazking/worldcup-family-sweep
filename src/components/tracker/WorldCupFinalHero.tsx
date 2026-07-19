@@ -117,21 +117,48 @@ export function WorldCupFinalHero({
 
       <div className={styles.inner}>
         <header className={styles.header}>
-          <p className={styles.eyebrow}>FIFA World Cup 2026</p>
-          <h2 id="world-cup-final-heading" className={styles.title}>
-            <span className={styles.titleStars} aria-hidden>
-              ★{" "}
-            </span>
-            WORLD CUP FINAL
-            <span className={styles.titleStars} aria-hidden>
-              {" "}
-              ★
-            </span>
-          </h2>
-          <p className={styles.subtitle}>
-            THE ULTIMATE SHOWDOWN
-            <span className={styles.subtitleRule} aria-hidden />
-          </p>
+          {matchup.live ? (
+            <div className={styles.liveBanner} aria-live="polite">
+              <div className={styles.liveIndicator}>
+                <span className={styles.liveDot} aria-hidden />
+                <span className={styles.liveLabel}>LIVE</span>
+                <span className={styles.liveStatus}>{matchup.live.statusLabel}</span>
+              </div>
+              <p id="world-cup-final-heading" className={styles.liveBannerTitle}>
+                WORLD CUP FINAL LIVE
+              </p>
+              <p className={styles.liveScore}>
+                {matchup.homeTeam} {matchup.live.scoreHome}–{matchup.live.scoreAway}{" "}
+                {matchup.awayTeam}
+              </p>
+              <p className={styles.livePhase}>Extra time in progress</p>
+              <p className={styles.liveAfter90}>
+                {matchup.live.scoreAfter90Home}–{matchup.live.scoreAfter90Away} after
+                90 minutes
+              </p>
+              {matchup.live.matchNote && (
+                <p className={styles.liveNote}>{matchup.live.matchNote}</p>
+              )}
+            </div>
+          ) : (
+            <>
+              <p className={styles.eyebrow}>FIFA World Cup 2026</p>
+              <h2 id="world-cup-final-heading" className={styles.title}>
+                <span className={styles.titleStars} aria-hidden>
+                  ★{" "}
+                </span>
+                WORLD CUP FINAL
+                <span className={styles.titleStars} aria-hidden>
+                  {" "}
+                  ★
+                </span>
+              </h2>
+              <p className={styles.subtitle}>
+                THE ULTIMATE SHOWDOWN
+                <span className={styles.subtitleRule} aria-hidden />
+              </p>
+            </>
+          )}
         </header>
 
         <div className={styles.matchup}>
@@ -145,13 +172,23 @@ export function WorldCupFinalHero({
           />
 
           <div className={styles.trophyStage}>
-            <span className={styles.vsLeft} aria-hidden>
-              VS
-            </span>
-            <FinalHeroTrophy />
-            <span className={styles.vsRight} aria-hidden>
-              VS
-            </span>
+            {matchup.live ? (
+              <p className={styles.liveCentreScore} aria-label={`Score ${matchup.live.scoreHome} to ${matchup.live.scoreAway}`}>
+                <span className={styles.liveCentreScoreNum}>{matchup.live.scoreHome}</span>
+                <span className={styles.liveCentreScoreSep}>–</span>
+                <span className={styles.liveCentreScoreNum}>{matchup.live.scoreAway}</span>
+              </p>
+            ) : (
+              <>
+                <span className={styles.vsLeft} aria-hidden>
+                  VS
+                </span>
+                <FinalHeroTrophy />
+                <span className={styles.vsRight} aria-hidden>
+                  VS
+                </span>
+              </>
+            )}
           </div>
 
           <FinalistCard
@@ -196,7 +233,9 @@ export function WorldCupFinalHero({
             Glory. Bragging Rights. Family Legend.
           </p>
           <p className={styles.grandPrizeFootnote}>
-            One winner will be crowned champion.
+            {matchup.live
+              ? "Final in progress — result pending."
+              : "One winner will be crowned champion."}
           </p>
         </aside>
 

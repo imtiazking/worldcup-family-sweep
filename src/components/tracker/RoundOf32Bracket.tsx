@@ -13,6 +13,7 @@ import {
 import { RoundOf32MobileCards } from "./RoundOf32MobileCards";
 import { ExternalAdvancerCard } from "./bracket/ExternalAdvancerCard";
 import { WorldCupFinalHeroFromData } from "./WorldCupFinalHero";
+import { FinalMatchupSummary } from "./FinalMatchupSummary";
 import { revealTransition, useMotionSettings } from "./motion-utils";
 
 type RoundOf32BracketProps = {
@@ -219,25 +220,8 @@ export function RoundOf32Bracket({
             <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
               World Cup Final
             </p>
-            <div className="mx-auto max-w-lg rounded-2xl border border-amber-200 bg-amber-50/80 px-6 py-5 text-center">
-              <p className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide text-slate-900">
-                {data.finalMatchup.homeTeam} vs {data.finalMatchup.awayTeam}
-              </p>
-              {data.finalMatchup.homeParticipant &&
-                data.finalMatchup.awayParticipant && (
-                  <p className="mt-2 text-sm font-medium text-slate-700">
-                    {data.finalMatchup.homeParticipant} vs{" "}
-                    {data.finalMatchup.awayParticipant}
-                  </p>
-                )}
-              <p className="mt-3 text-xs text-slate-600">
-                {data.finalMatchup.dateUk} · {data.finalMatchup.timeUk} UK
-              </p>
-              {data.finalMatchup.venue && (
-                <p className="mt-1 text-xs text-slate-500">
-                  {data.finalMatchup.venue}
-                </p>
-              )}
+            <div className="mx-auto max-w-lg">
+              <FinalMatchupSummary matchup={data.finalMatchup} />
             </div>
           </div>
         )}

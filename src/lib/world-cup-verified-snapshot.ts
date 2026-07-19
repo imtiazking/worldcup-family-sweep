@@ -1,6 +1,6 @@
 /**
  * Manually verified World Cup 2026 knockout status for family sweep teams.
- * Source: Official semi-final results (updated through 15 Jul 2026).
+ * Source: Official results through the Final (updated 19 Jul 2026, extra time).
  */
 
 export type VerifiedTeamStatus = {
@@ -17,9 +17,69 @@ export type VerifiedTeamStatus = {
 };
 
 export const VERIFIED_SNAPSHOT_SOURCE =
-  "Official 2026 FIFA World Cup semi-final results (verified snapshot, through 15 Jul 2026)";
+  "Official 2026 FIFA World Cup Final — manually verified live state (19 Jul 2026, extra time)";
 
-export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-15T21:00:00Z";
+export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-19T21:44:00Z";
+
+export type FamilyFixtureMatchStatus =
+  | "scheduled"
+  | "live"
+  | "extra_time"
+  | "finished";
+
+export type UpcomingFamilyFixture = {
+  homeTeam: string;
+  awayOpponent: string;
+  dateUk: string;
+  timeUk: string;
+  venue?: string;
+  matchStatus?: FamilyFixtureMatchStatus;
+  scoreHome?: number;
+  scoreAway?: number;
+  scoreAfter90Home?: number;
+  scoreAfter90Away?: number;
+  matchNote?: string;
+};
+
+export type FinalMatchLiveState = {
+  status: "live" | "extra_time";
+  scoreHome: number;
+  scoreAway: number;
+  scoreAfter90Home: number;
+  scoreAfter90Away: number;
+  matchNote: string | null;
+  statusLabel: string;
+};
+
+export function isFamilyFixtureLive(
+  fixture: UpcomingFamilyFixture | null | undefined,
+): boolean {
+  return (
+    fixture?.matchStatus === "live" || fixture?.matchStatus === "extra_time"
+  );
+}
+
+export function buildFinalMatchLiveState(
+  fixture: UpcomingFamilyFixture,
+): FinalMatchLiveState | null {
+  if (!isFamilyFixtureLive(fixture)) return null;
+
+  const status = fixture.matchStatus === "extra_time" ? "extra_time" : "live";
+
+  return {
+    status,
+    scoreHome: fixture.scoreHome ?? 0,
+    scoreAway: fixture.scoreAway ?? 0,
+    scoreAfter90Home: fixture.scoreAfter90Home ?? fixture.scoreHome ?? 0,
+    scoreAfter90Away: fixture.scoreAfter90Away ?? fixture.scoreAway ?? 0,
+    matchNote: fixture.matchNote ?? null,
+    statusLabel: status === "extra_time" ? "LIVE — EXTRA TIME" : "LIVE",
+  };
+}
+
+export function formatFinalLiveScore(fixture: UpcomingFamilyFixture): string {
+  return `${fixture.homeTeam} ${fixture.scoreHome ?? 0}–${fixture.scoreAway ?? 0} ${fixture.awayOpponent}`;
+}
 
 export type ExternalBracketAdvancer = {
   teamName: string;
@@ -133,8 +193,9 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     status: "active",
     stage: "Final",
     nextStageProbability: 100,
-    reason: "Advanced to Final — beat England 2-1 (15 Jul).",
-    nextFixture: "Final vs Spain (19 Jul 2026, 8pm UK)",
+    reason:
+      "World Cup Final in progress — 0–0 after 90 minutes, extra time underway.",
+    nextFixture: "LIVE vs Spain — 0–0 (extra time)",
     r16OpponentLocked: "Egypt",
   },
   {
@@ -177,8 +238,9 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     status: "active",
     stage: "Final",
     nextStageProbability: 100,
-    reason: "Advanced to Final — beat France 2-0 (14 Jul).",
-    nextFixture: "Final vs Argentina (19 Jul 2026, 8pm UK)",
+    reason:
+      "World Cup Final in progress — 0–0 after 90 minutes, extra time underway.",
+    nextFixture: "LIVE vs Argentina — 0–0 (extra time)",
     r16OpponentLocked: "Portugal",
   },
   {
@@ -210,24 +272,34 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
 ];
 
 /** Upcoming final fixture — remaining family sweep tie only */
-export const VERIFIED_UPCOMING_FAMILY_FIXTURES: Array<{
-  homeTeam: string;
-  awayOpponent: string;
-  dateUk: string;
-  timeUk: string;
-  venue?: string;
-}> = [
+export const VERIFIED_UPCOMING_FAMILY_FIXTURES: UpcomingFamilyFixture[] = [
   {
     homeTeam: "Spain",
     awayOpponent: "Argentina",
     dateUk: "19 Jul",
     timeUk: "20:00",
     venue: "New York/New Jersey Stadium, East Rutherford",
+    matchStatus: "extra_time",
+    scoreHome: 0,
+    scoreAway: 0,
+    scoreAfter90Home: 0,
+    scoreAfter90Away: 0,
+    matchNote: "Argentina reduced to 10 players",
   },
 ];
 
+export function getActiveFamilyFixture(): UpcomingFamilyFixture | null {
+  return VERIFIED_UPCOMING_FAMILY_FIXTURES[0] ?? null;
+}
+
 export function getNextFamilySweepFixtureLabel(): string {
   const next = VERIFIED_UPCOMING_FAMILY_FIXTURES[0];
+  if (!next) return "No upcoming fixtures";
+
+  if (isFamilyFixtureLive(next)) {
+    return `LIVE — EXTRA TIME: ${formatFinalLiveScore(next)}`;
+  }
+
   return `${next.homeTeam} vs ${next.awayOpponent} — Final · ${next.dateUk}, ${next.timeUk}`;
 }
 

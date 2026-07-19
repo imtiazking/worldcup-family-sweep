@@ -1,4 +1,4 @@
-import { VERIFIED_SNAPSHOT_AS_OF, getNextFamilySweepFixtureLabel } from "@/lib/world-cup-verified-snapshot";
+import { VERIFIED_SNAPSHOT_AS_OF, getNextFamilySweepFixtureLabel, getActiveFamilyFixture } from "@/lib/world-cup-verified-snapshot";
 import type { TournamentStage } from "@/lib/tracker";
 
 export type PhaseStatus = "complete" | "in_progress" | "pending";
@@ -15,11 +15,39 @@ export type NextTournamentFixture = {
   away: string;
   dateUk: string;
   timeUk: string;
+  isLive?: boolean;
+  matchStatus?: "live" | "extra_time";
+  scoreHome?: number;
+  scoreAway?: number;
+  scoreAfter90Home?: number;
+  scoreAfter90Away?: number;
+  matchNote?: string;
 };
 
 /** Next family sweep knockout fixture (World Cup Final). */
 export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = (() => {
   const label = getNextFamilySweepFixtureLabel();
+  const liveMatch = label.match(
+    /^LIVE — EXTRA TIME:\s+(.+?)\s+(\d+)–(\d+)\s+(.+)$/,
+  );
+  if (liveMatch) {
+    const active = getActiveFamilyFixture();
+    return {
+      home: liveMatch[1]?.trim() ?? "Spain",
+      away: liveMatch[4]?.trim() ?? "Argentina",
+      dateUk: active?.dateUk ?? "19 Jul",
+      timeUk: "LIVE",
+      label,
+      isLive: true,
+      matchStatus: active?.matchStatus === "extra_time" ? "extra_time" : "live",
+      scoreHome: active?.scoreHome ?? 0,
+      scoreAway: active?.scoreAway ?? 0,
+      scoreAfter90Home: active?.scoreAfter90Home ?? 0,
+      scoreAfter90Away: active?.scoreAfter90Away ?? 0,
+      matchNote: active?.matchNote,
+    };
+  }
+
   const familyMatch = label.match(
     /^(.+?)\s+vs\s+(.+?)\s+—\s+Final\s+·\s+(.+?),\s+(.+)$/,
   );
@@ -129,7 +157,7 @@ function buildProgressCaption(phases: TournamentPhase[]): string {
 
 /**
  * Tournament-wide knockout progress (independent of family sweep eliminations).
- * Updated through 15 Jul 2026 — semi-finals complete; Spain vs Argentina in the Final.
+ * Updated through 19 Jul 2026 — World Cup Final live in extra time (0–0).
  */
 export function getTournamentPhaseProgress(): TournamentPhaseProgress {
   const phases = buildPhasesForFinal();
