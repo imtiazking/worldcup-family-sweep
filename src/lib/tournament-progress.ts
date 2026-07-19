@@ -1,4 +1,4 @@
-import { VERIFIED_SNAPSHOT_AS_OF, getNextFamilySweepFixtureLabel, getActiveFamilyFixture } from "@/lib/world-cup-verified-snapshot";
+import { VERIFIED_SNAPSHOT_AS_OF, getNextFamilySweepFixtureLabel, getActiveFamilyFixture, buildLivePhaseSummary, type FamilyFixtureGoalEvent } from "@/lib/world-cup-verified-snapshot";
 import type { TournamentStage } from "@/lib/tracker";
 
 export type PhaseStatus = "complete" | "in_progress" | "pending";
@@ -22,6 +22,8 @@ export type NextTournamentFixture = {
   scoreAfter90Home?: number;
   scoreAfter90Away?: number;
   matchNote?: string;
+  phaseSummary?: string;
+  matchEvents?: FamilyFixtureGoalEvent[];
 };
 
 /** Next family sweep knockout fixture (World Cup Final). */
@@ -45,6 +47,8 @@ export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = (() => {
       scoreAfter90Home: active?.scoreAfter90Home ?? 0,
       scoreAfter90Away: active?.scoreAfter90Away ?? 0,
       matchNote: active?.matchNote,
+      phaseSummary: active ? buildLivePhaseSummary(active) : undefined,
+      matchEvents: active?.matchEvents,
     };
   }
 

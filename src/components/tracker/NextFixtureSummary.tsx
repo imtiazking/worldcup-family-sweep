@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { NextTournamentFixture } from "@/lib/tournament-progress";
 import { revealTransition, useMotionSettings } from "./motion-utils";
+import { LiveGoalEvents } from "./LiveGoalEvents";
 
 type NextFixtureSummaryProps = {
   fixture: NextTournamentFixture;
@@ -47,10 +48,20 @@ export function NextFixtureSummary({
           <span className="mt-1 block text-xs text-white/55">
             Extra time in progress
           </span>
+          {fixture.phaseSummary && (
+            <span className="mt-0.5 block text-xs font-medium text-white/65">
+              {fixture.phaseSummary}
+            </span>
+          )}
           <span className="mt-0.5 block text-xs text-white/45">
             {fixture.scoreAfter90Home ?? 0}–{fixture.scoreAfter90Away ?? 0} after
             90 minutes
           </span>
+          <LiveGoalEvents
+            events={fixture.matchEvents ?? []}
+            className="mt-1 space-y-0.5"
+            itemClassName="text-xs text-white/50"
+          />
           {fixture.matchNote && (
             <span className="mt-1 block text-xs text-white/40">
               {fixture.matchNote}

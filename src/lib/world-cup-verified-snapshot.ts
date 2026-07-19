@@ -19,7 +19,13 @@ export type VerifiedTeamStatus = {
 export const VERIFIED_SNAPSHOT_SOURCE =
   "Official 2026 FIFA World Cup Final — manually verified live state (19 Jul 2026, extra time)";
 
-export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-19T21:44:00Z";
+export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-19T21:58:00Z";
+
+export type FamilyFixtureGoalEvent = {
+  minute: number;
+  scorer: string;
+  teamName: string;
+};
 
 export type FamilyFixtureMatchStatus =
   | "scheduled"
@@ -39,6 +45,7 @@ export type UpcomingFamilyFixture = {
   scoreAfter90Home?: number;
   scoreAfter90Away?: number;
   matchNote?: string;
+  matchEvents?: FamilyFixtureGoalEvent[];
 };
 
 export type FinalMatchLiveState = {
@@ -49,7 +56,27 @@ export type FinalMatchLiveState = {
   scoreAfter90Away: number;
   matchNote: string | null;
   statusLabel: string;
+  phaseSummary: string;
+  matchEvents: FamilyFixtureGoalEvent[];
 };
+
+export function formatFamilyFixtureGoalEvent(
+  event: FamilyFixtureGoalEvent,
+): string {
+  return `${event.minute}' — ${event.scorer} — ${event.teamName}`;
+}
+
+export function buildLivePhaseSummary(fixture: UpcomingFamilyFixture): string {
+  const home = fixture.scoreHome ?? 0;
+  const away = fixture.scoreAway ?? 0;
+
+  if (home === away) {
+    return "Extra time in progress";
+  }
+
+  const leader = home > away ? fixture.homeTeam : fixture.awayOpponent;
+  return `${leader} lead ${home}–${away} in extra time`;
+}
 
 export function isFamilyFixtureLive(
   fixture: UpcomingFamilyFixture | null | undefined,
@@ -74,6 +101,8 @@ export function buildFinalMatchLiveState(
     scoreAfter90Away: fixture.scoreAfter90Away ?? fixture.scoreAway ?? 0,
     matchNote: fixture.matchNote ?? null,
     statusLabel: status === "extra_time" ? "LIVE — EXTRA TIME" : "LIVE",
+    phaseSummary: buildLivePhaseSummary(fixture),
+    matchEvents: fixture.matchEvents ?? [],
   };
 }
 
@@ -194,8 +223,8 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Final",
     nextStageProbability: 100,
     reason:
-      "World Cup Final in progress — 0–0 after 90 minutes, extra time underway.",
-    nextFixture: "LIVE vs Spain — 0–0 (extra time)",
+      "World Cup Final in progress — trailing 0–1 in extra time (Ferran Torres 106').",
+    nextFixture: "LIVE vs Spain — 0–1 (extra time)",
     r16OpponentLocked: "Egypt",
   },
   {
@@ -239,8 +268,8 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
     stage: "Final",
     nextStageProbability: 100,
     reason:
-      "World Cup Final in progress — 0–0 after 90 minutes, extra time underway.",
-    nextFixture: "LIVE vs Argentina — 0–0 (extra time)",
+      "World Cup Final in progress — Spain lead 1–0 in extra time (Ferran Torres 106').",
+    nextFixture: "LIVE vs Argentina — 1–0 (extra time)",
     r16OpponentLocked: "Portugal",
   },
   {
@@ -280,11 +309,12 @@ export const VERIFIED_UPCOMING_FAMILY_FIXTURES: UpcomingFamilyFixture[] = [
     timeUk: "20:00",
     venue: "New York/New Jersey Stadium, East Rutherford",
     matchStatus: "extra_time",
-    scoreHome: 0,
+    scoreHome: 1,
     scoreAway: 0,
     scoreAfter90Home: 0,
     scoreAfter90Away: 0,
     matchNote: "Argentina reduced to 10 players",
+    matchEvents: [{ minute: 106, scorer: "Ferran Torres", teamName: "Spain" }],
   },
 ];
 

@@ -9,6 +9,7 @@ import type {
 import { formatCompletedFixtureScore } from "@/lib/world-cup-verified-snapshot";
 import { revealTransition, useMotionSettings } from "./motion-utils";
 import { FinalHeroTrophy } from "./FinalHeroTrophy";
+import { LiveGoalEvents } from "./LiveGoalEvents";
 import styles from "./world-cup-final-hero.module.css";
 
 type WorldCupFinalHeroProps = {
@@ -132,10 +133,18 @@ export function WorldCupFinalHero({
                 {matchup.awayTeam}
               </p>
               <p className={styles.livePhase}>Extra time in progress</p>
+              {matchup.live.phaseSummary && (
+                <p className={styles.liveLead}>{matchup.live.phaseSummary}</p>
+              )}
               <p className={styles.liveAfter90}>
                 {matchup.live.scoreAfter90Home}–{matchup.live.scoreAfter90Away} after
                 90 minutes
               </p>
+              <LiveGoalEvents
+                events={matchup.live.matchEvents}
+                className={styles.liveGoals}
+                itemClassName={styles.liveGoalItem}
+              />
               {matchup.live.matchNote && (
                 <p className={styles.liveNote}>{matchup.live.matchNote}</p>
               )}

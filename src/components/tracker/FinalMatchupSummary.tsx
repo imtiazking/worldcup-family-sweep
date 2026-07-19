@@ -1,4 +1,5 @@
 import type { FinalMatchupData } from "@/lib/round-of-32-bracket";
+import { LiveGoalEvents } from "./LiveGoalEvents";
 
 type FinalMatchupSummaryProps = {
   matchup: FinalMatchupData;
@@ -43,9 +44,19 @@ export function FinalMatchupSummary({
           <p className="mt-3 text-xs font-medium text-slate-700">
             Extra time in progress
           </p>
+          {live.phaseSummary && (
+            <p className="mt-1 text-xs font-medium text-slate-700">
+              {live.phaseSummary}
+            </p>
+          )}
           <p className="mt-1 text-xs text-slate-600">
             {live.scoreAfter90Home}–{live.scoreAfter90Away} after 90 minutes
           </p>
+          <LiveGoalEvents
+            events={live.matchEvents}
+            className="mt-2 space-y-0.5"
+            itemClassName="text-xs text-slate-600"
+          />
           {live.matchNote && (
             <p className="mt-2 text-xs text-slate-500">{live.matchNote}</p>
           )}
