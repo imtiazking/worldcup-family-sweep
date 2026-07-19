@@ -60,6 +60,7 @@ function classifyTeam(
   row: Pick<TeamStatusRowInput, "status" | "stage" | "nextStageProbability">,
 ): "qualified" | "pending" | "eliminated" {
   if (row.status === "eliminated") return "eliminated";
+  if (row.status === "winner") return "qualified";
   if (
     row.nextStageProbability !== null &&
     row.nextStageProbability >= 100 &&

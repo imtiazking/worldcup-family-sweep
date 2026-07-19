@@ -11,18 +11,47 @@ export function FinalMatchupSummary({
   className = "",
 }: FinalMatchupSummaryProps) {
   const live = matchup.live;
+  const completed = matchup.completed;
 
   return (
     <article
       className={[
         "rounded-2xl border px-6 py-5 text-center",
-        live
-          ? "border-red-300/60 bg-red-50/80"
-          : "border-amber-200 bg-amber-50/80",
+        completed
+          ? "border-amber-300/70 bg-amber-50/90"
+          : live
+            ? "border-red-300/60 bg-red-50/80"
+            : "border-amber-200 bg-amber-50/80",
         className,
       ].join(" ")}
     >
-      {live ? (
+      {completed ? (
+        <>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-800/80">
+            Spain win the World Cup
+          </p>
+          <p className="mt-2 font-[family-name:var(--font-bebas)] text-3xl tracking-wide text-slate-900">
+            {matchup.homeTeam} {completed.scoreHome}–{completed.scoreAway}{" "}
+            {matchup.awayTeam}
+          </p>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-800/75">
+            AET
+          </p>
+          {matchup.homeParticipant && matchup.awayParticipant && (
+            <p className="mt-2 text-sm font-medium text-slate-700">
+              {matchup.homeParticipant} vs {matchup.awayParticipant}
+            </p>
+          )}
+          <p className="mt-2 text-xs text-slate-600">
+            {completed.statusLabel}
+          </p>
+          <LiveGoalEvents
+            events={completed.goalEvents}
+            className="mt-2 space-y-0.5"
+            itemClassName="text-xs text-slate-600"
+          />
+        </>
+      ) : live ? (
         <>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <span className="premium-live-dot h-2 w-2 rounded-full bg-red-500" />

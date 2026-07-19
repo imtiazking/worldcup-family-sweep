@@ -1,6 +1,7 @@
 import {
   buildFinalMatchLiveState,
   getCompletedFixturesForStage,
+  getVerifiedFinalResult,
   VERIFIED_FAMILY_TEAM_STATUSES,
   VERIFIED_UPCOMING_FAMILY_FIXTURES,
   type CompletedFamilyFixture,
@@ -405,6 +406,18 @@ export function getConfirmedMutualFixtures(
   return result;
 }
 
+export type FinalMatchCompletedState = {
+  scoreHome: number;
+  scoreAway: number;
+  afterExtraTime: boolean;
+  winnerTeam: string;
+  loserTeam: string;
+  winnerParticipant: string | null;
+  loserParticipant: string | null;
+  statusLabel: string;
+  goalEvents: import("@/lib/world-cup-verified-snapshot").FamilyFixtureGoalEvent[];
+};
+
 export type FinalMatchupData = {
   homeTeam: string;
   awayTeam: string;
@@ -418,6 +431,7 @@ export type FinalMatchupData = {
   venueStadium: string | null;
   venueCity: string | null;
   live: FinalMatchLiveState | null;
+  completed: FinalMatchCompletedState | null;
 };
 
 export type SemiFinalResultDetail = CompletedFamilyFixture & {
@@ -546,6 +560,10 @@ export function buildSweepBracketData(
     const teamName = row.team?.name ?? "";
     const snapshot = snapshotForTeam(teamName);
 
+    if (row.team_status.status === "winner") {
+      continue;
+    }
+
     if (isFinalQualified(row)) {
       finalQualified.push({
         row,
@@ -650,34 +668,63 @@ export function buildSweepBracketData(
   assignConfirmedFixtureRoles(through);
 
   const upcomingFinal = VERIFIED_UPCOMING_FAMILY_FIXTURES[0] ?? null;
-  const homeFinalist = finalQualified.find(
-    (e) =>
-      e.row.team?.name?.toLowerCase() ===
-      upcomingFinal?.homeTeam.toLowerCase(),
+  const finalResult = getVerifiedFinalResult();
+  const homeRow = rows.find(
+    (row) =>
+      row.team?.name?.toLowerCase() ===
+      (finalResult?.homeTeam ?? upcomingFinal?.homeTeam ?? "").toLowerCase(),
   );
-  const awayFinalist = finalQualified.find(
-    (e) =>
-      e.row.team?.name?.toLowerCase() ===
-      upcomingFinal?.awayOpponent.toLowerCase(),
+  const awayRow = rows.find(
+    (row) =>
+      row.team?.name?.toLowerCase() ===
+      (finalResult?.awayTeam ?? upcomingFinal?.awayOpponent ?? "").toLowerCase(),
   );
-  const venueParts = parseVenueParts(upcomingFinal?.venue);
+  const venueSource = finalResult?.venue ?? upcomingFinal?.venue;
+  const venueParts = parseVenueParts(venueSource);
   const finalMatchup: FinalMatchupData | null =
-    upcomingFinal && homeFinalist && awayFinalist
+    finalResult && homeRow && awayRow
       ? {
-          homeTeam: upcomingFinal.homeTeam,
-          awayTeam: upcomingFinal.awayOpponent,
-          homeParticipant: homeFinalist.row.participant?.name ?? null,
-          awayParticipant: awayFinalist.row.participant?.name ?? null,
-          homeFlagEmoji: homeFinalist.flagEmoji,
-          awayFlagEmoji: awayFinalist.flagEmoji,
-          dateUk: upcomingFinal.dateUk,
-          timeUk: upcomingFinal.timeUk,
-          venue: upcomingFinal.venue ?? null,
+          homeTeam: finalResult.homeTeam,
+          awayTeam: finalResult.awayTeam,
+          homeParticipant: homeRow.participant?.name ?? finalResult.winnerParticipant,
+          awayParticipant: awayRow.participant?.name ?? finalResult.loserParticipant,
+          homeFlagEmoji: homeRow.team?.flag_emoji?.trim() || "🇪🇸",
+          awayFlagEmoji: awayRow.team?.flag_emoji?.trim() || "🇦🇷",
+          dateUk: finalResult.dateUk,
+          timeUk: finalResult.timeUk,
+          venue: finalResult.venue,
           venueStadium: venueParts.stadium,
           venueCity: venueParts.city,
-          live: buildFinalMatchLiveState(upcomingFinal),
+          live: null,
+          completed: {
+            scoreHome: finalResult.scoreHome,
+            scoreAway: finalResult.scoreAway,
+            afterExtraTime: finalResult.afterExtraTime,
+            winnerTeam: finalResult.winnerTeam,
+            loserTeam: finalResult.loserTeam,
+            winnerParticipant: homeRow.participant?.name ?? finalResult.winnerParticipant,
+            loserParticipant: awayRow.participant?.name ?? finalResult.loserParticipant,
+            statusLabel: finalResult.statusLabel,
+            goalEvents: [finalResult.winningGoal],
+          },
         }
-      : null;
+      : upcomingFinal && homeRow && awayRow
+        ? {
+            homeTeam: upcomingFinal.homeTeam,
+            awayTeam: upcomingFinal.awayOpponent,
+            homeParticipant: homeRow.participant?.name ?? null,
+            awayParticipant: awayRow.participant?.name ?? null,
+            homeFlagEmoji: homeRow.team?.flag_emoji?.trim() || "⚽",
+            awayFlagEmoji: awayRow.team?.flag_emoji?.trim() || "⚽",
+            dateUk: upcomingFinal.dateUk,
+            timeUk: upcomingFinal.timeUk,
+            venue: upcomingFinal.venue ?? null,
+            venueStadium: venueParts.stadium,
+            venueCity: venueParts.city,
+            live: buildFinalMatchLiveState(upcomingFinal),
+            completed: null,
+          }
+        : null;
 
   const completedSemiFinals = getCompletedFixturesForStage("Semi-finals");
   const completedSemiFinalDetails = buildSemiFinalDetails(

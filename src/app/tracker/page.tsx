@@ -139,9 +139,7 @@ export default async function TrackerPage() {
 
   const winner = rows.find((r) => r.team_status.status === "winner");
   const alive = rows.filter(
-    (r) =>
-      r.team_status.status !== "eliminated" &&
-      r.team_status.status !== "winner",
+    (r) => r.team_status.status !== "eliminated",
   );
   const eliminated = rows.filter(
     (r) => r.team_status.status === "eliminated",

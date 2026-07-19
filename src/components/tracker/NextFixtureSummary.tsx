@@ -15,7 +15,43 @@ export function NextFixtureSummary({
   className = "",
 }: NextFixtureSummaryProps) {
   const { reduceMotion } = useMotionSettings();
+  const isComplete = fixture.isComplete === true;
   const isLive = fixture.isLive === true;
+
+  if (isComplete) {
+    return (
+      <motion.div
+        className={[
+          "text-center text-sm text-white/60 md:text-base",
+          className,
+        ].join(" ")}
+        initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={revealTransition(0.18, reduceMotion)}
+      >
+        <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-wc-gold md:text-xs">
+          Spain are World Cup champions
+        </span>
+        <span className="mt-1 block font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-white md:text-3xl">
+          {fixture.home} {fixture.scoreHome ?? 0}–{fixture.scoreAway ?? 0}{" "}
+          {fixture.away}
+        </span>
+        <span className="mt-1 block text-xs font-medium uppercase tracking-[0.16em] text-wc-gold/80">
+          AET · {fixture.statusLabel ?? "Full time after extra time"}
+        </span>
+        {fixture.winnerParticipant && (
+          <span className="mt-2 block text-sm text-white/75">
+            {fixture.winnerParticipant} wins the Family World Cup Sweep
+          </span>
+        )}
+        <LiveGoalEvents
+          events={fixture.matchEvents ?? []}
+          className="mt-2 space-y-0.5"
+          itemClassName="text-xs text-white/45"
+        />
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

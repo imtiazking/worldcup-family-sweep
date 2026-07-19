@@ -29,6 +29,7 @@ import {
   type TrackerTab,
 } from "./TrackerMobileTabs";
 import { WinnerBanner } from "./WinnerBanner";
+import { ChampionCeremonyButton } from "./ChampionCeremonyButton";
 import { revealTransition, useMotionSettings } from "./motion-utils";
 
 type TrackerExperienceProps = {
@@ -135,6 +136,7 @@ function DesktopHeroExtras({
     <div className="hidden md:block">
       <TournamentStatsStrip stats={stats} />
       {winner && <WinnerBanner winner={winner} />}
+      {hasWinner && <ChampionCeremonyButton className="mt-4" />}
       <FloatingTrophy hasWinner={hasWinner} />
       <NextFixtureSummary
         fixture={stats.tournamentProgress.nextFixture}
@@ -212,6 +214,7 @@ export function TrackerExperience({
               fixture={stats.tournamentProgress.nextFixture}
               className="mt-3"
             />
+            {hasWinner && <ChampionCeremonyButton className="mt-4" />}
             <TrackerSoundControl className="mt-2" />
             <TournamentStatsStrip stats={stats} className="mt-2" />
           </div>

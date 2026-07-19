@@ -121,9 +121,7 @@ export function computeTournamentStats(rows: TrackerRow[]): TournamentStats {
     (r) => r.team_status.status === "eliminated",
   ).length;
   const alive = rows.filter(
-    (r) =>
-      r.team_status.status !== "eliminated" &&
-      r.team_status.status !== "winner",
+    (r) => r.team_status.status !== "eliminated",
   ).length;
   const eliminationPercent =
     total > 0 ? Math.round((eliminated / total) * 100) : 0;

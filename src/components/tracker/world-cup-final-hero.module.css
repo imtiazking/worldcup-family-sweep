@@ -591,6 +591,56 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
+.championBanner {
+  margin: 0 auto;
+  max-width: 38rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212, 175, 55, 0.18), transparent 70%),
+    rgba(15, 23, 42, 0.55);
+}
+
+.championBannerTitle {
+  margin: 0;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: clamp(2rem, 7vw, 3.75rem);
+  line-height: 0.95;
+  letter-spacing: 0.08em;
+  color: #f0d060;
+}
+
+.championScore {
+  margin: 0.75rem 0 0;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: clamp(2.25rem, 8vw, 4rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+.championSweep {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.championStatus {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.85);
+}
+
+.completedTrophyWrap {
+  margin-top: 0.75rem;
+  transform: scale(0.82);
+}
+
 .liveAfter90 {
   margin: 0.35rem 0 0;
   font-size: 0.8rem;

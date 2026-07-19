@@ -16,6 +16,9 @@ const SNAPSHOT_BY_TEAM = new Map(
 
 function formatNextMatch(row: TrackerRow): string | null {
   const teamName = row.team?.name ?? "";
+  if (row.team_status.status === "winner") {
+    return "World Cup champions — Family Sweep winner";
+  }
   if (row.team_status.status === "eliminated") return null;
 
   const stage = row.team_status.stage;
@@ -145,7 +148,7 @@ export function AliveTeamsSection({
               </div>
 
               <span className="rounded-full bg-emerald-400/10 px-3 py-1 text-xs text-emerald-300">
-                Alive
+                {row.team_status.status === "winner" ? "Champion" : "Alive"}
               </span>
             </div>
 

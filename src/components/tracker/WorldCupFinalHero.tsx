@@ -118,7 +118,28 @@ export function WorldCupFinalHero({
 
       <div className={styles.inner}>
         <header className={styles.header}>
-          {matchup.live ? (
+          {matchup.completed ? (
+            <div className={styles.championBanner} aria-live="polite">
+              <p id="world-cup-final-heading" className={styles.championBannerTitle}>
+                SPAIN ARE WORLD CHAMPIONS
+              </p>
+              <p className={styles.championScore}>
+                {matchup.homeTeam} {matchup.completed.scoreHome}–
+                {matchup.completed.scoreAway} {matchup.awayTeam}
+              </p>
+              <p className={styles.championSweep}>
+                {matchup.completed.winnerParticipant} wins the Family World Cup Sweep
+              </p>
+              <p className={styles.championStatus}>
+                AET · {matchup.completed.statusLabel}
+              </p>
+              <LiveGoalEvents
+                events={matchup.completed.goalEvents}
+                className={styles.liveGoals}
+                itemClassName={styles.liveGoalItem}
+              />
+            </div>
+          ) : matchup.live ? (
             <div className={styles.liveBanner} aria-live="polite">
               <div className={styles.liveIndicator}>
                 <span className={styles.liveDot} aria-hidden />
@@ -181,7 +202,25 @@ export function WorldCupFinalHero({
           />
 
           <div className={styles.trophyStage}>
-            {matchup.live ? (
+            {matchup.completed ? (
+              <>
+                <p
+                  className={styles.liveCentreScore}
+                  aria-label={`Final score ${matchup.completed.scoreHome} to ${matchup.completed.scoreAway}`}
+                >
+                  <span className={styles.liveCentreScoreNum}>
+                    {matchup.completed.scoreHome}
+                  </span>
+                  <span className={styles.liveCentreScoreSep}>–</span>
+                  <span className={styles.liveCentreScoreNum}>
+                    {matchup.completed.scoreAway}
+                  </span>
+                </p>
+                <div className={styles.completedTrophyWrap}>
+                  <FinalHeroTrophy />
+                </div>
+              </>
+            ) : matchup.live ? (
               <p className={styles.liveCentreScore} aria-label={`Score ${matchup.live.scoreHome} to ${matchup.live.scoreAway}`}>
                 <span className={styles.liveCentreScoreNum}>{matchup.live.scoreHome}</span>
                 <span className={styles.liveCentreScoreSep}>–</span>
@@ -242,9 +281,11 @@ export function WorldCupFinalHero({
             Glory. Bragging Rights. Family Legend.
           </p>
           <p className={styles.grandPrizeFootnote}>
-            {matchup.live
-              ? "Final in progress — result pending."
-              : "One winner will be crowned champion."}
+            {matchup.completed
+              ? `${matchup.completed.winnerParticipant} — Family Sweep Champion.`
+              : matchup.live
+                ? "Final in progress — result pending."
+                : "One winner will be crowned champion."}
           </p>
         </aside>
 

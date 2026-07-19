@@ -1,4 +1,4 @@
-import { VERIFIED_SNAPSHOT_AS_OF, getNextFamilySweepFixtureLabel, getActiveFamilyFixture, buildLivePhaseSummary, type FamilyFixtureGoalEvent } from "@/lib/world-cup-verified-snapshot";
+import { VERIFIED_SNAPSHOT_AS_OF, getNextFamilySweepFixtureLabel, getActiveFamilyFixture, buildLivePhaseSummary, getVerifiedFinalResult, type FamilyFixtureGoalEvent } from "@/lib/world-cup-verified-snapshot";
 import type { TournamentStage } from "@/lib/tracker";
 
 export type PhaseStatus = "complete" | "in_progress" | "pending";
@@ -24,10 +24,30 @@ export type NextTournamentFixture = {
   matchNote?: string;
   phaseSummary?: string;
   matchEvents?: FamilyFixtureGoalEvent[];
+  isComplete?: boolean;
+  winnerParticipant?: string;
+  statusLabel?: string;
 };
 
 /** Next family sweep knockout fixture (World Cup Final). */
 export const NEXT_TOURNAMENT_FIXTURE: NextTournamentFixture = (() => {
+  const finalResult = getVerifiedFinalResult();
+  if (finalResult) {
+    return {
+      home: finalResult.homeTeam,
+      away: finalResult.awayTeam,
+      dateUk: finalResult.dateUk,
+      timeUk: finalResult.timeUk,
+      label: getNextFamilySweepFixtureLabel(),
+      isComplete: true,
+      scoreHome: finalResult.scoreHome,
+      scoreAway: finalResult.scoreAway,
+      winnerParticipant: finalResult.winnerParticipant,
+      statusLabel: finalResult.statusLabel,
+      matchEvents: [finalResult.winningGoal],
+    };
+  }
+
   const label = getNextFamilySweepFixtureLabel();
   const liveMatch = label.match(
     /^LIVE — EXTRA TIME:\s+(.+?)\s+(\d+)–(\d+)\s+(.+)$/,
@@ -96,7 +116,18 @@ export type TournamentPhaseProgress = {
   nextFixture: NextTournamentFixture;
 };
 
+function buildPhasesComplete(): TournamentPhase[] {
+  return DISPLAY_PHASES.map((phase) => ({
+    ...phase,
+    status: "complete" as const,
+  }));
+}
+
 function buildPhasesForFinal(): TournamentPhase[] {
+  if (getVerifiedFinalResult()) {
+    return buildPhasesComplete();
+  }
+
   return DISPLAY_PHASES.map((phase) => {
     if (
       phase.id === "Group Stage" ||
@@ -144,6 +175,10 @@ function computeGroupStagePercent(phases: TournamentPhase[]): number {
 }
 
 function buildProgressCaption(phases: TournamentPhase[]): string {
+  if (getVerifiedFinalResult()) {
+    return "Tournament complete · Spain are World Cup champions";
+  }
+
   const group = phases.find((p) => p.id === "Group Stage");
   const active = phases.find((p) => p.status === "in_progress");
 
@@ -161,11 +196,13 @@ function buildProgressCaption(phases: TournamentPhase[]): string {
 
 /**
  * Tournament-wide knockout progress (independent of family sweep eliminations).
- * Updated through 19 Jul 2026 — World Cup Final live in extra time (0–0).
+ * Updated through 19 Jul 2026 — World Cup Final complete (Spain 1–0 Argentina AET).
  */
 export function getTournamentPhaseProgress(): TournamentPhaseProgress {
   const phases = buildPhasesForFinal();
-  const current = phases.find((p) => p.status === "in_progress") ?? phases[0];
+  const current = getVerifiedFinalResult()
+    ? phases[phases.length - 1]
+    : phases.find((p) => p.status === "in_progress") ?? phases[0];
 
   return {
     asOf: VERIFIED_SNAPSHOT_AS_OF,

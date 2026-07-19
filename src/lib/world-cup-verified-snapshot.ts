@@ -1,11 +1,11 @@
 /**
  * Manually verified World Cup 2026 knockout status for family sweep teams.
- * Source: Official results through the Final (updated 19 Jul 2026, extra time).
+ * Source: Official results — World Cup Final complete (19 Jul 2026, AET).
  */
 
 export type VerifiedTeamStatus = {
   teamName: string;
-  status: "active" | "eliminated";
+  status: "active" | "eliminated" | "winner";
   stage: string;
   nextStageProbability: number | null;
   reason: string;
@@ -17,9 +17,9 @@ export type VerifiedTeamStatus = {
 };
 
 export const VERIFIED_SNAPSHOT_SOURCE =
-  "Official 2026 FIFA World Cup Final — manually verified live state (19 Jul 2026, extra time)";
+  "Official 2026 FIFA World Cup Final — verified full-time result (19 Jul 2026, AET)";
 
-export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-19T21:58:00Z";
+export const VERIFIED_SNAPSHOT_AS_OF = "2026-07-19T22:04:00Z";
 
 export type FamilyFixtureGoalEvent = {
   minute: number;
@@ -110,6 +110,48 @@ export function formatFinalLiveScore(fixture: UpcomingFamilyFixture): string {
   return `${fixture.homeTeam} ${fixture.scoreHome ?? 0}–${fixture.scoreAway ?? 0} ${fixture.awayOpponent}`;
 }
 
+export type VerifiedFinalResult = {
+  homeTeam: string;
+  awayTeam: string;
+  scoreHome: number;
+  scoreAway: number;
+  afterExtraTime: true;
+  dateUk: string;
+  timeUk: string;
+  venue: string;
+  statusLabel: string;
+  winnerTeam: string;
+  loserTeam: string;
+  winnerParticipant: string;
+  loserParticipant: string;
+  winningGoal: FamilyFixtureGoalEvent;
+};
+
+export const VERIFIED_FINAL_RESULT: VerifiedFinalResult = {
+  homeTeam: "Spain",
+  awayTeam: "Argentina",
+  scoreHome: 1,
+  scoreAway: 0,
+  afterExtraTime: true,
+  dateUk: "19 Jul",
+  timeUk: "20:00",
+  venue: "New York/New Jersey Stadium, East Rutherford",
+  statusLabel: "Full time after extra time",
+  winnerTeam: "Spain",
+  loserTeam: "Argentina",
+  winnerParticipant: "Zavier",
+  loserParticipant: "Imi",
+  winningGoal: { minute: 106, scorer: "Ferran Torres", teamName: "Spain" },
+};
+
+export function isTournamentComplete(): boolean {
+  return VERIFIED_FINAL_RESULT !== null;
+}
+
+export function getVerifiedFinalResult(): VerifiedFinalResult | null {
+  return VERIFIED_FINAL_RESULT;
+}
+
 export type ExternalBracketAdvancer = {
   teamName: string;
   flagEmoji: string;
@@ -131,6 +173,14 @@ export type CompletedFamilyFixture = {
 
 /** Confirmed family-sweep knockout results (most recent first). */
 export const VERIFIED_COMPLETED_FAMILY_FIXTURES: CompletedFamilyFixture[] = [
+  {
+    homeTeam: "Spain",
+    awayTeam: "Argentina",
+    scoreHome: 1,
+    scoreAway: 0,
+    stage: "Final",
+    afterExtraTime: true,
+  },
   {
     homeTeam: "England",
     awayTeam: "Argentina",
@@ -219,12 +269,12 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   },
   {
     teamName: "Argentina",
-    status: "active",
+    status: "eliminated",
     stage: "Final",
-    nextStageProbability: 100,
+    nextStageProbability: 0,
     reason:
-      "World Cup Final in progress — trailing 0–1 in extra time (Ferran Torres 106').",
-    nextFixture: "LIVE vs Spain — 0–1 (extra time)",
+      "Runners-up — lost World Cup Final 0–1 to Spain (AET, 19 Jul). Ferran Torres 106'.",
+    nextFixture: null,
     r16OpponentLocked: "Egypt",
   },
   {
@@ -264,12 +314,12 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   },
   {
     teamName: "Spain",
-    status: "active",
-    stage: "Final",
+    status: "winner",
+    stage: "World Cup Winner",
     nextStageProbability: 100,
     reason:
-      "World Cup Final in progress — Spain lead 1–0 in extra time (Ferran Torres 106').",
-    nextFixture: "LIVE vs Argentina — 1–0 (extra time)",
+      "World Cup champions — beat Argentina 1–0 (AET, 19 Jul). Ferran Torres 106'.",
+    nextFixture: null,
     r16OpponentLocked: "Portugal",
   },
   {
@@ -300,31 +350,22 @@ export const VERIFIED_FAMILY_TEAM_STATUSES: VerifiedTeamStatus[] = [
   },
 ];
 
-/** Upcoming final fixture — remaining family sweep tie only */
-export const VERIFIED_UPCOMING_FAMILY_FIXTURES: UpcomingFamilyFixture[] = [
-  {
-    homeTeam: "Spain",
-    awayOpponent: "Argentina",
-    dateUk: "19 Jul",
-    timeUk: "20:00",
-    venue: "New York/New Jersey Stadium, East Rutherford",
-    matchStatus: "extra_time",
-    scoreHome: 1,
-    scoreAway: 0,
-    scoreAfter90Home: 0,
-    scoreAfter90Away: 0,
-    matchNote: "Argentina reduced to 10 players",
-    matchEvents: [{ minute: 106, scorer: "Ferran Torres", teamName: "Spain" }],
-  },
-];
+/** No remaining fixtures — tournament complete. */
+export const VERIFIED_UPCOMING_FAMILY_FIXTURES: UpcomingFamilyFixture[] = [];
 
 export function getActiveFamilyFixture(): UpcomingFamilyFixture | null {
   return VERIFIED_UPCOMING_FAMILY_FIXTURES[0] ?? null;
 }
 
 export function getNextFamilySweepFixtureLabel(): string {
+  const finalResult = getVerifiedFinalResult();
+  if (finalResult) {
+    const suffix = finalResult.afterExtraTime ? " (AET)" : "";
+    return `${finalResult.homeTeam} ${finalResult.scoreHome}–${finalResult.scoreAway} ${finalResult.awayTeam}${suffix} — Final complete`;
+  }
+
   const next = VERIFIED_UPCOMING_FAMILY_FIXTURES[0];
-  if (!next) return "No upcoming fixtures";
+  if (!next) return "Tournament complete";
 
   if (isFamilyFixtureLive(next)) {
     return `LIVE — EXTRA TIME: ${formatFinalLiveScore(next)}`;
