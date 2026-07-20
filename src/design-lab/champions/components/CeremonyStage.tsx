@@ -1,19 +1,23 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
-import {
-  CHAMPION_CUTOUT_IMAGE_HEIGHT,
-  CHAMPION_CUTOUT_IMAGE_SRC,
-  CHAMPION_CUTOUT_IMAGE_WIDTH,
-} from "../constants";
+import { CHAMPIONS_PROTOTYPE } from "../constants";
+import type { CeremonyPresentation } from "../types";
 import { CeremonyPodium } from "./CeremonyPodium";
+import { CeremonySpotlights } from "./CeremonySpotlights";
+import { WinnersPodiumStand } from "./WinnersPodiumStand";
+import { WorldCupTrophy } from "./WorldCupTrophy";
 import styles from "../champions.module.css";
 
 type CeremonyStageProps = {
-  participantName: string;
+  presentation?: CeremonyPresentation;
   glowActive: boolean;
+  climaxGlow?: boolean;
+  spotlightsActive?: boolean;
   podiumVisible: boolean;
+  podiumBaseVisible?: boolean;
+  thirdPodiumVisible?: boolean;
+  secondPodiumVisible?: boolean;
   reduceMotion: boolean;
   foregroundConfetti: boolean;
   foregroundFireworks: boolean;
@@ -32,9 +36,14 @@ const MOBILE_FIREWORKS = 2;
 const DESKTOP_FIREWORKS = 4;
 
 export function CeremonyStage({
-  participantName,
+  presentation = "family",
   glowActive,
+  climaxGlow = false,
+  spotlightsActive = false,
   podiumVisible,
+  podiumBaseVisible = false,
+  thirdPodiumVisible = false,
+  secondPodiumVisible = false,
   reduceMotion,
   foregroundConfetti,
   foregroundFireworks,
@@ -44,6 +53,7 @@ export function CeremonyStage({
   stadiumLightsBoost,
   isMobile,
 }: CeremonyStageProps) {
+  const isTrophyMode = presentation === "trophy-podium";
   const rearConfettiCount = isMobile ? REAR_CONFETTI_MOBILE : REAR_CONFETTI_DESKTOP;
   const foregroundConfettiCount = isMobile
     ? FOREGROUND_CONFETTI_MOBILE
@@ -63,20 +73,24 @@ export function CeremonyStage({
     isMobile ? styles.ceremonyStageMobile : "",
     ceremonySettled ? styles.ceremonyStageSettled : "",
     stadiumLightsBoost ? styles.ceremonyStageLightsBoost : "",
+    isTrophyMode ? styles.ceremonyStageTrophy : "",
   ].join(" ");
 
   const fireworkCount = isMobile ? MOBILE_FIREWORKS : DESKTOP_FIREWORKS;
 
+  const winnerLayerClass = [
+    styles.stageWinnerLayer,
+    isTrophyMode ? styles.stageWinnerLayerTrophy : styles.stageWinnerLayerPodiumOnly,
+  ].join(" ");
+
   return (
     <div className={styles.ceremonyStageRoot}>
       <div className={stageClass}>
-        {/* Layer 1 — far stadium */}
         <div className={styles.stageFarStadium} aria-hidden>
           <div className={styles.stageStadiumArc} />
           <div className={styles.stageStadiumCrowd} />
         </div>
 
-        {/* Layer 2 — crowd lights */}
         <div className={styles.stageCrowdLights} aria-hidden>
           <span className={styles.stageCrowdBeam} />
           <span className={styles.stageCrowdBeam} />
@@ -84,7 +98,6 @@ export function CeremonyStage({
           <span className={styles.stageCrowdBeam} />
         </div>
 
-        {/* Layer 3 — background fireworks */}
         {foregroundFireworks && (
           <div className={styles.stageFireworks} aria-hidden>
             {Array.from({ length: fireworkCount }).map((_, index) => (
@@ -93,7 +106,6 @@ export function CeremonyStage({
           </div>
         )}
 
-        {/* Rear confetti — passes behind the winner */}
         {foregroundConfetti && (
           <div className={styles.stageConfettiRear} aria-hidden>
             {Array.from({ length: rearConfettiCount }).map((_, index) => (
@@ -121,63 +133,93 @@ export function CeremonyStage({
           </div>
         )}
 
-        {/* Layer 4 — trophy rear lighting + champion cut-out */}
-        <div className={styles.stageWinnerLayer}>
-          <div
-            className={[
-              styles.trophyGodRays,
-              glowActive ? styles.trophyGodRaysActive : "",
-            ].join(" ")}
-            aria-hidden
-          />
-          <div
-            className={[
-              styles.trophyHalo,
-              glowActive ? styles.trophyHaloPulse : "",
-            ].join(" ")}
-            aria-hidden
-          />
-          <div className={styles.trophyBloom} aria-hidden />
-          <div className={styles.trophyCoreGlow} aria-hidden />
-          <div className={styles.trophyParticles} aria-hidden>
-            {Array.from({ length: isMobile ? 4 : 8 }).map((_, index) => (
-              <span
-                key={index}
-                className={styles.trophyParticle}
-                style={{
-                  left: `${30 + index * 5}%`,
-                  animationDelay: `${index * 0.32}s`,
-                }}
+        <div className={winnerLayerClass}>
+          {isTrophyMode && (
+            <>
+              <div
+                className={[
+                  styles.trophyGodRays,
+                  glowActive ? styles.trophyGodRaysActive : "",
+                  styles.trophyGodRaysHero,
+                ].join(" ")}
+                aria-hidden
               />
-            ))}
-          </div>
+              <div
+                className={[
+                  styles.trophyHalo,
+                  glowActive ? styles.trophyHaloPulse : "",
+                  styles.trophyHaloHero,
+                ].join(" ")}
+                aria-hidden
+              />
+              <div
+                className={[styles.trophyBloom, styles.trophyBloomHero].join(" ")}
+                aria-hidden
+              />
+              <div
+                className={[styles.trophyCoreGlow, styles.trophyCoreGlowHero].join(" ")}
+                aria-hidden
+              />
+              <div
+                className={[styles.trophyParticles, styles.trophyParticlesHero].join(" ")}
+                aria-hidden
+              >
+                {Array.from({ length: isMobile ? 6 : 12 }).map((_, index) => (
+                  <span
+                    key={index}
+                    className={styles.trophyParticle}
+                    style={{
+                      left: `${20 + index * 5.5}%`,
+                      animationDelay: `${index * 0.28}s`,
+                    }}
+                  />
+                ))}
+              </div>
 
-          {showBurstFlash && (
-            <div className={styles.stageImpactBurst} aria-hidden />
+              {showBurstFlash && (
+                <div
+                  className={[styles.stageImpactBurst, styles.stageImpactBurstHero].join(
+                    " ",
+                  )}
+                  aria-hidden
+                />
+              )}
+
+              <CeremonySpotlights
+                active={spotlightsActive}
+                climax={climaxGlow}
+                reduceMotion={reduceMotion}
+              />
+            </>
           )}
 
-          <div className={styles.winnerCutoutWrap}>
-            <div className={styles.winnerRimLight} aria-hidden />
-            <Image
-              src={CHAMPION_CUTOUT_IMAGE_SRC}
-              alt={`${participantName} lifting the FIFA World Cup trophy`}
-              width={CHAMPION_CUTOUT_IMAGE_WIDTH}
-              height={CHAMPION_CUTOUT_IMAGE_HEIGHT}
-              className={styles.winnerCutout}
-              priority
-              sizes="(max-width: 767px) 78vw, (max-width: 1024px) 58vw, 43.5rem"
-            />
-          </div>
+          {isTrophyMode ? (
+            <div className={styles.trophyHeroStack}>
+              <WorldCupTrophy
+                glowActive={glowActive}
+                climaxGlow={climaxGlow}
+                reduceMotion={reduceMotion}
+              />
+              <WinnersPodiumStand
+                first={CHAMPIONS_PROTOTYPE.podium.first}
+                second={CHAMPIONS_PROTOTYPE.podium.second}
+                third={CHAMPIONS_PROTOTYPE.podium.third}
+                podiumBaseVisible={podiumBaseVisible}
+                thirdVisible={thirdPodiumVisible}
+                secondVisible={secondPodiumVisible}
+                centerVisible={podiumVisible}
+                reduceMotion={reduceMotion}
+                goldPulse={climaxGlow}
+              />
+            </div>
+          ) : (
+            <CeremonyPodium visible={podiumVisible} />
+          )}
 
-          <CeremonyPodium visible={podiumVisible} />
           <div className={styles.stagePodiumShadow} aria-hidden />
-          <div className={styles.stageContactShadow} aria-hidden />
-
-          <div className={styles.stageLegSmoke} aria-hidden />
           <div className={styles.stagePedestalMist} aria-hidden />
         </div>
 
-        {/* Layer 5 — foreground atmosphere */}
         <div className={styles.stageForeground} aria-hidden>
           <div className={styles.stageSmokeLeft} />
           <div className={styles.stageSmokeRight} />
