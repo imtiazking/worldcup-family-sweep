@@ -1,10 +1,14 @@
 import {
-  buildLeaderboard,
-  normalizeStage,
-  type TrackerRow,
-} from "@/lib/tracker";
-import type { CeremonyParticipant } from "@/design-lab/champions/types";
-import { CHAMPIONS_PROTOTYPE } from "@/design-lab/champions/constants";
+  CHAMPIONS_PROTOTYPE,
+} from "@/design-lab/champions/constants";
+import type {
+  CeremonyFinalData,
+  CeremonyParticipant,
+  CeremonyPodiumData,
+  CeremonyPodiumEntry,
+} from "@/design-lab/champions/types";
+import type { TrackerRow } from "@/lib/tracker";
+import { normalizeStage } from "@/lib/tracker";
 
 export type ChampionsCeremonyData = {
   eventTitle: string;
@@ -13,8 +17,13 @@ export type ChampionsCeremonyData = {
   champion: CeremonyParticipant;
   runnerUp: CeremonyParticipant;
   secondRunnerUp: CeremonyParticipant;
+  podium: CeremonyPodiumData;
+  final: CeremonyFinalData;
   closing: (typeof CHAMPIONS_PROTOTYPE)["closing"];
 };
+
+/** Verified tournament third place — family sweep maps to England (Siyana). */
+const VERIFIED_THIRD_PLACE_TEAM = "england";
 
 function toCeremonyParticipant(
   row: TrackerRow,
@@ -28,9 +37,44 @@ function toCeremonyParticipant(
   };
 }
 
+function buildPodiumEntry(
+  participant: CeremonyParticipant,
+  place: 1 | 2 | 3,
+): CeremonyPodiumEntry {
+  const prototype =
+    place === 1
+      ? CHAMPIONS_PROTOTYPE.podium.first
+      : place === 2
+        ? CHAMPIONS_PROTOTYPE.podium.second
+        : CHAMPIONS_PROTOTYPE.podium.third;
+
+  const placeLabel =
+    place === 1
+      ? "🥇 1ST PLACE"
+      : place === 2
+        ? "🥈 2ND PLACE"
+        : "🥉 3RD PLACE";
+
+  const roleLabel =
+    place === 1
+      ? "WORLD CUP CHAMPION"
+      : place === 2
+        ? "RUNNER-UP"
+        : "THIRD PLACE";
+
+  return {
+    ...prototype,
+    team: participant.team,
+    flagEmoji: participant.flagEmoji,
+    placeLabel,
+    roleLabel,
+    participantName: participant.name,
+  };
+}
+
 /**
  * Builds production ceremony participants from verified tracker rows.
- * Second runner-up = highest-ranked eliminated semi-finalist (family sweep podium).
+ * Third place uses the verified England assignment (tournament bronze medalist).
  */
 export function buildCeremonyDataFromRows(
   rows: TrackerRow[],
@@ -45,30 +89,31 @@ export function buildCeremonyDataFromRows(
   );
   if (!runnerUpRow) return null;
 
-  const thirdPlaceEntry = buildLeaderboard(rows).find(
-    (entry) =>
-      entry.status === "eliminated" && entry.stage === "Semi Final",
+  const thirdPlaceRow = rows.find(
+    (row) => row.team?.name?.trim().toLowerCase() === VERIFIED_THIRD_PLACE_TEAM,
   );
-  const thirdPlaceRow = thirdPlaceEntry
-    ? rows.find(
-        (row) =>
-          row.participant?.name === thirdPlaceEntry.participantName &&
-          row.team?.name === thirdPlaceEntry.teamName,
-      )
-    : undefined;
-
   if (!thirdPlaceRow) return null;
+
+  const champion = toCeremonyParticipant(winner, "Champion");
+  const runnerUp = toCeremonyParticipant(runnerUpRow, "Runner-up");
+  const secondRunnerUp = toCeremonyParticipant(thirdPlaceRow, "Third place");
 
   return {
     eventTitle: CHAMPIONS_PROTOTYPE.eventTitle,
     championHeading: CHAMPIONS_PROTOTYPE.championHeading,
     championSubheading: CHAMPIONS_PROTOTYPE.championSubheading,
-    champion: toCeremonyParticipant(winner, "Champion"),
-    runnerUp: toCeremonyParticipant(runnerUpRow, "Runner-up"),
-    secondRunnerUp: toCeremonyParticipant(
-      thirdPlaceRow,
-      "Second runner-up",
-    ),
+    champion,
+    runnerUp,
+    secondRunnerUp,
+    podium: {
+      first: buildPodiumEntry(champion, 1),
+      second: buildPodiumEntry(runnerUp, 2),
+      third: buildPodiumEntry(secondRunnerUp, 3),
+    },
+    final: {
+      scoreLine: "SPAIN 1–0 ARGENTINA",
+      note: "AET",
+    },
     closing: CHAMPIONS_PROTOTYPE.closing,
   };
 }

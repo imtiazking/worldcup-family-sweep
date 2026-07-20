@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CHAMPIONS_PROTOTYPE } from "../constants";
-import type { CeremonyPresentation } from "../types";
+import type { CeremonyPodiumData, CeremonyPresentation } from "../types";
 import { CeremonyPodium } from "./CeremonyPodium";
 import { CeremonySpotlights } from "./CeremonySpotlights";
 import { WinnersPodiumStand } from "./WinnersPodiumStand";
@@ -11,6 +11,7 @@ import styles from "../champions.module.css";
 
 type CeremonyStageProps = {
   presentation?: CeremonyPresentation;
+  podium?: CeremonyPodiumData;
   glowActive: boolean;
   climaxGlow?: boolean;
   spotlightsActive?: boolean;
@@ -37,6 +38,7 @@ const DESKTOP_FIREWORKS = 4;
 
 export function CeremonyStage({
   presentation = "family",
+  podium,
   glowActive,
   climaxGlow = false,
   spotlightsActive = false,
@@ -54,6 +56,9 @@ export function CeremonyStage({
   isMobile,
 }: CeremonyStageProps) {
   const isTrophyMode = presentation === "trophy-podium";
+  const isFamilyPodium = presentation === "family-podium";
+  const isIntegratedPodium = isTrophyMode || isFamilyPodium;
+  const podiumData = podium ?? CHAMPIONS_PROTOTYPE.podium;
   const rearConfettiCount = isMobile ? REAR_CONFETTI_MOBILE : REAR_CONFETTI_DESKTOP;
   const foregroundConfettiCount = isMobile
     ? FOREGROUND_CONFETTI_MOBILE
@@ -62,25 +67,26 @@ export function CeremonyStage({
   const [showBurstFlash, setShowBurstFlash] = useState(false);
 
   useEffect(() => {
-    if (!impactBurst || reduceMotion) return;
+    if (!impactBurst || reduceMotion || !isTrophyMode) return;
     setShowBurstFlash(true);
     const timer = window.setTimeout(() => setShowBurstFlash(false), 900);
     return () => window.clearTimeout(timer);
-  }, [impactBurst, reduceMotion]);
+  }, [impactBurst, isTrophyMode, reduceMotion]);
 
   const stageClass = [
     styles.ceremonyStage,
     isMobile ? styles.ceremonyStageMobile : "",
     ceremonySettled ? styles.ceremonyStageSettled : "",
     stadiumLightsBoost ? styles.ceremonyStageLightsBoost : "",
-    isTrophyMode ? styles.ceremonyStageTrophy : "",
+    isIntegratedPodium ? styles.ceremonyStageTrophy : "",
+    isFamilyPodium ? styles.ceremonyStageFamilyPodium : "",
   ].join(" ");
 
   const fireworkCount = isMobile ? MOBILE_FIREWORKS : DESKTOP_FIREWORKS;
 
   const winnerLayerClass = [
     styles.stageWinnerLayer,
-    isTrophyMode ? styles.stageWinnerLayerTrophy : styles.stageWinnerLayerPodiumOnly,
+    isIntegratedPodium ? styles.stageWinnerLayerTrophy : styles.stageWinnerLayerPodiumOnly,
   ].join(" ");
 
   return (
@@ -184,13 +190,15 @@ export function CeremonyStage({
                   aria-hidden
                 />
               )}
-
-              <CeremonySpotlights
-                active={spotlightsActive}
-                climax={climaxGlow}
-                reduceMotion={reduceMotion}
-              />
             </>
+          )}
+
+          {isIntegratedPodium && (
+            <CeremonySpotlights
+              active={spotlightsActive}
+              climax={climaxGlow}
+              reduceMotion={reduceMotion}
+            />
           )}
 
           {isTrophyMode ? (
@@ -201,9 +209,9 @@ export function CeremonyStage({
                 reduceMotion={reduceMotion}
               />
               <WinnersPodiumStand
-                first={CHAMPIONS_PROTOTYPE.podium.first}
-                second={CHAMPIONS_PROTOTYPE.podium.second}
-                third={CHAMPIONS_PROTOTYPE.podium.third}
+                first={podiumData.first}
+                second={podiumData.second}
+                third={podiumData.third}
                 podiumBaseVisible={podiumBaseVisible}
                 thirdVisible={thirdPodiumVisible}
                 secondVisible={secondPodiumVisible}
@@ -212,6 +220,18 @@ export function CeremonyStage({
                 goldPulse={climaxGlow}
               />
             </div>
+          ) : isFamilyPodium ? (
+            <WinnersPodiumStand
+              first={podiumData.first}
+              second={podiumData.second}
+              third={podiumData.third}
+              podiumBaseVisible={podiumBaseVisible}
+              thirdVisible={thirdPodiumVisible}
+              secondVisible={secondPodiumVisible}
+              centerVisible={podiumVisible}
+              reduceMotion={reduceMotion}
+              goldPulse={climaxGlow}
+            />
           ) : (
             <CeremonyPodium visible={podiumVisible} />
           )}

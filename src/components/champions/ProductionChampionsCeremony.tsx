@@ -8,6 +8,7 @@ import { useCeremonySequence } from "@/design-lab/champions/useCeremonySequence"
 import { CeremonyBackground } from "@/design-lab/champions/components/CeremonyBackground";
 import { ChampionHero } from "@/design-lab/champions/components/ChampionHero";
 import { CeremonyControls } from "@/design-lab/champions/components/CeremonyControls";
+import { CeremonyFinalScore } from "@/design-lab/champions/components/CeremonyFinalScore";
 import { ClosingSection } from "@/design-lab/champions/components/ClosingSection";
 import styles from "@/design-lab/champions/champions.module.css";
 
@@ -21,9 +22,10 @@ export function ProductionChampionsCeremony({
   const [replayKey, setReplayKey] = useState(0);
   const { reduceMotion, isMobile, intensity } = useCeremonyMotion("high");
 
-  const { isStepActive, ceremonyComplete } = useCeremonySequence({
+  const { isStepActive, ceremonyComplete, progress } = useCeremonySequence({
     reduceMotion,
     replayKey,
+    variant: "trophy",
   });
 
   const confettiCount = useMemo(() => {
@@ -38,6 +40,7 @@ export function ProductionChampionsCeremony({
   const showConfetti = isStepActive("confetti") || ceremonyComplete;
   const showFireworks = isStepActive("confetti") || ceremonyComplete;
   const lightsOn = isStepActive("lights") || ceremonyComplete;
+  const finalScoreVisible = isStepActive("nameplate") || ceremonyComplete;
 
   return (
     <div
@@ -65,15 +68,24 @@ export function ProductionChampionsCeremony({
       </header>
 
       <ChampionHero
+        presentation="family-podium"
         champion={data.champion}
         runnerUp={data.runnerUp}
         secondRunnerUp={data.secondRunnerUp}
+        podium={data.podium}
         isStepActive={isStepActive}
         ceremonyComplete={ceremonyComplete}
+        progress={progress}
         reduceMotion={reduceMotion}
         foregroundConfetti={showConfetti}
         foregroundFireworks={showFireworks}
         isMobile={isMobile}
+      />
+
+      <CeremonyFinalScore
+        final={data.final}
+        visible={finalScoreVisible}
+        reduceMotion={reduceMotion}
       />
 
       <ClosingSection
